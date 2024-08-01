@@ -1,0 +1,32 @@
+From a01770ed82757d7c0eaab812e4d89bd443a712e6 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 12 May 2024 18:45:03 +1100
+Subject: [PATCH 20/26] add absl_string_view target
+
+---
+ third_party/absl/system.absl.strings.BUILD | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/third_party/absl/system.absl.strings.BUILD b/third_party/absl/system.absl.strings.BUILD
+index d04776c98bf..573d6c2f32d 100644
+--- a/third_party/absl/system.absl.strings.BUILD
++++ b/third_party/absl/system.absl.strings.BUILD
+@@ -2,6 +2,18 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++cc_library(
++    name = "string_view",
++    linkopts = ["-labsl_string_view"],
++    deps = [
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:nullability",
++        "//absl/base:throw_delegate",
++    ],
++)
++
+ cc_library(
+     name = "strings",
+     linkopts = ["-labsl_strings"],
