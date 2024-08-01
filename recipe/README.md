@@ -1,3 +1,10 @@
+Recipes for Tensorflow related conda packages for tensorflow >1.8.0,<=2.12 can be found at:
+https://github.com/AnacondaRecipes/tensorflow_recipes
+
+We are moving back to using this feedstock as of tensorflow 2.17.0.
+
+
+
 To build a conda TensorFlow package with or without GPU support you can use
 docker and the `build-locally.py` script.
 

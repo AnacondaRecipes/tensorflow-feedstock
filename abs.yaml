@@ -1,0 +1,13 @@
+# the conda build parameters to use
+build_parameters:
+  - "--suppress-variables"
+  - "--skip-existing"
+  - "--variants \"{skip_cuda_prefect: True}\""
+  - "--python=3.12"
+  - "--numpy=1.26"
+  #- "--error-overlinking"
+
+channels:
+  - https://staging.continuum.io/prefect/fs/tensorboard-feedstock/pr1/3cd3dfd
+  - https://staging.continuum.io/prefect/fs/flatbuffers-feedstock/pr4/81cae60
+  - https://staging.continuum.io/prefect/fs/libml_dtypes-headers-feedstock/pr1/3fd497b

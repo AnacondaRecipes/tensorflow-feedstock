@@ -1,2 +1,15 @@
-github_actions_labels:
-- cirun-openstack-cpu-xlarge
+gpu_variant:
+  - None
+  - cuda-12                    # [win or (linux and x86_64)]
+
+cuda_compiler_version:
+  - None                       
+  - 12.4                       # [win or (linux and x86_64)]
+
+cuda_compiler:                 # [win or (linux and x86_64)]
+- cuda-nvcc                    # [win or (linux and x86_64)]
+
+zip_keys:                      # [win or (linux and x86_64)]
+  -                            # [win or (linux and x86_64)]
+    - gpu_variant              # [win or (linux and x86_64)]
+    - cuda_compiler_version    # [win or (linux and x86_64)]

@@ -11,6 +11,6 @@ if [[ "${build_platform}" == linux-* ]]; then
 fi
 bazel build tensorflow_estimator/tools/pip_package:build_pip_package
 bazel-bin/tensorflow_estimator/tools/pip_package/build_pip_package ${WHEEL_DIR}
-${PYTHON} -m pip install --no-deps ${WHEEL_DIR}/*.whl
+${PYTHON} -m pip install --no-deps --no-build-isolation ${WHEEL_DIR}/*.whl
 bazel clean
 popd
