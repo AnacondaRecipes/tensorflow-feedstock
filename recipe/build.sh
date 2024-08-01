@@ -2,6 +2,11 @@
 
 set -ex
 
+if [[ "${target_platform}" == osx-* ]]; then
+  # to avoid /private
+  cd $SRC_DIR
+fi
+
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
