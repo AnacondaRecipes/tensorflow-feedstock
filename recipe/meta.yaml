@@ -48,11 +48,10 @@ source:
 
 build:
   number: 0
-  skip: true  # [win]
+  skip: true  # [win or s390x]
   skip: true  # [python_impl == 'pypy']
   skip: true  # [py<39]
-  # The following skip can be removed when the absl::StrFormat build issues are fixed.
-  skip: true  # [cuda_compiler_version == "11.8"]
+  skip: true  # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
 
 requirements:
   build:
@@ -60,31 +59,31 @@ requirements:
     - python                                 # [build_platform != target_platform]
     - cython                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - nsync                                  # [build_platform != target_platform]
-    - snappy                                 # [build_platform != target_platform]
-    - giflib                                 # [build_platform != target_platform]
-    - libjpeg-turbo                          # [build_platform != target_platform]
-    - icu                                    # [build_platform != target_platform]
-    - libpng                                 # [build_platform != target_platform]
+    - nsync 1.24                             # [build_platform != target_platform]
+    - snappy 1.1                             # [build_platform != target_platform]
+    - giflib {{ giflib }}                    # [build_platform != target_platform]
+    - jpeg {{ jpeg }}                        # [build_platform != target_platform]
+    - icu {{ icu }}                          # [build_platform != target_platform]
+    - libpng {{ libpng }}                    # [build_platform != target_platform]
     - flatbuffers                            # [build_platform != target_platform]
     - onednn                                 # [build_platform != target_platform]
     - onednn-cpu-threadpool                  # [build_platform != target_platform]
-    - pybind11                               # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
+    - pybind11 2                               # [build_platform != target_platform]
+    - numpy {{ numpy }}                      # [build_platform != target_platform]
     - {{ compiler('c') }}
-    - {{ stdlib("c") }}
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel 6.*
-    - libgrpc
-    - libprotobuf
-    - nasm
+    - libgrpc {{ libgrpc }}
+    - libprotobuf {{ libprotobuf }}
+    - nasm 2.14                              # [x86_64]
     - patchelf
-    - sed
-    - rsync
+    - sed        # [unix]
     # realpath is not available from the docker image for cuda <= 10.2
     # so we install coreutils here
     - coreutils  # [cuda_compiler_version != "None"]
+    - patch      # [unix]
+    - m2-patch   # [win]
   host:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
@@ -103,16 +102,16 @@ requirements:
     - python
     - pip
     - packaging
-    - zlib
-    - libpng
-    - libcurl
-    - curl         # [win]
-    - unzip        # [not win]
-    - zip          # [not win]
+    - zlib {{ zlib }}
+    - libpng {{ libpng }}
+    - libcurl {{ libcurl }}
+    - curl {{ libcurl }}        # [win]
+    - unzip 6.0    # [not win]
+    - zip   3.0    # [not win]
     - m2-unzip     # [win]
     - m2-zip       # [win]
     - openjdk >=8
-    - nsync
+    - nsync 1.24
     # TF_SYSTEM_LIBS, see usage in
     # https://github.com/tensorflow/tensorflow/blob/v{{ version }}/third_party/systemlibs/syslibs_configure.bzl
     # their versions are specified in
@@ -120,23 +119,23 @@ requirements:
     # but so far there have been no problems with leaving these
     # unpinned; though some restrictions come in for packages
     # that are also listed as a requirement for the pip_package.
-    - libabseil
+    - libabseil {{ libabseil }}
     - astor
     - cython
     - dill
-    - giflib
-    - libgrpc
+    - giflib {{ giflib }}
+    - libgrpc {{ libgrpc }}
     - flatbuffers
-    - icu
-    - libjpeg-turbo
-    - libpng
-    - libprotobuf
-    - libprotobuf-python-headers
-    - openssl
-    - pybind11
-    - sqlite
-    - snappy
-    - zlib
+    - icu {{ icu }}
+    - jpeg {{ jpeg }}
+    - libpng {{ libpng }}
+    - libprotobuf {{ libprotobuf }}
+    - libprotobuf-python-headers {{ libprotobuf }}
+    - openssl {{ openssl }}
+    - pybind11 2
+    - sqlite {{ sqlite }}
+    - snappy 1.1
+    - zlib {{ zlib }}
 
 outputs:
   # 2021/12/29: hmaarrfk
@@ -166,7 +165,6 @@ outputs:
       # build requirements needs to pick up the compiler run_exports
       build:
         - {{ compiler('c') }}
-        - {{ stdlib("c") }}
         - {{ compiler('cxx') }}
         - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
         - python                              # [build_platform != target_platform]
@@ -191,24 +189,24 @@ outputs:
         - packaging
         - wheel
         # TF_SYSTEM_LIBS
-        - libabseil
+        - libabseil {{ libabseil }}
         - astor
         - cython
         - dill
-        - giflib
-        - libgrpc
+        - giflib {{ giflib }}
+        - libgrpc {{ libgrpc }}
         - flatbuffers
-        - icu
-        - libjpeg-turbo
-        - libcurl
-        - libpng
-        - libprotobuf
-        - libprotobuf-python-headers
-        - openssl
-        - pybind11
-        - snappy
-        - sqlite
-        - zlib
+        - icu {{ icu }}
+        - jpeg {{ jpeg }}
+        - libcurl {{ libcurl }}
+        - libpng {{ libpng }}
+        - libprotobuf {{ libprotobuf }}
+        - libprotobuf-python-headers {{ libprotobuf }}
+        - openssl {{ openssl }}
+        - pybind11 2
+        - snappy 1.1
+        - sqlite {{ sqlite }}
+        - zlib {{ zlib }}
         # requirements specified by the package itself, see
         # github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/tools/pip_package/setup.py
         - absl-py >=1.0.0
@@ -217,7 +215,7 @@ outputs:
         - google-pasta >=0.1.1
         - h5py >=3.10
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
-        - numpy
+        - numpy {{ numpy }}
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
@@ -315,7 +313,6 @@ outputs:
     requirements:
       build:
         - {{ compiler('c') }}
-        - {{ stdlib("c") }}
         - {{ compiler('cxx') }}
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
@@ -324,9 +321,9 @@ outputs:
         - bazel 6.*
         - python                                   # [build_platform != target_platform]
         - cross-python_{{ target_platform }}       # [build_platform != target_platform]
-        - libabseil                                # [build_platform != target_platform]
-        - libgrpc                                  # [build_platform != target_platform]
-        - icu                                      # [build_platform != target_platform]
+        - libabseil {{ libabseil }}                                # [build_platform != target_platform]
+        - libgrpc {{ libgrpc }}                                  # [build_platform != target_platform]
+        - icu {{ icu }}                                      # [build_platform != target_platform]
         - {{ pin_subpackage('tensorflow-base') }}  # [build_platform != target_platform]
       host:
         - python
@@ -337,7 +334,7 @@ outputs:
         # This ensures that a consistent version of openssl is chosen between
         # all packages.
         # https://github.com/conda-forge/conda-forge.github.io/issues/1528
-        - openssl
+        - openssl {{ openssl }}
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
         # Keep the cuda version here since it helps package solvers
         # decide on the cuda variant
@@ -364,7 +361,6 @@ outputs:
       # build requirements needs to pick up the compiler run_exports
       build:
         - {{ compiler('c') }}
-        - {{ stdlib("c") }}
         - {{ compiler('cxx') }}
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
@@ -372,18 +368,18 @@ outputs:
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
       # host requirements to pick up run_exports
       host:
-        - libabseil
-        - giflib
-        - libgrpc
-        - icu
-        - libjpeg-turbo
-        - libcurl
-        - libpng
-        - libprotobuf
-        - openssl
-        - snappy
-        - sqlite
-        - zlib
+        - libabseil {{ libabseil }}
+        - giflib {{ giflib }}
+        - libgrpc {{ libgrpc }}
+        - icu {{ icu }}
+        - jpeg {{ jpeg }}
+        - libcurl {{ libcurl }}
+        - libpng {{ libpng }}
+        - libprotobuf {{ libprotobuf }}
+        - openssl {{ openssl }}
+        - snappy 1.1
+        - sqlite {{ sqlite }}
+        - zlib {{ zlib }}
       run:
         # avoid that people without GPUs needlessly download ~200-300MB
         - __cuda  # [cuda_compiler_version != "None"]
@@ -410,28 +406,26 @@ outputs:
       # build requirements needs to pick up the compiler run_exports
       build:
         - {{ compiler('c') }}
-        - {{ stdlib("c") }}
         - {{ compiler('cxx') }}
         # Keep the cuda compiler here since it helps package solvers
         # decide on the cuda variant
         # https://github.com/conda-forge/tensorflow-feedstock/issues/162
         - {{ compiler('cuda') }}  # [cuda_compiler_version != "None"]
-        - rsync
       # host requirements to pick up run_exports
       host:
         - flatbuffers
-        - giflib
-        - icu
-        - libabseil
-        - libcurl
-        - libgrpc
-        - libjpeg-turbo
-        - libpng
-        - libprotobuf
-        - openssl
-        - snappy
-        - sqlite
-        - zlib
+        - giflib {{ giflib }}
+        - icu {{ icu }}
+        - libabseil {{ libabseil }}
+        - libcurl {{ libcurl }}
+        - libgrpc {{ libgrpc }}
+        - jpeg {{ jpeg }}
+        - libpng {{ libpng }}
+        - libprotobuf {{ libprotobuf }}
+        - openssl {{ openssl }}
+        - snappy 1.1
+        - sqlite {{ sqlite }}
+        - zlib {{ zlib }}
       run:
         - libml_dtypes-headers >={{ ml_dtypes_version }},<0.5
         # avoid that people without GPUs needlessly download ~200-300MB
@@ -464,7 +458,7 @@ outputs:
         - tensorflow
 
 about:
-  home: http://tensorflow.org/
+  home: https://www.tensorflow.org/
   license: Apache-2.0
   license_file: LICENSE
   license_family: Apache
@@ -475,10 +469,14 @@ about:
     Keras API, which makes getting started with TensorFlow and machine learning
     easy.
   dev_url: https://github.com/tensorflow/tensorflow
-  doc_url: https://www.tensorflow.org/get_started/get_started
-  doc_source_url: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/docs_src
+  doc_url: https://www.tensorflow.org/learn
 
 extra:
+  skip-lints:
+    - host_section_needs_exact_pinnings # Lots of python packages are needed in host and shouldn't be pinned.
+    - missing_imports_or_run_test_py    # Some packages are tested through the main package tests.
+    - missing_tests                     # This seems to be a linter mis-report.
+    - output_missing_name               # The linter trips over tensorflow_cpu_gpu.
   feedstock-name: tensorflow
   recipe-maintainers:
     - ngam
