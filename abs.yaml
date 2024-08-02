@@ -11,3 +11,5 @@ channels:
   - https://staging.continuum.io/prefect/fs/tensorboard-feedstock/pr1/3cd3dfd
   - https://staging.continuum.io/prefect/fs/flatbuffers-feedstock/pr4/81cae60
   - https://staging.continuum.io/prefect/fs/libml_dtypes-headers-feedstock/pr1/3fd497b
+  - https://staging.continuum.io/prefect/fs/popt-feedstock/pr2/c3cc730
+  - https://staging.continuum.io/prefect/fs/rsync-feedstock/pr2/e537eea
