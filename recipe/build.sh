@@ -2,11 +2,6 @@
 
 set -ex
 
-if [[ "${target_platform}" == osx-* ]]; then
-  # to avoid /private
-  cd $SRC_DIR
-fi
-
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
@@ -199,6 +194,9 @@ build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+# TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
+# See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
+build --define=xnn_enable_avx512fp16=false
 build --config=noaws
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
@@ -235,51 +233,13 @@ chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
 
 mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
 
-## begin rsync replacement ##
-
-# rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
-# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-# rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
-# rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
-# rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
-# rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
-
-copy_files() {
-  local src_dir=$1
-  local dest_dir=$2
-  local include_patterns=("${!3}")
-  local exclude_patterns=("${!4}")
-  local file_perm=$5
-  local dir_perm=$6
-
-  find "$src_dir" -type d $(printf "! -name %s " "${exclude_patterns[@]}") -prune -o -type f $(printf "-name %s -o " "${include_patterns[@]}" | sed 's/ -o $//') -exec sh -c '
-    for file; do
-      dir="'$dest_dir'/${file%/*}"
-      mkdir -p "$dir"
-      cp "$file" "$dir"
-      chmod '$file_perm' "${dir}/${file##*/}"
-      chmod '$dir_perm' "$dir"
-    done
-  ' sh {} +
-}
-
-# Define include and exclude patterns
-include_h_inc=('*/*.h' '*/*.inc')
-exclude_solib_virtual=('_solib*' '_virtual_includes' 'pip_package' 'lib_package')
-exclude_cc=('*.cc')
-exclude_txt=('*.txt')
-
-# Call the function for each rsync equivalent
-copy_files "bazel-bin/" "$SRC_DIR/libtensorflow_cc_output/include" include_h_inc[@] exclude_solib_virtual[@] 666 777
-copy_files "tensorflow/cc" "$SRC_DIR/libtensorflow_cc_output/include/tensorflow" include_h_inc[@] exclude_solib_virtual[@] 666 777
-copy_files "tensorflow/core" "$SRC_DIR/libtensorflow_cc_output/include/tensorflow" include_h_inc[@] exclude_solib_virtual[@] 666 777
-copy_files "third_party/xla/third_party/tsl/" "$SRC_DIR/libtensorflow_cc_output/include" include_h_inc[@] exclude_solib_virtual[@] 666 777
-copy_files "third_party/" "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party" include_h_inc[@] exclude_cc[@] 666 777
-copy_files "bazel-work/external/eigen_archive/Eigen/" "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen" include_h_inc[@] exclude_txt[@] 666 777
-copy_files "bazel-work/external/eigen_archive/unsupported/" "$SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported" include_h_inc[@] exclude_txt[@] 666 777
-
-## end rsync replacement ##
+rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
+rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
+rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
+rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
 
 pushd $SRC_DIR/libtensorflow_cc_output
   tar cf ../libtensorflow_cc_output.tar .
