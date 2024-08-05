@@ -60,7 +60,7 @@ requirements:
     - cython                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - nsync 1.24                             # [build_platform != target_platform]
-    - snappy 1.1                             # [build_platform != target_platform]
+    - snappy 1.2.1                           # [build_platform != target_platform]
     - giflib {{ giflib }}                    # [build_platform != target_platform]
     - jpeg {{ jpeg }}                        # [build_platform != target_platform]
     - icu {{ icu }}                          # [build_platform != target_platform]
@@ -135,7 +135,7 @@ requirements:
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
-    - snappy 1.1
+    - snappy 1.2.1
     - zlib {{ zlib }}
 
 outputs:
@@ -207,7 +207,7 @@ outputs:
         - libprotobuf-python-headers {{ libprotobuf }}
         - openssl {{ openssl }}
         - pybind11 2
-        - snappy 1.1
+        - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
         # requirements specified by the package itself, see
@@ -380,7 +380,7 @@ outputs:
         - libpng {{ libpng }}
         - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
-        - snappy 1.1
+        - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
       run:
@@ -426,7 +426,7 @@ outputs:
         - libpng {{ libpng }}
         - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
-        - snappy 1.1
+        - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
       run:
