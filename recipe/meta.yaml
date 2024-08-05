@@ -162,6 +162,8 @@ outputs:
         # - tensorboard = tensorboard.main:run_main
         - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
         - estimator_ckpt_converter = tensorflow_estimator.python.estimator.tools.checkpoint_converter:main
+      missing_dso_whitelist:
+        - "**/_pywrap_tensorflow_internal.*" # loaded by python wrapper pywrap_tensorflow.py
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
@@ -227,7 +229,7 @@ outputs:
         - wrapt >=1.11.0
         # TF-API needs to move in sync
         - tensorboard >=2.17,<2.18
-        - keras >=3.0
+        - keras >=3.2
       run:
         - python
         - packaging
@@ -248,7 +250,7 @@ outputs:
         - wrapt >=1.11.0
         # TF-API needs to move in sync
         - tensorboard >=2.17,<2.18
-        - keras >=3.0
+        - keras >=3.2
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851

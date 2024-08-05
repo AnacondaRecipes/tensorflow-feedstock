@@ -2,6 +2,16 @@
 
 set -ex
 
+# This hack is necessary because bazel produces a Python script with
+# "#! /usr/bin/python3" at the top. On CI systems this is a problem,
+# but only on Linux.
+if [[ $target_platform == linux-aarch64 ]]; then
+    if [ ! -f /usr/bin/python3 ] || [ -L /usr/bin/python3 ]; then
+        rm /usr/bin/python3 || true
+        ln -s ${PYTHON} /usr/bin/python3
+    fi
+fi
+
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
@@ -174,8 +184,8 @@ export TF_SET_ANDROID_WORKSPACE=0
 export TF_CONFIGURE_IOS=0
 
 
-#bazel clean --expunge
-#bazel shutdown
+bazel clean --expunge
+bazel shutdown
 
 ./configure
 
@@ -246,7 +256,8 @@ pushd $SRC_DIR/libtensorflow_cc_output
 popd
 rm -r $SRC_DIR/libtensorflow_cc_output
 
-bazel clean
+bazel clean --expunge
+bazel shutdown
 
 # This was only needed for protobuf_python
 rm -rf $PREFIX/include/python
