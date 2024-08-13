@@ -8,11 +8,4 @@ build_parameters:
   - "--numpy=1.26"
 
 channels:
-  - https://staging.continuum.io/prefect/fs/tensorboard-feedstock/pr1/3cd3dfd
-  - https://staging.continuum.io/prefect/fs/flatbuffers-feedstock/pr4/81cae60
-  - https://staging.continuum.io/prefect/fs/libml_dtypes-headers-feedstock/pr1/3fd497b
-  - https://staging.continuum.io/prefect/fs/popt-feedstock/pr2/c3cc730
-  - https://staging.continuum.io/prefect/fs/rsync-feedstock/pr2/e537eea
-  - https://staging.continuum.io/prefect/fs/optree-feedstock/pr1/ecac75e
-  - https://staging.continuum.io/prefect/fs/keras-feedstock/pr4/9b67f95
-  - https://staging.continuum.io/prefect/fs/snappy-feedstock/pr5/f29c581
+  - https://staging.continuum.io/prefect/fs/bazel-feedstock/pr19/4562bdf
