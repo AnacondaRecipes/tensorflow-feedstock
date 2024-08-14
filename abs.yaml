@@ -4,8 +4,6 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
   - "--variants \"{skip_cuda_prefect: True}\""
-  - "--python=3.12"
-  - "--numpy=1.26"
 
 channels:
   - https://staging.continuum.io/prefect/fs/bazel-feedstock/pr19/4562bdf
