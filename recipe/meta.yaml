@@ -52,7 +52,7 @@ build:
   skip: true  # [python_impl == 'pypy']
   skip: true  # [py<39]
   skip: true  # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
-  skip: true  # [not (linux and x86_64)]
+  skip: true  # [not linux]
 
 requirements:
   build:
@@ -128,6 +128,7 @@ requirements:
     - giflib {{ giflib }}
     - libgrpc {{ libgrpc }}
     - flatbuffers
+    - h5py >=3.10
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
@@ -165,6 +166,9 @@ outputs:
         - estimator_ckpt_converter = tensorflow_estimator.python.estimator.tools.checkpoint_converter:main
       missing_dso_whitelist:
         - "**/_pywrap_tensorflow_internal.*" # loaded by python wrapper pywrap_tensorflow.py
+        # some .sos look for other .sos in different site-packages directories. Root cause is probably
+        # similar to with pytorch, that it loads libraries manually in the python code (TBC)
+        - "**/libtensorflow_framework.so.2"
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
