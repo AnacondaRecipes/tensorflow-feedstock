@@ -52,7 +52,6 @@ build:
   skip: true  # [python_impl == 'pypy']
   skip: true  # [py<39]
   skip: true  # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
-  skip: true  # [not linux]
 
 requirements:
   build:
@@ -336,6 +335,7 @@ outputs:
         - python
         - setuptools
         - wheel
+        - {{ pin_subpackage('tensorflow-base') }}
       host:
         - python
         - pip
