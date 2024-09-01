@@ -26,11 +26,11 @@ def _impl(ctx):
         ),
         tool_path(
             name = "ar",
-            path = "${BUILD_PREFIX}/bin/${AR}",
+            path = "${CONDA_PREFIX}/bin/${AR}",
         ),
         tool_path(
             name = "patchelf",
-            path = "${BUILD_PREFIX}/bin/patchelf",
+            path = "${CONDA_PREFIX}/bin/patchelf",
         ),
         tool_path(
             name = "cpp",
@@ -147,10 +147,24 @@ def _impl(ctx):
         ],
     )
     
-    toolchain_include_directories_flags = [
-        "-isystem",
-        "${PREFIX}/include",
-    ]
+    if "TARGET_PLATFORM".startswith("osx"):
+        toolchain_include_directories_flags = [
+            "-isystem",
+            "${CONDA_PREFIX}/include/c++/v1",
+            "-isystem",
+            "${CONDA_PREFIX}/lib/clang/${COMPILER_VERSION}/include",
+            "-isystem",
+            "${CONDA_BUILD_SYSROOT}/usr/include",
+            "-isystem",
+            "${CONDA_BUILD_SYSROOT}/System/Library/Frameworks",
+            "-isystem",
+            "${PREFIX}/include",
+        ]
+    else:
+        toolchain_include_directories_flags = [
+            "-isystem",
+            "${PREFIX}/include",
+        ]
 
     toolchain_include_directories_feature = feature(
         name = "toolchain_include_directories",
@@ -287,23 +301,30 @@ def _impl(ctx):
         cxx_builtin_include_directories = [
             "${CONDA_BUILD_SYSROOT}/System/Library/Frameworks",
             "${CONDA_BUILD_SYSROOT}/usr/include",
-            "${BUILD_PREFIX}/lib/clang/${COMPILER_VERSION}/include",
-            "${BUILD_PREFIX}/lib/clang/${SHORT_COMPILER_VERSION}/include",
-            "${BUILD_PREFIX}/include/c++/v1",
+            "${CONDA_PREFIX}/lib/clang/${COMPILER_VERSION}/include",
+            "${CONDA_PREFIX}/lib/clang/${SHORT_COMPILER_VERSION}/include",
+            "${CONDA_PREFIX}/include/c++/v1",
             "${PREFIX}/include",
+            "${HOST_PREFIX}/include",
         ]
     else:
         cxx_builtin_include_directories = [
             "${CONDA_BUILD_SYSROOT}/usr/include",
-            "${BUILD_PREFIX}/lib/gcc/${HOST}/${COMPILER_VERSION}",
-            "${BUILD_PREFIX}/${HOST}/include/c++/${COMPILER_VERSION}",
+            "${CONDA_PREFIX}/lib/gcc/${HOST}/${COMPILER_VERSION}",
+            "${CONDA_PREFIX}/${HOST}/include/c++/${COMPILER_VERSION}",
             "${PREFIX}/include",
         ]
 
         if (len("${CUDA_HOME}")):
             cxx_builtin_include_directories.append("${CUDA_HOME}/include")
             cxx_builtin_include_directories.append("${CUDA_HOME}/targets/x86_64-linux/include/")
-            cxx_builtin_include_directories.append("${PREFIX}/targets/x86_64-linux/include")
+            # sbsa is linux-aarch64
+            cxx_builtin_include_directories.append("${CUDA_HOME}/targets/sbsa-linux/include/")
+            # These are needed for CUDA 12+
+            cxx_builtin_include_directories.append("${PREFIX}/targets/x86_64-linux/include/")
+            cxx_builtin_include_directories.append("${PREFIX}/targets/sbsa-linux/include/")
+            cxx_builtin_include_directories.append("${HOST_PREFIX}/targets/x86_64-linux/include/")
+            cxx_builtin_include_directories.append("${HOST_PREFIX}/targets/sbsa-linux/include/")
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,

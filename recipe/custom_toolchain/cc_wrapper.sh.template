@@ -53,9 +53,7 @@ done
 
 # Set-up the environment
 
-
 # Call the C++ compiler
-echo CONDA_BUILD_SYSROOT=${CONDA_BUILD_SYSROOT} ${CLANG} "$@"
 CONDA_BUILD_SYSROOT=${CONDA_BUILD_SYSROOT} ${CLANG} "$@"
 
 function get_library_path() {
@@ -107,6 +105,3 @@ for rpath in ${RPATHS}; do
     done
 done
 
-if [[ "${target_platform}" == "osx-arm64" ]]; then
-  /usr/bin/codesign -s - -f ${OUTPUT}
-fi

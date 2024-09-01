@@ -7,12 +7,15 @@ filegroup(
 
 filegroup(
     name = "cc_wrapper",
-    srcs = ["cc_wrapper.sh"],
+    srcs = [
+        "cc_wrapper.sh",
+        "cc_wrapper_build.sh",
+    ],
 )
 
 filegroup(
     name = "compiler_deps",
-    srcs = glob(["extra_tools/**"]) + [":cc_wrapper"],
+    srcs = [":cc_wrapper"],
 )
 
 load(
@@ -65,4 +68,48 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 0,
+)
+
+toolchain(
+    name = "cc_cf_toolchain",
+    toolchain = ":cc-compiler-target",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+    exec_compatible_with = [
+        "@platforms//cpu:BUILD_PLATFORM_CPU",
+        "@platforms//os:BUILD_PLATFORM_OS",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:TARGET_PLATFORM_CPU",
+        "@platforms//os:TARGET_PLATFORM_OS",
+    ],
+)
+
+toolchain(
+    name = "cc_cf_host_toolchain",
+    toolchain = ":cc-compiler-build",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+    exec_compatible_with = [
+        "@platforms//cpu:BUILD_PLATFORM_CPU",
+        "@platforms//os:BUILD_PLATFORM_OS",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:BUILD_PLATFORM_CPU",
+        "@platforms//os:BUILD_PLATFORM_OS",
+    ],
+)
+
+platform(
+    name = "build_platform",
+    constraint_values = [
+        "@platforms//os:BUILD_PLATFORM_OS",
+        "@platforms//cpu:BUILD_PLATFORM_CPU",
+    ],
+)
+
+platform(
+    name = "target_platform",
+    constraint_values = [
+        "@platforms//os:TARGET_PLATFORM_OS",
+        "@platforms//cpu:TARGET_PLATFORM_CPU",
+    ],
 )
