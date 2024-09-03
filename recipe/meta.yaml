@@ -42,6 +42,7 @@ source:
       - patches/0031-work-around-for-warning-that-clang-falsely-treats-as.patch
       - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
       - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch
+      - patches/0032-loosen-hermetic-python.patch
   - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz
     sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530
     folder: tensorflow-estimator
@@ -127,7 +128,6 @@ requirements:
     - giflib {{ giflib }}
     - libgrpc {{ libgrpc }}
     - flatbuffers
-    - h5py >=3.10
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
