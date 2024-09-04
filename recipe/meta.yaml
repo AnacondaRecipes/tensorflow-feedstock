@@ -172,6 +172,7 @@ outputs:
         # some .sos look for other .sos in different site-packages directories. Root cause is probably
         # similar to with pytorch, that it loads libraries manually in the python code (TBC)
         - "**/libtensorflow_framework.so.2"
+        - "**/libtensorflow_framework.2.dylib"
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
