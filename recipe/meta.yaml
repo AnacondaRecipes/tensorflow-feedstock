@@ -82,14 +82,14 @@ requirements:
     - libgrpc {{ libgrpc }}
     - libprotobuf {{ libprotobuf }}
     - nasm 2.14                              # [x86_64]
-    - patchelf
+    - patchelf   # [unix]
     - sed        # [unix]
     # realpath is not available from the docker image for cuda <= 10.2
     # so we install coreutils here
     - coreutils  # [cuda_compiler_version != "None"]
     - patch      # [unix]
     - m2-patch   # [win]
-    - rsync
+    - rsync      # [unix]
   host:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
