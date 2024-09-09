@@ -184,7 +184,7 @@ outputs:
       host:
         # GPU reuqirements
         - cudnn                   # [cuda_compiler_version != "None"]
-        - nccl                    # [cuda_compiler_version != "None"]
+        - nccl 2.21.5.1           # [cuda_compiler_version != "None"]
         - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
         - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
         - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
@@ -399,6 +399,7 @@ outputs:
         - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
+        - nccl 2.21.5.1    # [cuda_compiler_version != "None"]
       run:
         # avoid that people without GPUs needlessly download ~200-300MB
         - __cuda  # [cuda_compiler_version != "None"]
@@ -445,6 +446,7 @@ outputs:
         - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
+        - nccl 2.21.5.1      # [cuda_compiler_version != "None"]
       run:
         - libml_dtypes-headers >={{ ml_dtypes_version }},<0.5
         # avoid that people without GPUs needlessly download ~200-300MB

@@ -121,9 +121,9 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 	export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
         export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
 	# XLA can only cope with a single cuda header include directory, merge both
-	#rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
-	mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include
-	cp -a ${PREFIX}/targets/x86_64-linux/include/* ${BUILD_PREFIX}/targets/x86_64-linux/include/
+	rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
+	#mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include
+	#cp -a ${PREFIX}/targets/x86_64-linux/include/* ${BUILD_PREFIX}/targets/x86_64-linux/include/
 
 
 	# hmaarrfk -- 2023/12/30
