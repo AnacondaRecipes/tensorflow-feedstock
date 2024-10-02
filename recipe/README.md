@@ -3,7 +3,7 @@ https://github.com/AnacondaRecipes/tensorflow_recipes
 
 We are moving back to using this feedstock as of tensorflow 2.17.0.
 
-
+This isn't a fork of conda-forge's feedstock. Whoever works on this and wishes to bring changes from the conda-forge feedstock should pull conda-forge's changes and reapply changes made in this PR on top of that.
 
 To build a conda TensorFlow package with or without GPU support you can use
 docker and the `build-locally.py` script.

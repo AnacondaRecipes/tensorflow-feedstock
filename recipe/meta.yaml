@@ -140,6 +140,7 @@ requirements:
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
+    # snappy needs rtti enabled, this version of ours has it
     - snappy 1.2.1
     - zlib {{ zlib }}
 
@@ -216,6 +217,7 @@ outputs:
         - libprotobuf-python-headers {{ libprotobuf }}
         - openssl {{ openssl }}
         - pybind11 2
+        # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
@@ -396,6 +398,7 @@ outputs:
         - libpng {{ libpng }}
         - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
+        # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
@@ -443,6 +446,7 @@ outputs:
         - libpng {{ libpng }}
         - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
+        # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
         - sqlite {{ sqlite }}
         - zlib {{ zlib }}
