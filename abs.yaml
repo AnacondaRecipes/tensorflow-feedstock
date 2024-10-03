@@ -6,4 +6,4 @@ build_parameters:
   - "--variants \"{skip_cuda_prefect: True}\""
 
 channels:
-  - https://staging.continuum.io/prefect/fs/bazel-feedstock/pr19/4562bdf
+  - https://staging.continuum.io/prefect/fs/bazel-toolchain-feedstock/pr3/ec9a539
