@@ -232,7 +232,8 @@ outputs:
         - google-pasta >=0.1.1
         - h5py >=3.10
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
-        - numpy {{ numpy }}
+        - numpy 1.22        # [py<311]
+        - numpy {{ numpy }} # [py>=311]
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
@@ -243,7 +244,7 @@ outputs:
         - wrapt >=1.11.0
         # TF-API needs to move in sync
         - tensorboard >=2.17,<2.18
-        - keras >=3.2
+        - keras >=3.2.0
       run:
         - python
         - packaging
@@ -254,6 +255,7 @@ outputs:
         - grpcio {{ libgrpc }}.*
         - h5py >=3.10
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
+        - {{ pin_compatible('numpy') }}
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
@@ -264,7 +266,7 @@ outputs:
         - wrapt >=1.11.0
         # TF-API needs to move in sync
         - tensorboard >=2.17,<2.18
-        - keras >=3.2
+        - keras >=3.2.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
