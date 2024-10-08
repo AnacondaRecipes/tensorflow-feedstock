@@ -4,6 +4,3 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
   - "--variants \"{skip_cuda_prefect: True}\""
-
-channels:
-  - https://staging.continuum.io/prefect/fs/bazel-toolchain-feedstock/pr3/ec9a539
