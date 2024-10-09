@@ -2,6 +2,16 @@
 
 set -ex
 
+# This hack is necessary because bazel produces a Python script with
+# "#! /usr/bin/python3" at the top. On CI systems this is a problem,
+# but only on Linux.
+if [[ $target_platform == linux-aarch64 ]]; then
+    if [ ! -f /usr/bin/python3 ] || [ -L /usr/bin/python3 ]; then
+        rm /usr/bin/python3 || true
+        ln -s ${PYTHON} /usr/bin/python3
+    fi
+fi
+
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
@@ -112,6 +122,9 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
 	# XLA can only cope with a single cuda header include directory, merge both
 	rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
+	#mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include
+	#cp -a ${PREFIX}/targets/x86_64-linux/include/* ${BUILD_PREFIX}/targets/x86_64-linux/include/
+
 
 	# hmaarrfk -- 2023/12/30
         # This logic should be safe to keep in even when the underlying issue is resolved
@@ -127,7 +140,7 @@ else
     export TF_NEED_CUDA=0
 fi
 
-source ${RECIPE_DIR}/gen-bazel-toolchain.sh
+source gen-bazel-toolchain
 
 if [[ "${target_platform}" == "osx-64" ]]; then
   # Tensorflow doesn't cope yet with an explicit architecture (darwin_x86_64) on osx-64 yet.
@@ -171,8 +184,8 @@ export TF_SET_ANDROID_WORKSPACE=0
 export TF_CONFIGURE_IOS=0
 
 
-#bazel clean --expunge
-#bazel shutdown
+bazel clean --expunge
+bazel shutdown
 
 ./configure
 
@@ -186,11 +199,14 @@ if [[ "${build_platform}" == linux-* ]]; then
 fi
 
 cat >> .bazelrc <<EOF
-build --crosstool_top=//custom_toolchain:toolchain
+build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+# TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
+# See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
+build --define=xnn_enable_avx512fp16=false
 build --config=noaws
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
@@ -226,6 +242,7 @@ fi
 chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
 
 mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
+
 rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
 rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
 rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
@@ -233,12 +250,14 @@ rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --ex
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
+
 pushd $SRC_DIR/libtensorflow_cc_output
   tar cf ../libtensorflow_cc_output.tar .
 popd
 rm -r $SRC_DIR/libtensorflow_cc_output
 
-bazel clean
+bazel clean --expunge
+bazel shutdown
 
 # This was only needed for protobuf_python
 rm -rf $PREFIX/include/python
