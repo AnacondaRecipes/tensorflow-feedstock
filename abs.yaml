@@ -4,3 +4,7 @@ build_parameters:
   - "--skip-existing"
   - "--error-overlinking"
   - "--variants \"{skip_cuda_prefect: True}\""
+
+# build fails on ventura
+extra_labels_for_os:
+  osx-arm64: [big-sur]
