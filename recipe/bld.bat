@@ -65,7 +65,7 @@ set TF_SET_ANDROID_WORKSPACE=0
 @REM TODO: we will want to eventually use clang.
 set TF_NEED_CLANG=0 
 set TF_OVERRIDE_EIGEN_STRONG_INLINE=0
-./configure
+call configure
 
 :: build using bazel
 bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
