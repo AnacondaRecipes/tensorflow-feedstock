@@ -33,12 +33,12 @@ set BUILD_OPTS=^
  --linkopt=-znow^
  --linkopt=-L${PREFIX}/lib^
  --verbose_failures^
- --action_env="PYTHON_BIN_PATH=${PYTHON}"^
- --action_env="PYTHON_LIB_PATH=${SP_DIR}"^
- --python_path="${PYTHON}"^
- --define=PREFIX="$PREFIX"^
- --define=LIBDIR="$PREFIX/lib"^
- --define=INCLUDEDIR="$PREFIX/include"^
+ --action_env="PYTHON_BIN_PATH=%PYTHON%"^
+ --action_env="PYTHON_LIB_PATH=%SP_DIR%"^
+ --python_path="%PYTHON%"^
+ --define=PREFIX="%PREFIX%"^
+ --define=LIBDIR="%PREFIX%/lib"^
+ --define=INCLUDEDIR="%PREFIX%/include"^
  %BAZEL_MKL_OPT%^
  --config=opt
 
