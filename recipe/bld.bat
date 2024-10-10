@@ -10,7 +10,7 @@ set "TF_SYSTEM_LIBS=llvm,swig"
 set TF_NEED_MKL=0
 set BAZEL_MKL_OPT=
 
-mkdir -p ./bazel_output_base
+mkdir -p bazel_output_base
 set BAZEL_OPTS=
 
 :: the following arguments are useful for debugging
