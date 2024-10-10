@@ -10,7 +10,7 @@ set "TF_SYSTEM_LIBS=llvm,swig"
 set TF_NEED_MKL=0
 set BAZEL_MKL_OPT=
 
-mkdir -p bazel_output_base
+mkdir bazel_output_base
 set BAZEL_OPTS=
 
 :: the following arguments are useful for debugging
@@ -71,6 +71,6 @@ set TF_OVERRIDE_EIGEN_STRONG_INLINE=0
 bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
 
 :: build a whl file
-mkdir -p %SRC_DIR%\\tensorflow_pkg
+mkdir %SRC_DIR%\\tensorflow_pkg
 bazel-bin\\tensorflow\\tools\\pip_package\\build_pip_package %SRC_DIR%\\tensorflow_pkg
 
