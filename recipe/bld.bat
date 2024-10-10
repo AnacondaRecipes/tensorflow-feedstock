@@ -20,7 +20,7 @@ set BAZEL_OPTS=
 ::    --jobs=20
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
-BUILD_OPTS="
+set BUILD_OPTS="
 --copt=-march=nocona
 --copt=-mtune=haswell
 --copt=-ftree-vectorize
