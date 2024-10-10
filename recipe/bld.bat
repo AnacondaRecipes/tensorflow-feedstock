@@ -20,20 +20,21 @@ set BAZEL_OPTS=
 ::    --jobs=20
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
-set BUILD_OPTS="
---copt=-march=nocona
---copt=-mtune=haswell
---copt=-ftree-vectorize
---copt=-fPIC
---copt=-fstack-protector-strong
---copt=-O2
---cxxopt=-fvisibility-inlines-hidden
---cxxopt=-fmessage-length=0
---linkopt=-zrelro
---linkopt=-znow
---verbose_failures
-%BAZEL_MKL_OPT%
---config=opt"
+set BUILD_OPTS=^
+ --copt=-march=nocona^
+ --copt=-mtune=haswell^
+ --copt=-ftree-vectorize^
+ --copt=-fPIC^
+ --copt=-fstack-protector-strong^
+ --copt=-O2^
+ --cxxopt=-fvisibility-inlines-hidden^
+ --cxxopt=-fmessage-length=0^
+ --linkopt=-zrelro^
+ --linkopt=-znow^
+ --verbose_failures^
+ %BAZEL_MKL_OPT%^
+ --config=opt
+
 set TF_ENABLE_XLA=0
 set BUILD_TARGET="//tensorflow/tools/pip_package:build_pip_package //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so"
 
