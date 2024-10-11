@@ -43,7 +43,7 @@ set BUILD_OPTS=^
  --config=opt
 
 set TF_ENABLE_XLA=0
-set BUILD_TARGET="//tensorflow/tools/pip_package:build_pip_package //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so"
+set BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so"
 
 :: Python settings
 set PYTHON_BIN_PATH=%PYTHON%
