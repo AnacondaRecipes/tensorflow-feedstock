@@ -1,8 +1,9 @@
 @echo on
 
 set "PATH=%CD%:%PATH%"
-set LIBDIR=%LIBRARY_BIN%
-set INCLUDEDIR=%LIBRARY_INC%
+set LIBDIR=%LIBRARY_BIN:\=/%
+set INCLUDEDIR=%LIBRARY_INC:\=/%
+set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
 
 set "TF_SYSTEM_LIBS=llvm,swig"
 
@@ -31,14 +32,14 @@ set BUILD_OPTS=^
  --cxxopt=-fmessage-length=0^
  --linkopt=-zrelro^
  --linkopt=-znow^
- --linkopt=-L${PREFIX}/lib^
+ --linkopt=-L%PREFIX%/lib^
  --verbose_failures^
  --action_env="PYTHON_BIN_PATH=%PYTHON%"^
  --action_env="PYTHON_LIB_PATH=%SP_DIR%"^
  --python_path="%PYTHON%"^
- --define=PREFIX="%PREFIX%"^
- --define=LIBDIR="%PREFIX%/lib"^
- --define=INCLUDEDIR="%PREFIX%/include"^
+ --define=PREFIX="%PREFIX:\=/%"^
+ --define=LIBDIR="%LIBRARY_LIB:\=/%"^
+ --define=PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%^
  %BAZEL_MKL_OPT%^
  --config=opt
 
