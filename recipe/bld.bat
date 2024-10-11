@@ -72,6 +72,7 @@ set TF_SYSTEM_LIBS=^
 set PYTHON_BIN_PATH=%PYTHON%
 set PYTHON_LIB_PATH=%SP_DIR%
 set USE_DEFAULT_PYTHON_LIB_PATH=1
+set TF_PYTHON_VERSION=%PY_VER%
 
 :: additional settings
 set CC_OPT_FLAGS="-march=nocona -mtune=haswell"
