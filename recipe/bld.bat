@@ -4,6 +4,8 @@ set "PATH=%CD%:%PATH%"
 set LIBDIR=%LIBRARY_BIN:\=/%
 set INCLUDEDIR=%LIBRARY_INC:\=/%
 set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
+set BAZEL_VS=C:/Program Files/Microsoft Visual Studio/2022/BuildTools 
+set BAZEL_VC=C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC
 
 set "TF_SYSTEM_LIBS=llvm,swig"
 
