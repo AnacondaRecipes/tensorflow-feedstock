@@ -46,6 +46,28 @@ set BUILD_OPTS=^
 set TF_ENABLE_XLA=0
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so
 
+set TF_SYSTEM_LIBS=^
+  astor_archive^
+  astunparse_archive^
+  boringssl^
+  com_github_googlecloudplatform_google_cloud_cpp^
+  com_github_grpc_grpc^
+  com_google_absl^
+  com_google_protobuf^
+  curl^
+  cython^
+  dill_archive^
+  flatbuffers^
+  gast_archive^
+  gif^
+  icu^
+  libjpeg_turbo^
+  org_sqlite^
+  png^
+  pybind11^
+  snappy^
+  zlib^
+
 :: Python settings
 set PYTHON_BIN_PATH=%PYTHON%
 set PYTHON_LIB_PATH=%SP_DIR%
