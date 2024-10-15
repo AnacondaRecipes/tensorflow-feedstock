@@ -148,6 +148,7 @@ requirements:
     # snappy needs rtti enabled, this version of ours has it
     - snappy 1.2.1
     - zlib {{ zlib }}
+    - perl  # [win]
 
 outputs:
   # 2021/12/29: hmaarrfk
