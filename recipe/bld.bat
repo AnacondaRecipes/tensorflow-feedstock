@@ -1,14 +1,12 @@
 @echo on
 
 set "PATH=%CD%:%PATH%"
-set LIBDIR=%LIBRARY_BIN:\=/%
-set INCLUDEDIR=%LIBRARY_INC:\=/%
-set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
+@REM set LIBDIR=%LIBRARY_BIN:\=/%
+@REM set INCLUDEDIR=%LIBRARY_INC:\=/%
+@REM set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
 set BAZEL_VS=C:/Program Files/Microsoft Visual Studio/2022/BuildTools 
 set BAZEL_VC=C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC
 set Bazel_LLVM=C:/Program Files/LLVM
-
-set "TF_SYSTEM_LIBS=llvm,swig"
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
@@ -25,25 +23,6 @@ set BAZEL_OPTS=
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
 set BUILD_OPTS=^
- --copt=-march=nocona^
- --copt=-mtune=haswell^
- --copt=-ftree-vectorize^
- --copt=-fPIC^
- --copt=-fstack-protector-strong^
- --copt=-O2^
- --cxxopt=-fvisibility-inlines-hidden^
- --cxxopt=-fmessage-length=0^
- --linkopt=-zrelro^
- --linkopt=-znow^
- --linkopt=-L%PREFIX%/lib^
- --verbose_failures^
- --action_env="PYTHON_BIN_PATH=%PYTHON%"^
- --action_env="PYTHON_LIB_PATH=%SP_DIR%"^
- --python_path="%PYTHON%"^
- --define=PREFIX="%PREFIX:\=/%"^
- --define=LIBDIR="%LIBRARY_LIB:\=/%"^
- --define=PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%^
- %BAZEL_MKL_OPT%^
  --config=win_clang
 
 set TF_ENABLE_XLA=0
