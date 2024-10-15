@@ -23,30 +23,30 @@ source:
       - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
       # - patches/0003-Add-missing-any_invocable-target-to-absel-bazel.patch
       - patches/0004-Fix-missing-abseil-linkages.patch
-      - patches/0005-Fix-protobuf_python-for-systemlibs.patch
-      - patches/0006-Add-absl_log-systemlib.patch
-      - patches/0007-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch
-      - patches/0008-Fix-further-abseil-linkage.patch
-      - patches/0009-Add-constraint-to-pybind11-systemlib.patch
-      - patches/0010-Different-file-ending-for-flatbuffers-LICENSE.patch
-      - patches/0011-Use-correct-hermetic-python.patch
-      - patches/0012-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch
-      - patches/0013-Add-protobuf-toolchain.patch
-      - patches/0014-fix-genproto.patch
-      - patches/0015-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
-      - patches/0019-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0021-Link-to-absl_log_flags-instead-of-absl_flags.patch
-      - patches/0022-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch
-      - patches/0024-add-absl_string_view-target.patch
-      - patches/0025-add-absl_nullability-target.patch
-      - patches/0026-add-absl_prefetch-target.patch
-      - patches/0027-add-absl_die_if_null-target.patch
-      - patches/0028-add-absl_crc32c-targets.patch
-      - patches/0030-add-kernel_timeout_internal-target.patch
-      - patches/0031-work-around-for-warning-that-clang-falsely-treats-as.patch
-      - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
-      - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch
-      - patches/0032-loosen-hermetic-python.patch
+      - patches/0005-Fix-protobuf_python-for-systemlibs.patch  # [not win]
+      - patches/0006-Add-absl_log-systemlib.patch  # [not win]
+      - patches/0007-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch  # [not win]
+      - patches/0008-Fix-further-abseil-linkage.patch  # [not win]
+      - patches/0009-Add-constraint-to-pybind11-systemlib.patch  # [not win]
+      - patches/0010-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
+      - patches/0011-Use-correct-hermetic-python.patch  # [not win]
+      - patches/0012-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
+      - patches/0013-Add-protobuf-toolchain.patch  # [not win]
+      - patches/0014-fix-genproto.patch  # [not win]
+      - patches/0015-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]  # [not win]
+      - patches/0019-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]  # [not win]
+      - patches/0021-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
+      - patches/0022-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
+      - patches/0024-add-absl_string_view-target.patch  # [not win]
+      - patches/0025-add-absl_nullability-target.patch  # [not win]
+      - patches/0026-add-absl_prefetch-target.patch  # [not win]
+      - patches/0027-add-absl_die_if_null-target.patch  # [not win]
+      - patches/0028-add-absl_crc32c-targets.patch  # [not win]
+      - patches/0030-add-kernel_timeout_internal-target.patch  # [not win]
+      - patches/0031-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
+      - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
+      - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      - patches/0032-loosen-hermetic-python.patch  # [not win]
   - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz
     sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530
     folder: tensorflow-estimator
