@@ -6,6 +6,7 @@ set INCLUDEDIR=%LIBRARY_INC:\=/%
 set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
 set BAZEL_VS=C:/Program Files/Microsoft Visual Studio/2022/BuildTools 
 set BAZEL_VC=C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC
+set Bazel_LLVM=C:/clang
 
 set "TF_SYSTEM_LIBS=llvm,swig"
 
@@ -43,7 +44,7 @@ set BUILD_OPTS=^
  --define=LIBDIR="%LIBRARY_LIB:\=/%"^
  --define=PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%^
  %BAZEL_MKL_OPT%^
- --config=opt
+ --config=win_clang
 
 set TF_ENABLE_XLA=0
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so
