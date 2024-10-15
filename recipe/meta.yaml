@@ -47,6 +47,7 @@ source:
       - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
       - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
       - patches/0032-loosen-hermetic-python.patch  # [not win]
+      - patches/0033-win-fix-inline-perl.patch  # [win]
   - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz
     sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530
     folder: tensorflow-estimator
