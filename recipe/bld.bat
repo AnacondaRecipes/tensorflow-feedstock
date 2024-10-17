@@ -7,6 +7,7 @@ set "PATH=%CD%:%PATH%"
 set BAZEL_VS=C:/Program Files/Microsoft Visual Studio/2022/BuildTools 
 set BAZEL_VC=C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC
 set Bazel_LLVM=C:/Program Files/LLVM
+set CLANG_COMPILER_PATH=%Bazel_LLVM%/bin/clang.exe
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
