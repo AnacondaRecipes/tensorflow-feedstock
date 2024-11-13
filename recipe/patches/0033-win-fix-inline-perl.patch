@@ -1,3 +1,25 @@
+diff --git a/tensorflow/BUILD b/tensorflow/BUILD
+index fb87fda9f82..8de33363520 100644
+--- a/tensorflow/BUILD
++++ b/tensorflow/BUILD
+@@ -1332,11 +1332,16 @@ tf_cc_shared_library(
+         "@local_xla//xla:__subpackages__",
+     ],
+     framework_so = [],
++    features = ["-parse_headers"], 
+     linkopts = select({
+         "//tensorflow:macos": [
+             "-Wl,-exported_symbols_list,$(location //tensorflow:tf_exported_symbols.lds)",
+         ],
+-        "//tensorflow:windows": [],
++        "//tensorflow:windows": [
++            "/WHOLEARCHIVE:tensorflow_framework.lib",
++            "/NODEFAULTLIB:libcmt.lib",
++            "/DEFAULTLIB:msvcrt.lib",
++        ],
+         "//conditions:default": [
+             "-z defs",
+             "-Wl,--version-script,$(location //tensorflow:tf_version_script.lds)",
 diff --git a/tensorflow/lite/acceleration/configuration/BUILD b/tensorflow/lite/acceleration/configuration/BUILD
 index a8e13de931c..fa46c39dce0 100644
 --- a/tensorflow/lite/acceleration/configuration/BUILD
