@@ -1,13 +1,8 @@
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
-index fb87fda9f82..8de33363520 100644
+index fb87fda9f82..c4f3d15db98 100644
 --- a/tensorflow/BUILD
 +++ b/tensorflow/BUILD
-@@ -1332,11 +1332,16 @@ tf_cc_shared_library(
-         "@local_xla//xla:__subpackages__",
-     ],
-     framework_so = [],
-+    features = ["-parse_headers"], 
-     linkopts = select({
+@@ -1336,7 +1336,11 @@ tf_cc_shared_library(
          "//tensorflow:macos": [
              "-Wl,-exported_symbols_list,$(location //tensorflow:tf_exported_symbols.lds)",
          ],
