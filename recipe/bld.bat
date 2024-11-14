@@ -79,6 +79,10 @@ bazel shutdown
 
 call configure
 
+ECHO build --features=layering_check>>.bazelrc
+ECHO build --features=parse_headers>>.bazelrc
+ECHO build --enable_runfiles>>.bazelrc
+
 :: build using bazel
 bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
 
