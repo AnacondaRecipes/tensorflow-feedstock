@@ -1,4 +1,15 @@
-@echo on
+@echo off
+
+@REM Ensure symlinks are allowed
+echo test> symlink_test.txt
+mklink symlink_test2.txt symlink_test.txt
+
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO Enable Developer mode to enable symlinks %ERRORLEVEL%
+    exit 1
+)
+rm -f symlink_test2.txt
+rm -f symlink_test.txt
 
 set "PATH=%CD%:%PATH%"
 @REM set LIBDIR=%LIBRARY_BIN:\=/%
