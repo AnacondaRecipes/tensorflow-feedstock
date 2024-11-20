@@ -40,7 +40,7 @@ set BUILD_OPTS=^
  --config=win_clang
 
 set TF_ENABLE_XLA=0
-set BUILD_TARGET=//tensorflow/tools/pip_package:wheel //tensorflow:libtensorflow.so //tensorflow:libtensorflow_cc.so
+set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow_cpu
 
 @REM set TF_SYSTEM_LIBS=^
 @REM   astor_archive^
