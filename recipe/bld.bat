@@ -79,3 +79,5 @@ bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
 mkdir %SRC_DIR%\\tensorflow_pkg
 copy bazel-bin\\tensorflow\\tools\\pip_package\\wheel_house\\tensorflow*.whl %SRC_DIR%\\tensorflow_pkg
 
+bazel clean --expunge
+bazel shutdown
