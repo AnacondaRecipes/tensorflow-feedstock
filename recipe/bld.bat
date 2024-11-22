@@ -12,10 +12,10 @@ rm -f symlink_test2.txt
 rm -f symlink_test.txt
 
 set "PATH=%CD%:%PATH%"
+set Bazel_LLVM=C:/Program Files/LLVM
+set CLANG_COMPILER_PATH=%Bazel_LLVM%/bin/clang.exe
 set BAZEL_VS="%VSINSTALLDIR%"
 set BAZEL_VC="%VSINSTALLDIR%/VC"
-set CLANG_COMPILER_PATH=%BUILD_PREFIX:\=/%/Library/bin/clang.exe
-set BAZEL_LLVM=%BUILD_PREFIX:\=/%/Library/
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
