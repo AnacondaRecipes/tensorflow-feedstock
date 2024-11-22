@@ -59,6 +59,8 @@ build:
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<39 or py>312]
   skip: true  # [skip_cuda_prefect and (gpu_variant or "").startswith('cuda')]
+  # TODO:
+  skip: true  # [not win]
 
 requirements:
   build:
