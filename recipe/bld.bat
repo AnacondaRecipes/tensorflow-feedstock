@@ -12,13 +12,10 @@ rm -f symlink_test2.txt
 rm -f symlink_test.txt
 
 set "PATH=%CD%:%PATH%"
-@REM set LIBDIR=%LIBRARY_BIN:\=/%
-@REM set INCLUDEDIR=%LIBRARY_INC:\=/%
-@REM set PROTOBUF_INCLUDE_PATH=%LIBRARY_INC:\=/%
-set BAZEL_VS=C:/Program Files/Microsoft Visual Studio/2022/BuildTools 
-set BAZEL_VC=C:/Program Files/Microsoft Visual Studio/2022/BuildTools/VC
 set Bazel_LLVM=C:/Program Files/LLVM
 set CLANG_COMPILER_PATH=%Bazel_LLVM%/bin/clang.exe
+set BAZEL_VS="%VSINSTALLDIR%"
+set BAZEL_VC="%VSINSTALLDIR%/VC"
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
@@ -42,27 +39,8 @@ set BUILD_OPTS=^
 set TF_ENABLE_XLA=0
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow_cpu
 
-@REM set TF_SYSTEM_LIBS=^
-@REM   astor_archive^
-@REM   astunparse_archive^
-@REM   boringssl^
-@REM   com_github_googlecloudplatform_google_cloud_cpp^
-@REM   com_github_grpc_grpc^
-@REM   com_google_absl^
-@REM   com_google_protobuf^
-@REM   curl^
-@REM   cython^
-@REM   dill_archive^
-@REM   flatbuffers^
-@REM   gast_archive^
-@REM   gif^
-@REM   icu^
-@REM   libjpeg_turbo^
-@REM   org_sqlite^
-@REM   png^
-@REM   pybind11^
-@REM   snappy^
-@REM   zlib^
+@REM TF_SYSTEM_LIBS don't work on Windows: https://github.com/openxla/xla/blob/edf18ce242f234fbd20d1fbf4e9c96dfa5be2847/.bazelrc#L383
+@REM set TF_SYSTEM_LIBS=
 
 :: Python settings
 set PYTHON_BIN_PATH=%PYTHON%
