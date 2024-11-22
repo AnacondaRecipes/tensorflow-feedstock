@@ -99,5 +99,5 @@ bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
 
 :: build a whl file
 mkdir %SRC_DIR%\\tensorflow_pkg
-bazel-bin\\tensorflow\\tools\\pip_package\\build_pip_package %SRC_DIR%\\tensorflow_pkg
+copy bazel-bin\\tensorflow\\tools\\pip_package\\wheel_house\\tensorflow*.whl %SRC_DIR%\\tensorflow_pkg
 
