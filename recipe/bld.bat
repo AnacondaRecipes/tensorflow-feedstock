@@ -36,7 +36,7 @@ set BUILD_OPTS=^
  --define=no_tensorflow_py_deps=true^
  --config=win_clang
 
-set TF_ENABLE_XLA=0
+set TF_ENABLE_XLA=1
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow_cpu
 
 @REM TF_SYSTEM_LIBS don't work on Windows: https://github.com/openxla/xla/blob/edf18ce242f234fbd20d1fbf4e9c96dfa5be2847/.bazelrc#L383
