@@ -326,8 +326,8 @@ outputs:
         - tflite_convert --help      # [build_platform == target_platform]
         - toco_from_protos --help    # [build_platform == target_platform]
         - toco --help                # [build_platform == target_platform]
-        - python -c 'import tensorflow as tf; assert tf.test.is_built_with_cuda()'      # [cuda_compiler_version != "None"]
-        - python -c 'import tensorflow as tf; assert not tf.test.is_built_with_cuda()'  # [cuda_compiler_version == "None"]
+        - python -c "import tensorflow as tf; assert tf.test.is_built_with_cuda()"      # [cuda_compiler_version != "None"]
+        - python -c "import tensorflow as tf; assert not tf.test.is_built_with_cuda()"  # [cuda_compiler_version == "None"]
         # See https://github.com/conda-forge/tensorflow-feedstock/issues/364
         - python -c "import tensorflow as tf;graph = tf.function(lambda x:x).get_concrete_function(1.).graph;tf.compat.v1.train.export_meta_graph(graph=graph,graph_def=graph.as_graph_def())"
 
