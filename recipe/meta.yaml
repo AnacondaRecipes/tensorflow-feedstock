@@ -333,10 +333,11 @@ outputs:
 
   - name: tensorflow-estimator
     script: build_estimator.sh  # [unix]
-    script: build_estimator.bat  # [win]
     build:
       string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
       string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+      # Note, estimators are deprecated: https://www.tensorflow.org/guide/migrate/migrating_estimator
+      skip: true  # [win]
     requirements:
       build:
         - {{ compiler('c') }}
