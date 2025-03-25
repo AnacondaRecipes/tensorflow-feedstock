@@ -48,9 +48,9 @@ source:
       - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
       - patches/0032-loosen-hermetic-python.patch  # [not win]
       - patches/0033-win-fix-inline-perl.patch  # [win]
-  - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530
-    folder: tensorflow-estimator
+  - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz  # [not win]
+    sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530  # [not win]
+    folder: tensorflow-estimator  # [not win]
 
 build:
   number: {{ build }}
@@ -308,7 +308,7 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
-        - {{ pin_subpackage('tensorflow-estimator', exact=True) }}
+        - {{ pin_subpackage('tensorflow-estimator', exact=True) }}  # [not win]
         # avoid that people without GPUs needlessly download ~0.5-1GB
         # This also helps mamba give preference to the CPU build
         - __cuda  # [cuda_compiler_version != "None"]
