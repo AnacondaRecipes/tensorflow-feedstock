@@ -323,6 +323,7 @@ outputs:
         # override any potential keras config file on the builder
         - set KERAS_BACKEND=tensorflow     # [win]
         - export KERAS_BACKEND=tensorflow  # [not win]
+        - set PYTHONIOENCODING=utf-8       # [win]
         - pip check                  # [build_platform == target_platform]
         - cat test_tensorflow.py     # [unix]
         - python test_tensorflow.py  # [build_platform == target_platform]
