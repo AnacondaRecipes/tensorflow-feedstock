@@ -1,5 +1,7 @@
 channels:
   - llvmdev17
+  - https://staging.continuum.io/prefect/fs/tensorboard-feedstock/pr3/f7827c5
+  - https://staging.continuum.io/prefect/fs/ml_dtypes-feedstock/pr5/c387226
 
 # the conda build parameters to use
 build_parameters:
