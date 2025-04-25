@@ -1,14 +1,14 @@
-{% set version = "2.17.0" %}
+{% set version = "2.18.1" %}
 {% set estimator_version = "2.15.0" %}
 {% set build = 1 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
 {% endif %}
-# 2.17.0.rc1 uses unreleased commit
-# https://github.com/jax-ml/ml_dtypes/commit/24084d9ed2c3d45bf83b7a9bff833aa185bf9172
-# see
-# https://github.com/tensorflow/tensorflow/blob/v2.17.0-rc1/third_party/py/ml_dtypes/workspace.bzl
+
+# Quite often libml_dtypes-headers and ml_dtypes diverge.
+# https://github.com/tensorflow/tensorflow/blob/v2.18.0/third_party/py/ml_dtypes/workspace.bzl
+{% set libml_dtypes_version = "0.5.0" %}
 {% set ml_dtypes_version = "0.4.0" %}
 
 package:
@@ -17,7 +17,7 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 9cc4d5773b8ee910079baaecb4086d0c28939f024dd74b33fc5e64779b6533dc
+    sha256: 467c512b631e72ad5c9d5c16b23669bcf89675de630cfbb58f9dde746d34afa8
     patches:
       - patches/0001-loosen-requirements.patch
       - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
@@ -239,11 +239,11 @@ outputs:
         - astunparse >=1.6.0
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
-        - h5py >=3.10
+        - h5py >=3.11
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -251,7 +251,7 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.17,<2.18
+        - tensorboard >=2.17,<2.19
         - keras >=3.2.0
       run:
         - python
@@ -265,7 +265,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
         - {{ pin_compatible('numpy') }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -273,7 +273,7 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.17,<2.18
+        - tensorboard >=2.17,<2.19
         - keras >=3.2.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
@@ -470,7 +470,7 @@ outputs:
         - zlib {{ zlib }}
         - nccl 2.21.5.1      # [cuda_compiler_version != "None"]
       run:
-        - libml_dtypes-headers >={{ ml_dtypes_version }},<0.5
+        - libml_dtypes-headers >={{ libml_dtypes_version }},<0.6
         # avoid that people without GPUs needlessly download ~200-300MB
         - __cuda  # [cuda_compiler_version != "None"]
     test:
