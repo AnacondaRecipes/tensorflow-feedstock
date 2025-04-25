@@ -216,6 +216,7 @@ build --define=xnn_enable_avx256vnniint8=false
 build --define=xnn_enable_avx512vnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
+build --linkopt=-labsl_cord_internal
 EOF
 
 # Update TF lite schema with latest flatbuffers version
