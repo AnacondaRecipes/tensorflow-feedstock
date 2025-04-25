@@ -207,6 +207,13 @@ build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
 build --define=xnn_enable_avx512fp16=false
+build --define=xnn_enable_avxvnni=false
+build --define=xnn_enable_avxvnniint8=false
+build --define=xnn_enable_avx512vnni=false
+build --define=xnn_enable_avx512amx=false
+build --define=xnn_enable_avx256vnni=false
+build --define=xnn_enable_avx256vnniint8=false
+build --define=xnn_enable_avx512vnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
 EOF
