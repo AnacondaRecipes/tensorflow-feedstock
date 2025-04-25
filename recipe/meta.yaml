@@ -1,6 +1,6 @@
 {% set version = "2.17.0" %}
 {% set estimator_version = "2.15.0" %}
-{% set build = 0 %}
+{% set build = 1 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -23,33 +23,34 @@ source:
       - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
       # - patches/0003-Add-missing-any_invocable-target-to-absel-bazel.patch
       - patches/0004-Fix-missing-abseil-linkages.patch
-      - patches/0005-Fix-protobuf_python-for-systemlibs.patch
-      - patches/0006-Add-absl_log-systemlib.patch
-      - patches/0007-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch
-      - patches/0008-Fix-further-abseil-linkage.patch
-      - patches/0009-Add-constraint-to-pybind11-systemlib.patch
-      - patches/0010-Different-file-ending-for-flatbuffers-LICENSE.patch
-      - patches/0011-Use-correct-hermetic-python.patch
-      - patches/0012-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch
-      - patches/0013-Add-protobuf-toolchain.patch
-      - patches/0014-fix-genproto.patch
-      - patches/0015-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
-      - patches/0019-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0021-Link-to-absl_log_flags-instead-of-absl_flags.patch
-      - patches/0022-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch
-      - patches/0024-add-absl_string_view-target.patch
-      - patches/0025-add-absl_nullability-target.patch
-      - patches/0026-add-absl_prefetch-target.patch
-      - patches/0027-add-absl_die_if_null-target.patch
-      - patches/0028-add-absl_crc32c-targets.patch
-      - patches/0030-add-kernel_timeout_internal-target.patch
-      - patches/0031-work-around-for-warning-that-clang-falsely-treats-as.patch
-      - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
-      - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch
-      - patches/0032-loosen-hermetic-python.patch
-  - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530
-    folder: tensorflow-estimator
+      - patches/0005-Fix-protobuf_python-for-systemlibs.patch  # [not win]
+      - patches/0006-Add-absl_log-systemlib.patch  # [not win]
+      - patches/0007-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch  # [not win]
+      - patches/0008-Fix-further-abseil-linkage.patch  # [not win]
+      - patches/0009-Add-constraint-to-pybind11-systemlib.patch  # [not win]
+      - patches/0010-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
+      - patches/0011-Use-correct-hermetic-python.patch  # [not win]
+      - patches/0012-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
+      - patches/0013-Add-protobuf-toolchain.patch  # [not win]
+      - patches/0014-fix-genproto.patch  # [not win]
+      - patches/0015-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]  # [not win]
+      - patches/0019-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]  # [not win]
+      - patches/0021-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
+      - patches/0022-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
+      - patches/0024-add-absl_string_view-target.patch  # [not win]
+      - patches/0025-add-absl_nullability-target.patch  # [not win]
+      - patches/0026-add-absl_prefetch-target.patch  # [not win]
+      - patches/0027-add-absl_die_if_null-target.patch  # [not win]
+      - patches/0028-add-absl_crc32c-targets.patch  # [not win]
+      - patches/0030-add-kernel_timeout_internal-target.patch  # [not win]
+      - patches/0031-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
+      - patches/0001-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
+      - patches/0001-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      - patches/0032-loosen-hermetic-python.patch  # [not win]
+      - patches/0033-win-fix-inline-perl.patch  # [win]
+  - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz  # [not win]
+    sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530  # [not win]
+    folder: tensorflow-estimator  # [not win]
 
 build:
   number: {{ build }}
@@ -61,7 +62,7 @@ build:
 
 requirements:
   build:
-    - perl                                   # [linux]
+    - perl                                   # [win or linux]
     - python                                 # [build_platform != target_platform]
     - cython                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -79,11 +80,14 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
+    - clang    # [win]
+    - llvmdev  # [win]
+    - lld      # [win]
     - bazel 6.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
-    - bazel-toolchain >=0.2.0b1
+    - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
-    - libprotobuf {{ libprotobuf }}
+    - libprotobuf {{ libprotobuf }}  # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
     - sed        # [unix]
@@ -93,6 +97,7 @@ requirements:
     - patch      # [unix]
     - m2-patch   # [win]
     - rsync      # [unix]
+    - sqlite     # [win]
   host:
     # GPU requirements for CUDA
     - cudnn      # [cuda_compiler_version != "None"]
@@ -138,14 +143,15 @@ requirements:
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
-    - libprotobuf {{ libprotobuf }}
-    - libprotobuf-python-headers {{ libprotobuf }}
+    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
     # snappy needs rtti enabled, this version of ours has it
     - snappy 1.2.1
     - zlib {{ zlib }}
+    - perl  # [win]
 
 outputs:
   # 2021/12/29: hmaarrfk
@@ -183,6 +189,9 @@ outputs:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
         - {{ compiler('cuda') }}              # [cuda_compiler_version != "None"]
+        - clang    # [win]
+        - llvmdev  # [win]
+        - lld      # [win]
         - python                              # [build_platform != target_platform]
         - cross-python_{{ target_platform }}  # [build_platform != target_platform]
       host:
@@ -216,8 +225,8 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}
-        - libprotobuf-python-headers {{ libprotobuf }}
+        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
         - openssl {{ openssl }}
         - pybind11 2
         # snappy needs rtti enabled, this version of ours has it
@@ -232,10 +241,9 @@ outputs:
         - google-pasta >=0.1.1
         - h5py >=3.10
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
-        - numpy 1.22        # [py<311]
-        - numpy {{ numpy }} # [py>=311]
+        - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -257,7 +265,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<0.5
         - {{ pin_compatible('numpy') }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+        - protobuf >=3.20.3,<5,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -297,7 +305,7 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
-        - {{ pin_subpackage('tensorflow-estimator', exact=True) }}
+        - {{ pin_subpackage('tensorflow-estimator', exact=True) }}  # [not win]
         # avoid that people without GPUs needlessly download ~0.5-1GB
         # This also helps mamba give preference to the CPU build
         - __cuda  # [cuda_compiler_version != "None"]
@@ -312,6 +320,7 @@ outputs:
         # override any potential keras config file on the builder
         - set KERAS_BACKEND=tensorflow     # [win]
         - export KERAS_BACKEND=tensorflow  # [not win]
+        - set PYTHONIOENCODING=utf-8       # [win]
         - pip check                  # [build_platform == target_platform]
         - cat test_tensorflow.py     # [unix]
         - python test_tensorflow.py  # [build_platform == target_platform]
@@ -321,17 +330,18 @@ outputs:
         - tflite_convert --help      # [build_platform == target_platform]
         - toco_from_protos --help    # [build_platform == target_platform]
         - toco --help                # [build_platform == target_platform]
-        - python -c 'import tensorflow as tf; assert tf.test.is_built_with_cuda()'      # [cuda_compiler_version != "None"]
-        - python -c 'import tensorflow as tf; assert not tf.test.is_built_with_cuda()'  # [cuda_compiler_version == "None"]
+        - python -c "import tensorflow as tf; assert tf.test.is_built_with_cuda()"      # [cuda_compiler_version != "None"]
+        - python -c "import tensorflow as tf; assert not tf.test.is_built_with_cuda()"  # [cuda_compiler_version == "None"]
         # See https://github.com/conda-forge/tensorflow-feedstock/issues/364
         - python -c "import tensorflow as tf;graph = tf.function(lambda x:x).get_concrete_function(1.).graph;tf.compat.v1.train.export_meta_graph(graph=graph,graph_def=graph.as_graph_def())"
 
   - name: tensorflow-estimator
     script: build_estimator.sh  # [unix]
-    script: build_estimator.bat  # [win]
     build:
       string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
       string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
+      # Note, estimators are deprecated: https://www.tensorflow.org/guide/migrate/migrating_estimator
+      skip: true  # [win]
     requirements:
       build:
         - {{ compiler('c') }}
@@ -340,6 +350,9 @@ outputs:
         # decide on the cuda variant
         # https://github.com/conda-forge/tensorflow-feedstock/issues/162
         - {{ compiler('cuda') }}                   # [cuda_compiler_version != "None"]
+        - clang 17.0.6    # [win]
+        - llvmdev 17.0.6  # [win]
+        - lld             # [win]
         - bazel 6.*
         - python                                   # [build_platform != target_platform]
         - cross-python_{{ target_platform }}       # [build_platform != target_platform]
@@ -401,7 +414,7 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}
+        - libprotobuf {{ libprotobuf }}  # [not win]
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
@@ -449,7 +462,7 @@ outputs:
         - libgrpc {{ libgrpc }}
         - jpeg {{ jpeg }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}
+        - libprotobuf {{ libprotobuf }}  # [not win]
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
