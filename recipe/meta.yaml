@@ -308,7 +308,7 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
-        - {{ pin_subpackage('tensorflow-estimator', exact=True) }}  # [not win]
+        # - {{ pin_subpackage('tensorflow-estimator', exact=True) }}  # [not win]
         # avoid that people without GPUs needlessly download ~0.5-1GB
         # This also helps mamba give preference to the CPU build
         - __cuda  # [cuda_compiler_version != "None"]
