@@ -1,5 +1,4 @@
 {% set version = "2.18.1" %}
-{% set estimator_version = "2.15.0" %}
 {% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
@@ -51,9 +50,6 @@ source:
       - patches/0030-remove-dependencies-to-libcuda.patch
       - patches/0031-loosen-hermetic-python.patch  # [not win]
       - patches/0032-win-fix-inline-perl.patch  # [win]
-  - url: https://github.com/tensorflow/estimator/archive/refs/tags/v{{ estimator_version.replace(".rc", "-rc") }}.tar.gz  # [not win]
-    sha256: 2d7e100b1878084da34b5e23b49a0cbb5ee8a7add74b7dd189a82ada1cf85530  # [not win]
-    folder: tensorflow-estimator  # [not win]
 
 build:
   number: {{ build }}
@@ -179,7 +175,6 @@ outputs:
         # The tensorboard package adds this entry point.
         # - tensorboard = tensorboard.main:run_main
         - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
-        - estimator_ckpt_converter = tensorflow_estimator.python.estimator.tools.checkpoint_converter:main
       missing_dso_whitelist:
         - "**/_pywrap_tensorflow_internal.*" # loaded by python wrapper pywrap_tensorflow.py
         # some .sos look for other .sos in different site-packages directories. Root cause is probably
@@ -308,7 +303,6 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('tensorflow-base', exact=True) }}
-        # - {{ pin_subpackage('tensorflow-estimator', exact=True) }}  # [not win]
         # avoid that people without GPUs needlessly download ~0.5-1GB
         # This also helps mamba give preference to the CPU build
         - __cuda  # [cuda_compiler_version != "None"]
@@ -337,58 +331,6 @@ outputs:
         - python -c "import tensorflow as tf; assert not tf.test.is_built_with_cuda()"  # [cuda_compiler_version == "None"]
         # See https://github.com/conda-forge/tensorflow-feedstock/issues/364
         - python -c "import tensorflow as tf;graph = tf.function(lambda x:x).get_concrete_function(1.).graph;tf.compat.v1.train.export_meta_graph(graph=graph,graph_def=graph.as_graph_def())"
-
-  - name: tensorflow-estimator
-    script: build_estimator.sh  # [unix]
-    build:
-      string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version != "None"]
-      string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version == "None"]
-      # Note, estimators are deprecated: https://www.tensorflow.org/guide/migrate/migrating_estimator
-      skip: true
-    requirements:
-      build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}
-        # Keep the cuda compiler here since it helps package solvers
-        # decide on the cuda variant
-        # https://github.com/conda-forge/tensorflow-feedstock/issues/162
-        - {{ compiler('cuda') }}                   # [cuda_compiler_version != "None"]
-        - clang 17.0.6    # [win]
-        - llvmdev 17.0.6  # [win]
-        - lld             # [win]
-        - bazel 6.*
-        - python                                   # [build_platform != target_platform]
-        - cross-python_{{ target_platform }}       # [build_platform != target_platform]
-        - libabseil {{ libabseil }}                                # [build_platform != target_platform]
-        - libgrpc {{ libgrpc }}                                  # [build_platform != target_platform]
-        - icu {{ icu }}                                      # [build_platform != target_platform]
-        - {{ pin_subpackage('tensorflow-base') }}  # [build_platform != target_platform]
-        - python
-        - setuptools
-        - wheel
-        - {{ pin_subpackage('tensorflow-base') }}
-      host:
-        - python
-        - pip
-        - packaging
-        - setuptools
-        - wheel
-        # This ensures that a consistent version of openssl is chosen between
-        # all packages.
-        # https://github.com/conda-forge/conda-forge.github.io/issues/1528
-        - openssl {{ openssl }}
-        - {{ pin_subpackage('tensorflow-base', exact=True) }}
-        # Keep the cuda version here since it helps package solvers
-        # decide on the cuda variant
-        - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-      run:
-        - python
-        - {{ pin_subpackage('tensorflow-base', exact=True) }}
-    test:
-      requires:
-        - pip
-      commands:
-        - pip check  # [build_platform == target_platform]
 
   - name: libtensorflow
     script: cp_libtensorflow.sh
