@@ -36,3 +36,4 @@ index 3c2c8ae5..b522b41c 100644
      int64_t rank, std::optional<mlir::DenseIntElementsAttr> opt_padding);
  
  // Does the padding correspond to "SAME" on given dimension configuration.
+ 

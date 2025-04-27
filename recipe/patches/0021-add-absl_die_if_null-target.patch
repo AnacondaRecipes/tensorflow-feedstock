@@ -4,16 +4,16 @@ Date: Sun, 12 May 2024 22:46:04 +1100
 Subject: [PATCH 23/26] add absl_die_if_null target
 
 ---
- third_party/absl/system.absl.log.BUILD | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ third_party/absl/system.absl.log.BUILD | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/third_party/absl/system.absl.log.BUILD b/third_party/absl/system.absl.log.BUILD
-index 1fe1e342594..6606aaa5dd0 100644
+index e435b379b59..6bff4ae4023 100644
 --- a/third_party/absl/system.absl.log.BUILD
 +++ b/third_party/absl/system.absl.log.BUILD
-@@ -2,6 +2,17 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
- 
- package(default_visibility = ["//visibility:public"])
+@@ -13,6 +13,18 @@ cc_library(
+     ],
+ )
  
 +cc_library(
 +    name = "die_if_null",
@@ -26,6 +26,7 @@ index 1fe1e342594..6606aaa5dd0 100644
 +    ],
 +)
 +
++
  cc_library(
-     name = "log",
+     name = "check",
      linkopts = [
