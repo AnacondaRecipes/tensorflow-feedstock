@@ -4,17 +4,17 @@ Date: Tue, 27 Feb 2024 18:01:19 -0500
 Subject: [PATCH 19/26] Update ABSL Log Definition for
  libabsl_vlog_config_internal.so
 
----
+--
  third_party/absl/system.absl.log.BUILD | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/third_party/absl/system.absl.log.BUILD b/third_party/absl/system.absl.log.BUILD
-index 0248bda0f52..1fe1e342594 100644
+index 419f6a0404d..e435b379b59 100644
 --- a/third_party/absl/system.absl.log.BUILD
 +++ b/third_party/absl/system.absl.log.BUILD
 @@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
  cc_library(
-     name = "log",
+     name = "absl_log",
      linkopts = [
 +        "-labsl_vlog_config_internal",
          "-labsl_log_internal_conditions",
