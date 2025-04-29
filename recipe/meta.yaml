@@ -8,7 +8,7 @@
 # Quite often libml_dtypes-headers and ml_dtypes diverge.
 # https://github.com/tensorflow/tensorflow/blob/v2.18.0/third_party/py/ml_dtypes/workspace.bzl
 {% set libml_dtypes_version = "0.5.0" %}
-{% set ml_dtypes_version = "0.4.0" %}
+{% set ml_dtypes_version = "0.4.1" %}
 
 package:
   name: tensorflow-split
@@ -45,6 +45,7 @@ source:
       - patches/0025-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
       - patches/0026-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
       - patches/0027-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      # Note that this patch generates two patches in the third_party directory. Which then get applied via bazel.
       - patches/0028-Protobuf-5-compatability.patch  # [not win]
       - patches/0029-Fix-ResolvePadding-to-be-consistent-in-the-size-of-t.patch
       - patches/0030-Avoid-linking-with-internal-nvrtc.patch
@@ -62,7 +63,7 @@ build:
 
 requirements:
   build:
-    - perl                                   # [win or linux]
+    - perl                                   # [not osx]
     - python                                 # [build_platform != target_platform]
     - cython                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -151,7 +152,6 @@ requirements:
     # snappy needs rtti enabled, this version of ours has it
     - snappy 1.2.1
     - zlib {{ zlib }}
-    - perl  # [win]
 
 outputs:
   # 2021/12/29: hmaarrfk
@@ -239,7 +239,7 @@ outputs:
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
         - h5py >=3.11
-        - ml_dtypes >={{ ml_dtypes_version }},<0.5
+        - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
@@ -250,8 +250,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.17,<2.19
-        - keras >=3.2.0
+        - tensorboard >=2.18,<2.19
+        - keras >=3.5.0
       run:
         - python
         - packaging
@@ -261,8 +261,8 @@ outputs:
         - google-pasta >=0.1.1
         - grpcio {{ libgrpc }}.*
         - h5py >=3.10
-        - ml_dtypes >={{ ml_dtypes_version }},<0.5
-        - {{ pin_compatible('numpy') }}
+        - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
+        - numpy >=1.26.0,<2.1.0
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
@@ -272,8 +272,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.17,<2.19
-        - keras >=3.2.0
+        - tensorboard >=2.18,<2.19
+        - keras >=3.5.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
