@@ -32,9 +32,6 @@ set BAZEL_OPTS=
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
 set BUILD_OPTS=^
- --define=xnn_enable_avx512vnnigfni=false^
- --define=xnn_enable_avxvnni=false^
- --define=xnn_enable_avxvnni_microkernels=false^
  --define=no_tensorflow_py_deps=true^
  --config=win_clang
 
