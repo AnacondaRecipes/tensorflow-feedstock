@@ -8,3 +8,7 @@ build_parameters:
 # build fails on ventura
 extra_labels_for_os:
   osx-arm64: [big-sur]
+  osx-64: [big-sur]
+
+channels:
+  - https://staging.continuum.io/prefect/fs/ml_dtypes-feedstock/pr7/c4080c3
