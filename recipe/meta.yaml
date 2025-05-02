@@ -55,7 +55,6 @@ source:
 
 build:
   number: {{ build }}
-  skip: true  # [unix]
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<39 or py>312]
