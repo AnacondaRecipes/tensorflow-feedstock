@@ -1,4 +1,4 @@
-{% set version = "2.18.1" %}
+{% set version = "2.19.0" %}
 {% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
@@ -7,8 +7,8 @@
 
 # Quite often libml_dtypes-headers and ml_dtypes diverge.
 # https://github.com/tensorflow/tensorflow/blob/v2.18.0/third_party/py/ml_dtypes/workspace.bzl
-{% set libml_dtypes_version = "0.5.0" %}
-{% set ml_dtypes_version = "0.4.1" %}
+{% set libml_dtypes_version = "0.5.1" %}
+{% set ml_dtypes_version = "0.5.1" %}
 
 package:
   name: tensorflow-split
@@ -16,7 +16,7 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 467c512b631e72ad5c9d5c16b23669bcf89675de630cfbb58f9dde746d34afa8
+    sha256: 4691b18e8c914cdf6759b80f1b3b7f3e17be41099607ed0143134f38836d058e
     patches:
       - patches/0001-loosen-requirements.patch
       - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
@@ -236,6 +236,7 @@ outputs:
         # github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/tools/pip_package/setup.py
         - absl-py >=1.0.0
         - astunparse >=1.6.0
+        - python-flatbuffers >=24.3.25
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
         - h5py >=3.11
@@ -243,14 +244,13 @@ outputs:
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
-        - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.18,<2.19
+        - tensorboard >=2.19.0,<2.20.0
         - keras >=3.5.0
       run:
         - python
@@ -260,9 +260,9 @@ outputs:
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
         - grpcio {{ libgrpc }}.*
-        - h5py >=3.10
+        - h5py >=3.11
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
-        - numpy >=1.26.0,<2.1.0
+        - numpy >=1.26.0,<2.3.0
         - opt_einsum >=2.3.2
         - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
         - python-flatbuffers >=24.3.25
@@ -272,7 +272,7 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.18,<2.19
+        - tensorboard >=2.19.0,<2.20.0
         - keras >=3.5.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
