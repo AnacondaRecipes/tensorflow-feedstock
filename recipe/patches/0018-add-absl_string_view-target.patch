@@ -8,12 +8,12 @@ Subject: [PATCH 18/27] add absl_string_view target
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/third_party/absl/system.absl.strings.BUILD b/third_party/absl/system.absl.strings.BUILD
-index d04776c98bf..573d6c2f32d 100644
+index d04776c98bf..105aa0b4804 100644
 --- a/third_party/absl/system.absl.strings.BUILD
 +++ b/third_party/absl/system.absl.strings.BUILD
-@@ -2,6 +2,18 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
- 
- package(default_visibility = ["//visibility:public"])
+@@ -24,9 +24,21 @@ cc_library(
+     ],
+ )
  
 +cc_library(
 +    name = "string_view",
@@ -28,5 +28,11 @@ index d04776c98bf..573d6c2f32d 100644
 +)
 +
  cc_library(
-     name = "strings",
-     linkopts = ["-labsl_strings"],
+     name = "cord",
+-    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info"],
++    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info", "-labsl_cord_internal"],
+     deps = [
+         ":str_format",
+         "//absl/container:compressed_tuple",
+-- 
+2.39.5 (Apple Git-154)
