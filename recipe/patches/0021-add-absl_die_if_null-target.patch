@@ -8,10 +8,10 @@ Subject: [PATCH 23/26] add absl_die_if_null target
  1 file changed, 12 insertions(+)
 
 diff --git a/third_party/absl/system.absl.log.BUILD b/third_party/absl/system.absl.log.BUILD
-index e435b379b59..6bff4ae4023 100644
+index e435b379b59..ca3c8dc499f 100644
 --- a/third_party/absl/system.absl.log.BUILD
 +++ b/third_party/absl/system.absl.log.BUILD
-@@ -13,6 +13,18 @@ cc_library(
+@@ -13,6 +13,17 @@ cc_library(
      ],
  )
  
@@ -25,7 +25,6 @@ index e435b379b59..6bff4ae4023 100644
 +        "//absl/strings",
 +    ],
 +)
-+
 +
  cc_library(
      name = "check",

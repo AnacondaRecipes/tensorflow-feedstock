@@ -11,7 +11,7 @@ Subject: [PATCH 24/26] add absl_crc32c targets
 
 diff --git a/third_party/absl/system.absl.crc.BUILD b/third_party/absl/system.absl.crc.BUILD
 new file mode 100644
-index 00000000000..487c36ff45b
+index 00000000000..34d2f871de1
 --- /dev/null
 +++ b/third_party/absl/system.absl.crc.BUILD
 @@ -0,0 +1,70 @@
@@ -85,8 +85,9 @@ index 00000000000..487c36ff45b
 +        "//absl/base:config",
 +    ],
 +)
+
 diff --git a/third_party/absl/workspace.bzl b/third_party/absl/workspace.bzl
-index c54df3cfbae..94ee77bb7d2 100644
+index b5197f9304b..0bb3fbbf074 100644
 --- a/third_party/absl/workspace.bzl
 +++ b/third_party/absl/workspace.bzl
 @@ -14,6 +14,7 @@ def repo():

@@ -8,24 +8,30 @@ Subject: [PATCH] Hardcode BUILD_PREFIX in build_pip_package
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/tensorflow/tools/pip_package/build_pip_package.py b/tensorflow/tools/pip_package/build_pip_package.py
-index 9588fc19..53bb2395 100644
+index 4809d5ec7a7..f6efc0cab44 100644
 --- a/tensorflow/tools/pip_package/build_pip_package.py
 +++ b/tensorflow/tools/pip_package/build_pip_package.py
-@@ -240,12 +240,12 @@ def patch_so(srcs_dir: str) -> None:
-   }
+@@ -341,18 +341,18 @@ def patch_so(srcs_dir: str) -> None:
    for file, path in to_patch.items():
-     rpath = subprocess.check_output(
--        ["patchelf", "--print-rpath",
-+        ["BUILD_PREFIX/bin/patchelf", "--print-rpath",
-          "{}/{}".format(srcs_dir, file)]).decode().strip()
+     rpath = (
+         subprocess.check_output(
+-            ["patchelf", "--print-rpath", "{}/{}".format(srcs_dir, file)]
++            ["BUILD_PREFIX/patchelf", "--print-rpath", "{}/{}".format(srcs_dir, file)]
+         )
+         .decode()
+         .strip()
+     )
      new_rpath = rpath + ":" + path
--    subprocess.run(["patchelf", "--set-rpath", new_rpath,
-+    subprocess.run(["BUILD_PREFIX/bin/patchelf", "--set-rpath", new_rpath,
-                     "{}/{}".format(srcs_dir, file)], check=True)
--    subprocess.run(["patchelf", "--shrink-rpath",
-+    subprocess.run(["BUILD_PREFIX/bin/patchelf", "--shrink-rpath",
-                     "{}/{}".format(srcs_dir, file)], check=True)
- 
+     subprocess.run(
+-        ["patchelf", "--set-rpath", new_rpath, "{}/{}".format(srcs_dir, file)],
++        ["BUILD_PREFIX/patchelf", "--set-rpath", new_rpath, "{}/{}".format(srcs_dir, file)],
+         check=True,
+     )
+     subprocess.run(
+-        ["patchelf", "--shrink-rpath", "{}/{}".format(srcs_dir, file)],
++        ["BUILD_PREFIX/patchelf", "--shrink-rpath", "{}/{}".format(srcs_dir, file)],
+         check=True,
+     )
  
 -- 
 2.34.1

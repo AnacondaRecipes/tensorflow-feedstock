@@ -10,10 +10,10 @@ see https://github.com/llvm/llvm-project/issues/92630
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/.bazelrc b/.bazelrc
-index f48811d1..0d1c0305 100644
+index b9f83146895..6ba3875c4de 100644
 --- a/.bazelrc
 +++ b/.bazelrc
-@@ -310,7 +310,7 @@ build:ios --noenable_platform_specific_config
+@@ -331,7 +331,7 @@ build:ios --noenable_platform_specific_config
  build:android --copt=-w
  build:ios --copt=-w
  build:linux --host_copt=-w

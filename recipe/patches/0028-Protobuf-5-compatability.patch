@@ -11,19 +11,22 @@ Subject: [PATCH 27/27] Protobuf 5 compatability
  .../profiler/convert/hlo_to_tools_data.cc     |  4 ++
  .../convert/xplane_to_memory_profile.cc       |  4 ++
  .../profiler/convert/xplane_to_tools_data.cc  |  8 +++
- tensorflow/core/util/proto/proto_utils.cc     | 10 ++--
+ tensorflow/core/util/proto/proto_utils.cc     |  9 ++--
  tensorflow/core/util/proto/proto_utils.h      |  4 +-
  .../proto_text/gen_proto_text_functions.cc    |  4 +-
  tensorflow/workspace2.bzl                     |  4 ++
- ...Migrate-from-AddError-to-RecordError.patch | 33 ++++++++++++
- ...y-with-protobuf-v26-migrate-from-dep.patch | 52 +++++++++++++++++++
+ ...Migrate-from-AddError-to-RecordError.patch | 32 ++++++++++++
+ ...y-with-protobuf-v26-migrate-from-dep.patch | 51 +++++++++++++++++++
+ .../xla/xla/hlo/tools/hlo_proto_to_json.cc    |  6 ++-
+ .../xla/xla/hlo/tools/hlo_translate.cc        |  2 +-
+ .../hlo/translate/hlo_to_mhlo/translate.cc    |  2 +-
  .../platform/default/human_readable_json.cc   |  4 ++
- 14 files changed, 125 insertions(+), 12 deletions(-)
+ 17 files changed, 128 insertions(+), 16 deletions(-)
  create mode 100644 third_party/0001-Migrate-from-AddError-to-RecordError.patch
  create mode 100644 third_party/0002-Fix-compatibility-with-protobuf-v26-migrate-from-dep.patch
 
 diff --git a/tensorflow/compiler/mlir/lite/python/jax_to_tfl_flatbuffer.cc b/tensorflow/compiler/mlir/lite/python/jax_to_tfl_flatbuffer.cc
-index eba1ebc4..dc9f7b81 100644
+index d4a2d02db6a..a7c60e70f58 100644
 --- a/tensorflow/compiler/mlir/lite/python/jax_to_tfl_flatbuffer.cc
 +++ b/tensorflow/compiler/mlir/lite/python/jax_to_tfl_flatbuffer.cc
 @@ -57,7 +57,7 @@ namespace {
@@ -31,12 +34,12 @@ index eba1ebc4..dc9f7b81 100644
  class NoOpErrorCollector : public tsl::protobuf::io::ErrorCollector {
   public:
 -  void AddError(int line, int column, const std::string& message) override {}
-+  void RecordError(int line, int column, const absl::string_view message) override {}
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override {}
  };
  
- bool LoadHloProto(const std::string& contents, xla::HloProto* hlo_proto) {
+ absl::StatusOr<xla::HloProto> LoadHloProto(const std::string& contents) {
 diff --git a/tensorflow/compiler/mlir/tensorflow/utils/parse_text_proto.cc b/tensorflow/compiler/mlir/tensorflow/utils/parse_text_proto.cc
-index 906a058d..0c673310 100644
+index aa2d9406e91..dee3ba27c36 100644
 --- a/tensorflow/compiler/mlir/tensorflow/utils/parse_text_proto.cc
 +++ b/tensorflow/compiler/mlir/tensorflow/utils/parse_text_proto.cc
 @@ -30,7 +30,7 @@ namespace {
@@ -44,12 +47,12 @@ index 906a058d..0c673310 100644
  class NoOpErrorCollector : public protobuf::io::ErrorCollector {
   public:
 -  void AddError(int line, int column, const std::string& message) override {}
-+  void RecordError(int line, int column, absl::string_view message) override {}
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override {}
  };
  }  // namespace
  
 diff --git a/tensorflow/core/debug/debug_io_utils.cc b/tensorflow/core/debug/debug_io_utils.cc
-index 0e4e11d8..912970b7 100644
+index 04317455a94..700b5b2b645 100644
 --- a/tensorflow/core/debug/debug_io_utils.cc
 +++ b/tensorflow/core/debug/debug_io_utils.cc
 @@ -94,7 +94,11 @@ Event PrepareChunkEventProto(const DebugNodeKey& debug_node_key,
@@ -65,7 +68,7 @@ index 0e4e11d8..912970b7 100644
        metadata, &json_output, json_options);
    if (status.ok()) {
 diff --git a/tensorflow/core/ir/importexport/parse_text_proto.cc b/tensorflow/core/ir/importexport/parse_text_proto.cc
-index c631785c..3ab6e17c 100644
+index c631785cefc..e81792fb043 100644
 --- a/tensorflow/core/ir/importexport/parse_text_proto.cc
 +++ b/tensorflow/core/ir/importexport/parse_text_proto.cc
 @@ -35,7 +35,7 @@ namespace {
@@ -73,12 +76,12 @@ index c631785c..3ab6e17c 100644
  class NoOpErrorCollector : public tensorflow::protobuf::io::ErrorCollector {
   public:
 -  void AddError(int line, int column, const std::string& message) override {}
-+  void RecordError(int line, int column, const absl::string_view message) override {}
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, const absl::string_view message) override {}
  };
  }  // namespace
  
 diff --git a/tensorflow/core/profiler/convert/hlo_to_tools_data.cc b/tensorflow/core/profiler/convert/hlo_to_tools_data.cc
-index 7fbcd397..d17f3402 100644
+index 7fbcd397906..d17f3402a3f 100644
 --- a/tensorflow/core/profiler/convert/hlo_to_tools_data.cc
 +++ b/tensorflow/core/profiler/convert/hlo_to_tools_data.cc
 @@ -62,7 +62,11 @@ absl::StatusOr<std::string> ConvertHloProtoToMemoryViewer(
@@ -94,12 +97,12 @@ index 7fbcd397..d17f3402 100644
        result_or.value(), &json_output, options);
    if (!encoded_status.ok()) {
 diff --git a/tensorflow/core/profiler/convert/xplane_to_memory_profile.cc b/tensorflow/core/profiler/convert/xplane_to_memory_profile.cc
-index b289f54b..38e89170 100644
+index 612a40bc3f7..7f82387011a 100644
 --- a/tensorflow/core/profiler/convert/xplane_to_memory_profile.cc
 +++ b/tensorflow/core/profiler/convert/xplane_to_memory_profile.cc
-@@ -529,7 +529,11 @@ void ProcessMemoryProfileProto(int64_t max_num_snapshots,
- template <typename Proto>
- Status ConvertProtoToJson(const Proto& proto_output, std::string* json_output) {
+@@ -530,7 +530,11 @@ template <typename Proto>
+ absl::Status ConvertProtoToJson(const Proto& proto_output,
+                                 std::string* json_output) {
    protobuf::util::JsonPrintOptions json_options;
 +#if GOOGLE_PROTOBUF_VERSION < 5026000
    json_options.always_print_primitive_fields = true;
@@ -110,10 +113,10 @@ index b289f54b..38e89170 100644
                                                      json_options);
    if (!status.ok()) {
 diff --git a/tensorflow/core/profiler/convert/xplane_to_tools_data.cc b/tensorflow/core/profiler/convert/xplane_to_tools_data.cc
-index dcc7cea4..a995db64 100644
+index 01168576114..09b284e34f5 100644
 --- a/tensorflow/core/profiler/convert/xplane_to_tools_data.cc
 +++ b/tensorflow/core/profiler/convert/xplane_to_tools_data.cc
-@@ -218,7 +218,11 @@ absl::StatusOr<std::string> ConvertMultiXSpacesToPodViewer(
+@@ -230,7 +230,11 @@ absl::StatusOr<std::string> ConvertMultiXSpacesToPodViewer(
  
    std::string json_output;
    protobuf::util::JsonPrintOptions opts;
@@ -125,7 +128,7 @@ index dcc7cea4..a995db64 100644
    auto encode_status = protobuf::util::MessageToJsonString(
        ConvertOpStatsToPodViewer(combined_op_stats), &json_output, opts);
    if (!encode_status.ok()) {
-@@ -272,7 +276,11 @@ absl::StatusOr<std::string> ConvertMultiXSpacesToOpProfileViewer(
+@@ -310,7 +314,11 @@ absl::StatusOr<std::string> ConvertMultiXSpacesToOpProfileViewer(
        profile);
    std::string json_output;
    protobuf::util::JsonPrintOptions opts;
@@ -138,17 +141,16 @@ index dcc7cea4..a995db64 100644
    auto encode_status =
        protobuf::util::MessageToJsonString(profile, &json_output, opts);
 diff --git a/tensorflow/core/util/proto/proto_utils.cc b/tensorflow/core/util/proto/proto_utils.cc
-index 282be94a..7cfed84d 100644
+index be13bdd8767..5e1d3c4826f 100644
 --- a/tensorflow/core/util/proto/proto_utils.cc
 +++ b/tensorflow/core/util/proto/proto_utils.cc
-@@ -101,17 +101,17 @@ StringErrorCollector::StringErrorCollector(string* error_text,
+@@ -101,18 +101,15 @@ StringErrorCollector::StringErrorCollector(string* error_text,
    }
  }
  
 -void StringErrorCollector::AddError(int line, int column,
 -                                    const string& message) {
-+void StringErrorCollector::RecordError(int line, int column,
-+                                    absl::string_view message) {
++void StringErrorCollector::RecordError(int line, int column, absl::string_view message) {
    if (error_text_ != nullptr) {
      absl::SubstituteAndAppend(error_text_, "$0($1): $2\n", line + index_offset_,
                                column + index_offset_, message);
@@ -158,14 +160,14 @@ index 282be94a..7cfed84d 100644
 -void StringErrorCollector::AddWarning(int line, int column,
 -                                      const string& message) {
 -  AddError(line, column, message);
-+void StringErrorCollector::RecordWarning(int line, int column,
-+                                      absl::string_view message) {
++void StringErrorCollector::RecordWarning(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) {
 +  RecordError(line, column, message);
  }
- 
+-
  }  // namespace proto_utils
+ }  // namespace tensorflow
 diff --git a/tensorflow/core/util/proto/proto_utils.h b/tensorflow/core/util/proto/proto_utils.h
-index f0347a84..c8b2a4b9 100644
+index 01b8ad0d747..c17c6a8079d 100644
 --- a/tensorflow/core/util/proto/proto_utils.h
 +++ b/tensorflow/core/util/proto/proto_utils.h
 @@ -53,10 +53,10 @@ class StringErrorCollector : public protobuf::io::ErrorCollector {
@@ -173,16 +175,16 @@ index f0347a84..c8b2a4b9 100644
  
    // Implementation of protobuf::io::ErrorCollector::AddError.
 -  void AddError(int line, int column, const string& message) override;
-+  void RecordError(int line, int column, absl::string_view message) override;
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override;
  
    // Implementation of protobuf::io::ErrorCollector::AddWarning.
 -  void AddWarning(int line, int column, const string& message) override;
-+  void RecordWarning(int line, int column, absl::string_view message) override;
++  void RecordWarning(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override;
  
   private:
    string* const error_text_;
 diff --git a/tensorflow/tools/proto_text/gen_proto_text_functions.cc b/tensorflow/tools/proto_text/gen_proto_text_functions.cc
-index 406e6641..d97eae73 100644
+index 9fab9130d94..05f0b8c3280 100644
 --- a/tensorflow/tools/proto_text/gen_proto_text_functions.cc
 +++ b/tensorflow/tools/proto_text/gen_proto_text_functions.cc
 @@ -31,8 +31,8 @@ class CrashOnErrorCollector
@@ -191,16 +193,16 @@ index 406e6641..d97eae73 100644
  
 -  void AddError(const string& filename, int line, int column,
 -                const string& message) override {
-+  void RecordError(absl::string_view filename, int line, int column,
-+                absl::string_view message) override {
++    void RecordError(absl::string_view filename, int line, int column,
++                    absl::string_view message) override {
      LOG(FATAL) << "Unexpected error at " << filename << "@" << line << ":"
                 << column << " - " << message;
    }
 diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
-index 5320aa18..32f0a39c 100644
+index 9e01075c3c4..10a15c0a886 100644
 --- a/tensorflow/workspace2.bzl
 +++ b/tensorflow/workspace2.bzl
-@@ -878,6 +878,10 @@ def _tf_repositories():
+@@ -871,6 +871,10 @@ def _tf_repositories():
          name = "riegeli",
          sha256 = "1d216d5c97fa60632143d209a1bb48c2a83788efdb876902e7bbc06396d5ee1f",
          strip_prefix = "riegeli-5d75119232cd4f6db8dfa69a1503289f050e9643",
@@ -213,10 +215,10 @@ index 5320aa18..32f0a39c 100644
  
 diff --git a/third_party/0001-Migrate-from-AddError-to-RecordError.patch b/third_party/0001-Migrate-from-AddError-to-RecordError.patch
 new file mode 100644
-index 00000000..0ed75ee8
+index 00000000000..fef55f09cbf
 --- /dev/null
 +++ b/third_party/0001-Migrate-from-AddError-to-RecordError.patch
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,32 @@
 +From e75b32516c67dbcb0cd1a698d6700c3d7bd85a35 Mon Sep 17 00:00:00 2001
 +From: Compression Team <noreply@google.com>
 +Date: Fri, 31 May 2024 18:20:47 +0200
@@ -249,13 +251,12 @@ index 00000000..0ed75ee8
 +                      ": ", message)));
 +-- 
 +2.34.1
-+
 diff --git a/third_party/0002-Fix-compatibility-with-protobuf-v26-migrate-from-dep.patch b/third_party/0002-Fix-compatibility-with-protobuf-v26-migrate-from-dep.patch
 new file mode 100644
-index 00000000..b5af8d2d
+index 00000000000..688e4e7da8c
 --- /dev/null
 +++ b/third_party/0002-Fix-compatibility-with-protobuf-v26-migrate-from-dep.patch
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,51 @@
 +From 96dccef7210d7e182446b2db7424b16f44a66dd0 Mon Sep 17 00:00:00 2001
 +From: Marcin Kowalczyk <qrczak@google.com>
 +Date: Tue, 4 Jun 2024 16:50:59 +0200
@@ -307,11 +308,53 @@ index 00000000..b5af8d2d
 + 
 +-- 
 +2.34.1
-+
-diff --git a/third_party/xla/third_party/tsl/tsl/platform/default/human_readable_json.cc b/third_party/xla/third_party/tsl/tsl/platform/default/human_readable_json.cc
-index 167cdd2b..dc1ebdd1 100644
---- a/third_party/xla/third_party/tsl/tsl/platform/default/human_readable_json.cc
-+++ b/third_party/xla/third_party/tsl/tsl/platform/default/human_readable_json.cc
+diff --git a/third_party/xla/xla/hlo/tools/hlo_proto_to_json.cc b/third_party/xla/xla/hlo/tools/hlo_proto_to_json.cc
+index ae7f0e019a9..ea8231b9e59 100644
+--- a/third_party/xla/xla/hlo/tools/hlo_proto_to_json.cc
++++ b/third_party/xla/xla/hlo/tools/hlo_proto_to_json.cc
+@@ -46,7 +46,11 @@ absl::StatusOr<std::string> ToJson(const tsl::protobuf::Message& message) {
+   std::string json_output;
+   tsl::protobuf::util::JsonPrintOptions json_options;
+   json_options.add_whitespace = true;
+-  json_options.always_print_primitive_fields = true;
++#if GOOGLE_PROTOBUF_VERSION < 5026000
++  opts.always_print_primitive_fields = true;
++#else
++  opts.always_print_fields_with_no_presence = true;
++#endif
+   auto status = tsl::protobuf::util::MessageToJsonString(message, &json_output,
+                                                          json_options);
+   if (!status.ok()) {
+diff --git a/third_party/xla/xla/hlo/tools/hlo_translate.cc b/third_party/xla/xla/hlo/tools/hlo_translate.cc
+index 653e4e2386a..9a213df2197 100644
+--- a/third_party/xla/xla/hlo/tools/hlo_translate.cc
++++ b/third_party/xla/xla/hlo/tools/hlo_translate.cc
+@@ -80,7 +80,7 @@ llvm::cl::opt<bool> print_sugar(
+ // Error collector that simply ignores errors reported.
+ class NoOpErrorCollector : public tsl::protobuf::io::ErrorCollector {
+  public:
+-  void AddError(int line, int column, const std::string& message) override {}
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override {}
+ };
+ 
+ bool LoadHloProto(const std::string& contents, xla::HloProto* hlo_proto) {
+diff --git a/third_party/xla/xla/hlo/translate/hlo_to_mhlo/translate.cc b/third_party/xla/xla/hlo/translate/hlo_to_mhlo/translate.cc
+index e203008f718..465c0d8be50 100644
+--- a/third_party/xla/xla/hlo/translate/hlo_to_mhlo/translate.cc
++++ b/third_party/xla/xla/hlo/translate/hlo_to_mhlo/translate.cc
+@@ -37,7 +37,7 @@ namespace {
+ // Error collector that simply ignores errors reported.
+ class NoOpErrorCollector : public tsl::protobuf::io::ErrorCollector {
+  public:
+-  void AddError(int line, int column, const std::string& message) override {}
++  void RecordError(int line, google::protobuf::io::ColumnNumber column, absl::string_view message) override {}
+ };
+ 
+ bool LoadHloProto(const std::string& contents, HloProto* hlo_proto) {
+diff --git a/third_party/xla/xla/tsl/platform/default/human_readable_json.cc b/third_party/xla/xla/tsl/platform/default/human_readable_json.cc
+index 5c3da22fddd..375ca1d701d 100644
+--- a/third_party/xla/xla/tsl/platform/default/human_readable_json.cc
++++ b/third_party/xla/xla/tsl/platform/default/human_readable_json.cc
 @@ -33,7 +33,11 @@ absl::StatusOr<std::string> ProtoToHumanReadableJson(
  
    protobuf::util::JsonPrintOptions json_options;
@@ -324,3 +367,6 @@ index 167cdd2b..dc1ebdd1 100644
    auto status =
        protobuf::util::MessageToJsonString(proto, &result, json_options);
    if (!status.ok()) {
+-- 
+2.39.5 (Apple Git-154)
+
