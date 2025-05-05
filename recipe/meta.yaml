@@ -51,6 +51,7 @@ source:
       - patches/0030-remove-dependencies-to-libcuda.patch   
       - patches/0031-loosen-hermetic-python.patch  # [not win]
       - patches/0032-win-fix-inline-perl.patch  # [win]
+      - patches/0033-fix-osx-wheel-name.patch  # [osx]
 
 build:
   number: {{ build }}

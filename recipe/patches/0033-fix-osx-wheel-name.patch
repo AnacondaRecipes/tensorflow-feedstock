@@ -1,0 +1,39 @@
+From 57d50329c7c1b8ab11ff6bedec8f04414544bedd Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Wed, 2 Apr 2025 10:06:28 -0600
+Subject: [PATCH 1/1] fix-osx-wheel-name
+
+To check the compatible tags pip will accept, run:
+`python -m pip debug --verbose` 
+
+The wheel is generated as ie: tensorflow-2.19.0-cp312-cp312-macosx_11_1_arm64.whl
+
+But pip only accepts a limited set of platform tags (see `packaging.tags`),
+and `macosx_11_1_arm64` is not among them — even though it's ABI-compatible.
+This change clamps the tag to `macosx_11_0_arm64`, which pip will accept.
+
+---
+ tensorflow/tools/pip_package/utils/tf_wheel.bzl | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/tensorflow/tools/pip_package/utils/tf_awheel.bzl b/tensorflow/tools/pip_package/utils/tf_wheel.bzl
+index 057779e946e..19b14aa575e 100644
+--- a/tensorflow/tools/pip_package/utils/tf_wheel.bzl
++++ b/tensorflow/tools/pip_package/utils/tf_wheel.bzl
+@@ -37,7 +37,12 @@ load(
+ load("//tensorflow:tensorflow.bzl", "VERSION", "WHEEL_VERSION")
+ 
+ def _get_wheel_platform_name(platform_name, platform_tag):
+-    macos_platform_version = "{}_".format(MACOSX_DEPLOYMENT_TARGET.replace(".", "_")) if MACOSX_DEPLOYMENT_TARGET else ""
++    macos_platform_version = ""
++    if MACOSX_DEPLOYMENT_TARGET:
++        # Clamp macOS platform version to version compatible with pip check/install
++        major_minor = MACOSX_DEPLOYMENT_TARGET.split(".")
++        major = major_minor[0]
++        macos_platform_version = "{major}_0_".format(major = major)
+     tag = platform_tag
+     if platform_tag == "x86_64" and platform_name == "win":
+         tag = "amd64"
+-- 
+2.39.5 (Apple Git-154)
+
