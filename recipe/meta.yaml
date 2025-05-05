@@ -53,6 +53,7 @@ source:
       - patches/0032-win-fix-inline-perl.patch  # [win]
       - patches/0033-fix-osx-wheel-name.patch  # [osx]
       - patches/0034-add-missing-argument-countdown.patch
+      - patches/0035-add-missing-target.patch
 
 build:
   number: {{ build }}

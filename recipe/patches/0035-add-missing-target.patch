@@ -1,0 +1,34 @@
+From 2d3bfd6042ca76010b457bd7a977054113f7c802 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 5 May 2025 15:22:16 -0600
+Subject: [PATCH 1/1] add-missing-target
+
+/include/tensorflow/third_party/xla/xla/tsl/platform/status.h:39:10: fatal error: 'xla/tsl/protobuf/error_codes.pb.h' file not found
+---
+ tensorflow/core/BUILD | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/tensorflow/core/BUILD b/tensorflow/core/BUILD
+index 0b796498421..3574f95471e 100644
+--- a/tensorflow/core/BUILD
++++ b/tensorflow/core/BUILD
+@@ -1564,12 +1564,10 @@ alias(
+     actual = "//tensorflow/core/protobuf:error_codes_proto_impl_cc",
+ )
+ 
+-# copybara:uncomment_begin(google-only)
+-# alias(
+-#     name = "error_codes_proto",
+-#     actual = "//tensorflow/core/lib/core:error_codes_proto",
+-# )
+-# copybara:uncomment_end
++alias(
++    name = "error_codes_proto",
++    actual = "//tensorflow/core/lib/core:error_codes_proto",
++)
+ 
+ alias(
+     name = "version_lib",
+-- 
+2.39.5 (Apple Git-154)
+
