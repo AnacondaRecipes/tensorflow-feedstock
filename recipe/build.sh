@@ -221,6 +221,7 @@ if [[ "${build_platform}" == linux-* ]]; then
 fi
 
 cat >> .bazelrc <<EOF
+
 build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
@@ -232,7 +233,12 @@ build --define=xnn_enable_avx512fp16=false
 build --define=xnn_enable_avxvnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
+
 EOF
+
+if [[ ${cuda_compiler_version} != "None" ]]; then
+    echo "build --config=cuda_wheel" >> .bazelrc
+fi
 
 # Update TF lite schema with latest flatbuffers version
 pushd tensorflow/compiler/mlir/lite/schema
