@@ -116,17 +116,54 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
     elif [[ "${cuda_compiler_version}" == 12* ]]; then
         export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
-	export CUDNN_INSTALL_PATH=$PREFIX
-	export NCCL_INSTALL_PATH=$PREFIX
-	export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
+        export CUDNN_INSTALL_PATH=$PREFIX
+        export NCCL_INSTALL_PATH=$PREFIX
+        export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
         export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
-	# XLA can only cope with a single cuda header include directory, merge both
-	rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
-	#mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include
-	#cp -a ${PREFIX}/targets/x86_64-linux/include/* ${BUILD_PREFIX}/targets/x86_64-linux/include/
+        
+        export HERMETIC_CUDA_VERSION="${cuda_compiler_version}"
+        export HERMETIC_CUDNN_VERSION="${cudnn}"
+        export HERMETIC_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES}
+        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/targets/x86_64-linux"
+        export LOCAL_CUDNN_PATH="${PREFIX}/targets/x86_64-linux"
+        export LOCAL_NCCL_PATH="${PREFIX}/targets/x86_64-linux"
 
+        # XLA can only cope with a single cuda header include directory, merge both
+        rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
+        
+        # Also merge CUDA libraries
+        rsync -a ${PREFIX}/targets/x86_64-linux/lib/ ${BUILD_PREFIX}/targets/x86_64-linux/lib/
+        
+        # Verify critical CUDA static libraries are available
+        if [[ ! -f "${BUILD_PREFIX}/targets/x86_64-linux/lib/libcudart_static.a" ]]; then
+            echo "ERROR: libcudart_static.a not found in ${BUILD_PREFIX}/targets/x86_64-linux/lib/"
+            echo "Available CUDA libraries:"
+            ls -la ${BUILD_PREFIX}/targets/x86_64-linux/lib/libcuda* || echo "No CUDA libraries found"
+            ls -la ${PREFIX}/targets/x86_64-linux/lib/libcuda* || echo "No CUDA libraries found in PREFIX"
+            exit 1
+        fi
 
-	# hmaarrfk -- 2023/12/30
+        # Although XLA supports a non-hermetic build, it still tries to find headers in the hermetic locations.
+        # We do this in the BUILD_PREFIX to not have any impact on the resulting package.
+        # Otherwise, these copied files would be included in the package.
+        rm -rf ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI
+        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/
+        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI/
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn
+        cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn/
+
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/bin
+        ln -s $(which ptxas) ${BUILD_PREFIX}/targets/x86_64-linux/bin/ptxas
+        ln -s $(which nvlink) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvlink
+        ln -s $(which fatbinary) ${BUILD_PREFIX}/targets/x86_64-linux/bin/fatbinary
+        ln -s $(which bin2c) ${BUILD_PREFIX}/targets/x86_64-linux/bin/bin2c
+        ln -s $(which nvprune) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvprune
+        ln -s $PREFIX/bin/crt ${BUILD_PREFIX}/targets/x86_64-linux/bin/crt
+
+        export PATH=$PATH:${BUILD_PREFIX}/nvvm/bin
+          
+  # hmaarrfk -- 2023/12/30
         # This logic should be safe to keep in even when the underlying issue is resolved
         # xref: https://github.com/conda-forge/cuda-nvcc-impl-feedstock/issues/9
         if [[ -x ${BUILD_PREFIX}/nvvm/bin/cicc ]]; then
@@ -199,6 +236,7 @@ if [[ "${build_platform}" == linux-* ]]; then
 fi
 
 cat >> .bazelrc <<EOF
+
 build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
@@ -210,7 +248,12 @@ build --define=xnn_enable_avx512fp16=false
 build --define=xnn_enable_avxvnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
+
 EOF
+
+if [[ ${cuda_compiler_version} != "None" ]]; then
+    echo "build --config=cuda_wheel" >> .bazelrc
+fi
 
 # Update TF lite schema with latest flatbuffers version
 pushd tensorflow/compiler/mlir/lite/schema

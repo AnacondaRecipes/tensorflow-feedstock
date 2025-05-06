@@ -52,6 +52,8 @@ source:
       - patches/0031-remove-dependencies-to-libcuda.patch   
       - patches/0032-loosen-hermetic-python.patch  # [not win]
       - patches/0033-win-fix-inline-perl.patch  # [win]
+      - patches/0034-set-protobuf-version.patch  # [not win]
+      - patches/0035-protobuf-5-compatibility.patch  # [not win]
 
 build:
   number: {{ build }}
@@ -100,8 +102,8 @@ requirements:
     - sqlite     # [win]
   host:
     # GPU requirements for CUDA
-    - cudnn      # [cuda_compiler_version != "None"]
-    - nccl       # [cuda_compiler_version != "None"]
+    - cudnn  {{ cudnn }}  # [cuda_compiler_version != "None"]
+    - nccl  {{ nccl }}    # [cuda_compiler_version != "None"]
     - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
     - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
     - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
@@ -112,6 +114,10 @@ requirements:
     - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
     - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
     - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
+    - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
     # conda build requirements
     - python
     - pip
@@ -206,6 +212,10 @@ outputs:
         - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
         - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
         - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
+        - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
         # conda build requirements
         - python
         - pip

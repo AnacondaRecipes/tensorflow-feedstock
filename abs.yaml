@@ -9,3 +9,6 @@ build_parameters:
 extra_labels_for_os:
   osx-arm64: [big-sur]
   osx-64: [big-sur]
+
+channels:
+  - https://staging.continuum.io/prefect/fs/libprotobuf-feedstock/pr29/5e4d806 
