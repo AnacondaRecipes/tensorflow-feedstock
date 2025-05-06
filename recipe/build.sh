@@ -116,17 +116,39 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
     elif [[ "${cuda_compiler_version}" == 12* ]]; then
         export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
-	export CUDNN_INSTALL_PATH=$PREFIX
-	export NCCL_INSTALL_PATH=$PREFIX
-	export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
+        export CUDNN_INSTALL_PATH=$PREFIX
+        export NCCL_INSTALL_PATH=$PREFIX
+        export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
         export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
-	# XLA can only cope with a single cuda header include directory, merge both
-	rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
-	#mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include
-	#cp -a ${PREFIX}/targets/x86_64-linux/include/* ${BUILD_PREFIX}/targets/x86_64-linux/include/
+        
+        export HERMETIC_CUDA_VERSION="${cuda_compiler_version}"
+        export HERMETIC_CUDNN_VERSION="${cudnn}"
+        export HERMETIC_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES}
+        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/targets/x86_64-linux"
+        export LOCAL_CUDNN_PATH="${PREFIX}/targets/x86_64-linux"
+        export LOCAL_NCCL_PATH="${PREFIX}/targets/x86_64-linux"
 
+        # XLA can only cope with a single cuda header include directory, merge both
+        rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
 
-	# hmaarrfk -- 2023/12/30
+        # Although XLA supports a non-hermetic build, it still tries to find headers in the hermetic locations.
+        # We do this in the BUILD_PREFIX to not have any impact on the resulting package.
+        # Otherwise, these copied files would be included in the package.
+        rm -rf ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI
+        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/
+        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI/
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn
+        cp ${PREFIX}/include/cudnn.h ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn/
+
+        export PATH=$PATH:${BUILD_PREFIX}/nvvm/bin
+        
+        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/bin
+        ln -s $(which ptxas) ${BUILD_PREFIX}/targets/x86_64-linux/bin/ptxas
+        ln -s $(which nvlink) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvlink
+        ln -s $(which fatbinary) ${BUILD_PREFIX}/targets/x86_64-linux/bin/fatbinary
+          
+  # hmaarrfk -- 2023/12/30
         # This logic should be safe to keep in even when the underlying issue is resolved
         # xref: https://github.com/conda-forge/cuda-nvcc-impl-feedstock/issues/9
         if [[ -x ${BUILD_PREFIX}/nvvm/bin/cicc ]]; then

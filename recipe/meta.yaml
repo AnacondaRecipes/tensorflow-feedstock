@@ -100,8 +100,8 @@ requirements:
     - sqlite     # [win]
   host:
     # GPU requirements for CUDA
-    - cudnn      # [cuda_compiler_version != "None"]
-    - nccl       # [cuda_compiler_version != "None"]
+    - cudnn  {{ cudnn }}  # [cuda_compiler_version != "None"]
+    - nccl  {{ nccl }}    # [cuda_compiler_version != "None"]
     - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
     - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
     - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
