@@ -32,7 +32,6 @@ set BAZEL_OPTS=
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
 set BUILD_OPTS=^
- --keep_going^
  --define=no_tensorflow_py_deps=true^
  --config=win_clang
 
@@ -71,11 +70,12 @@ call configure
 ECHO build --features=layering_check>>.bazelrc
 ECHO build --features=parse_headers>>.bazelrc
 ECHO build --enable_runfiles>>.bazelrc
+ECHO build --define=xnn_enable_avxvnniint8=false>>.bazelrc
 
 :: build using bazel
 bazel %BAZEL_OPTS% build %BUILD_OPTS% %BUILD_TARGET%
 
-:: build a whl file
+:: move a whl file
 mkdir %SRC_DIR%\\tensorflow_pkg
 copy bazel-bin\\tensorflow\\tools\\pip_package\\wheel_house\\tensorflow*.whl %SRC_DIR%\\tensorflow_pkg
 

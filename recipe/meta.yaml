@@ -31,8 +31,8 @@ source:
       - patches/0011-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
       - patches/0012-Add-protobuf-toolchain.patch  # [not win]
       - patches/0013-fix-genproto.patch  # [not win]
-      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]  # [not win]
-      - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]  # [not win]
+      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
+      - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
       - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
       - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
       - patches/0018-add-absl_string_view-target.patch  # [not win]
@@ -55,7 +55,6 @@ source:
 
 build:
   number: {{ build }}
-  skip: true  # [win or s390x]
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<39 or py>312]
@@ -88,7 +87,7 @@ requirements:
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
-    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf {{ libprotobuf }}
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
     - sed        # [unix]
@@ -144,8 +143,8 @@ requirements:
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
-    - libprotobuf {{ libprotobuf }}  # [not win]
-    - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+    - libprotobuf {{ libprotobuf }}
+    - libprotobuf-python-headers {{ libprotobuf }}
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
@@ -224,8 +223,8 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
-        - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
+        - libprotobuf-python-headers {{ libprotobuf }}
         - openssl {{ openssl }}
         - pybind11 2
         # snappy needs rtti enabled, this version of ours has it
@@ -242,7 +241,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -264,7 +263,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0,<2.1.0
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -360,7 +359,7 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
@@ -408,7 +407,7 @@ outputs:
         - libgrpc {{ libgrpc }}
         - jpeg {{ jpeg }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
