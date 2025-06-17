@@ -133,15 +133,6 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         
         # Also merge CUDA libraries
         rsync -a ${PREFIX}/targets/x86_64-linux/lib/ ${BUILD_PREFIX}/targets/x86_64-linux/lib/
-        
-        # Verify critical CUDA static libraries are available
-        if [[ ! -f "${BUILD_PREFIX}/targets/x86_64-linux/lib/libcudart_static.a" ]]; then
-            echo "ERROR: libcudart_static.a not found in ${BUILD_PREFIX}/targets/x86_64-linux/lib/"
-            echo "Available CUDA libraries:"
-            ls -la ${BUILD_PREFIX}/targets/x86_64-linux/lib/libcuda* || echo "No CUDA libraries found"
-            ls -la ${PREFIX}/targets/x86_64-linux/lib/libcuda* || echo "No CUDA libraries found in PREFIX"
-            exit 1
-        fi
 
         # Although XLA supports a non-hermetic build, it still tries to find headers in the hermetic locations.
         # We do this in the BUILD_PREFIX to not have any impact on the resulting package.

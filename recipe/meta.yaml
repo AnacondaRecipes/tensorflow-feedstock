@@ -52,9 +52,6 @@ source:
       - patches/0031-remove-dependencies-to-libcuda.patch   
       - patches/0032-loosen-hermetic-python.patch  # [not win]
       - patches/0033-win-fix-inline-perl.patch  # [win]
-      - patches/0034-set-protobuf-version.patch  # [not win]
-      - patches/0035-protobuf-5-compatibility.patch  # [not win]
-
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
