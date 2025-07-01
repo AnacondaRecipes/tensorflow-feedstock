@@ -43,7 +43,7 @@ index 00000000000..419f6a0404d
 +    actual = ":absl_log",
 +)
 diff --git a/third_party/absl/workspace.bzl b/third_party/absl/workspace.bzl
-index 9565a82c331..addb2410abd 100644
+index 9565a82c..addb2410 100644
 --- a/third_party/absl/workspace.bzl
 +++ b/third_party/absl/workspace.bzl
 @@ -20,6 +20,7 @@ def repo():

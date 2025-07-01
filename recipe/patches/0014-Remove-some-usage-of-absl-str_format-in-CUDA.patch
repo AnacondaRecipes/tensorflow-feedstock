@@ -13,7 +13,7 @@ yield the same results without the usage of absl.
  3 files changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/tensorflow/core/framework/resource_base.h b/tensorflow/core/framework/resource_base.h
-index 46a76ea094c..2f8d0a21878 100644
+index c22adb559f1..8b218e6eb10 100644
 --- a/tensorflow/core/framework/resource_base.h
 +++ b/tensorflow/core/framework/resource_base.h
 @@ -18,8 +18,9 @@ limitations under the License.
@@ -42,7 +42,7 @@ index 46a76ea094c..2f8d0a21878 100644
  
    // Returns memory used by this resource.
 diff --git a/tensorflow/core/framework/resource_var.cc b/tensorflow/core/framework/resource_var.cc
-index c441a8e2648..7e1f1fdf0ea 100644
+index 9cd77215af9..36dff751cdf 100644
 --- a/tensorflow/core/framework/resource_var.cc
 +++ b/tensorflow/core/framework/resource_var.cc
 @@ -18,6 +18,8 @@ limitations under the License.
@@ -53,7 +53,7 @@ index c441a8e2648..7e1f1fdf0ea 100644
 +
  namespace tensorflow {
  
- Status Var::AsGraphDef(GraphDefBuilder* builder, Node** out) const {
+ absl::Status Var::AsGraphDef(GraphDefBuilder* builder, Node** out) const {
 diff --git a/tensorflow/core/kernels/conv_ops_gpu.h b/tensorflow/core/kernels/conv_ops_gpu.h
 index 627450ef2d6..d0c97527284 100644
 --- a/tensorflow/core/kernels/conv_ops_gpu.h

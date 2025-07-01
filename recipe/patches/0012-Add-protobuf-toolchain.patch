@@ -8,7 +8,7 @@ Subject: [PATCH 13/26] Add protobuf toolchain
  1 file changed, 14 insertions(+)
 
 diff --git a/third_party/systemlibs/protobuf.BUILD b/third_party/systemlibs/protobuf.BUILD
-index 504bc81af0d..4f105d33f84 100644
+index 697d77a197f..5a840367d69 100644
 --- a/third_party/systemlibs/protobuf.BUILD
 +++ b/third_party/systemlibs/protobuf.BUILD
 @@ -65,12 +65,26 @@ cc_library(

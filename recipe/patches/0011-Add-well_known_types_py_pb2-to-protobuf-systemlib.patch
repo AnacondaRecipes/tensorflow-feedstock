@@ -8,7 +8,7 @@ Subject: [PATCH 12/26] Add well_known_types_py_pb2 to protobuf systemlib
  1 file changed, 7 insertions(+)
 
 diff --git a/third_party/systemlibs/protobuf.BUILD b/third_party/systemlibs/protobuf.BUILD
-index c7d940605f9..504bc81af0d 100644
+index c7d940605f9..697d77a197f 100644
 --- a/third_party/systemlibs/protobuf.BUILD
 +++ b/third_party/systemlibs/protobuf.BUILD
 @@ -111,3 +111,10 @@ py_library(

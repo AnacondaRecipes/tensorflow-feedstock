@@ -8,7 +8,7 @@ Subject: [PATCH 02/26] Add additional absl_synchronization linkage to gRPC
  1 file changed, 3 insertions(+)
 
 diff --git a/third_party/systemlibs/grpc.BUILD b/third_party/systemlibs/grpc.BUILD
-index 8b703f11556..7d4f5aed676 100644
+index 0e4e862ce4c..c4d4d3f160f 100644
 --- a/third_party/systemlibs/grpc.BUILD
 +++ b/third_party/systemlibs/grpc.BUILD
 @@ -10,6 +10,7 @@ cc_library(
@@ -27,7 +27,7 @@ index 8b703f11556..7d4f5aed676 100644
      ],
      visibility = ["//visibility:public"],
  )
-@@ -38,6 +40,7 @@ cc_library(
+@@ -33,6 +35,7 @@ cc_library(
      linkopts = [
          "-lgrpc_unsecure",
          "-lgpr",
@@ -35,3 +35,6 @@ index 8b703f11556..7d4f5aed676 100644
      ],
      visibility = ["//visibility:public"],
  )
+-- 
+2.39.5 (Apple Git-154)
+

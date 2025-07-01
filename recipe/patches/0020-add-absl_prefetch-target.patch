@@ -8,10 +8,10 @@ Subject: [PATCH 22/26] add absl_prefetch target
  1 file changed, 8 insertions(+)
 
 diff --git a/third_party/absl/system.absl.base.BUILD b/third_party/absl/system.absl.base.BUILD
-index a423d5f70da..b31592d31a3 100644
+index ef22befa8b6..e31b7f4c1ff 100644
 --- a/third_party/absl/system.absl.base.BUILD
 +++ b/third_party/absl/system.absl.base.BUILD
-@@ -116,6 +116,14 @@ cc_library(
+@@ -117,6 +117,14 @@ cc_library(
      ],
  )
  
