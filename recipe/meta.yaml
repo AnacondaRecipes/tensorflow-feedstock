@@ -31,8 +31,8 @@ source:
       - patches/0011-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
       - patches/0012-Add-protobuf-toolchain.patch  # [not win]
       - patches/0013-fix-genproto.patch  # [not win]
-      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]  # [not win]
-      - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]  # [not win]
+      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
+      - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
       - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
       - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
       - patches/0018-add-absl_string_view-target.patch  # [not win]
@@ -47,13 +47,11 @@ source:
       - patches/0027-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
       # Note that this patch generates two patches in the third_party directory. Which then get applied via bazel.
       - patches/0028-Protobuf-5-compatability.patch  # [not win]
-      - patches/0029-Avoid-linking-with-internal-nvrtc.patch
-      - patches/0030-remove-dependencies-to-libcuda.patch   
-      - patches/0031-loosen-hermetic-python.patch  # [not win]
-      - patches/0032-win-fix-inline-perl.patch  # [win]
-      - patches/0033-fix-osx-wheel-name.patch  # [osx]
-      - patches/0034-add-missing-argument-countdown.patch
-
+      - patches/0029-Fix-ResolvePadding-to-be-consistent-in-the-size-of-t.patch
+      - patches/0030-Avoid-linking-with-internal-nvrtc.patch
+      - patches/0031-remove-dependencies-to-libcuda.patch   
+      - patches/0032-loosen-hermetic-python.patch  # [not win]
+      - patches/0033-win-fix-inline-perl.patch  # [win]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
@@ -88,7 +86,7 @@ requirements:
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
-    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf {{ libprotobuf }}
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
     - sed        # [unix]
@@ -101,8 +99,8 @@ requirements:
     - sqlite     # [win]
   host:
     # GPU requirements for CUDA
-    - cudnn      # [cuda_compiler_version != "None"]
-    - nccl       # [cuda_compiler_version != "None"]
+    - cudnn  {{ cudnn }}  # [cuda_compiler_version != "None"]
+    - nccl  {{ nccl }}    # [cuda_compiler_version != "None"]
     - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
     - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
     - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
@@ -113,6 +111,10 @@ requirements:
     - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
     - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
     - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
+    - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
     # conda build requirements
     - python
     - pip
@@ -144,8 +146,8 @@ requirements:
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
-    - libprotobuf {{ libprotobuf }}  # [not win]
-    - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+    - libprotobuf {{ libprotobuf }}
+    - libprotobuf-python-headers {{ libprotobuf }}
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
@@ -207,6 +209,10 @@ outputs:
         - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
         - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
         - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
+        - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
         # conda build requirements
         - python
         - pip
@@ -224,8 +230,8 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
-        - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
+        - libprotobuf-python-headers {{ libprotobuf }}
         - openssl {{ openssl }}
         - pybind11 2
         # snappy needs rtti enabled, this version of ours has it
@@ -243,7 +249,8 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+        - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
@@ -264,7 +271,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0,<2.3.0
         - opt_einsum >=2.3.2
-        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5  # [not win]
+        - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
         - python-flatbuffers >=24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -360,7 +367,7 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
@@ -408,7 +415,7 @@ outputs:
         - libgrpc {{ libgrpc }}
         - jpeg {{ jpeg }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf {{ libprotobuf }}
         - openssl {{ openssl }}
         # snappy needs rtti enabled, this version of ours has it
         - snappy 1.2.1
