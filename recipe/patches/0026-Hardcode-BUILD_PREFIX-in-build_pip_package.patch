@@ -16,7 +16,7 @@ index 4809d5ec7a7..f6efc0cab44 100644
      rpath = (
          subprocess.check_output(
 -            ["patchelf", "--print-rpath", "{}/{}".format(srcs_dir, file)]
-+            ["BUILD_PREFIX/patchelf", "--print-rpath", "{}/{}".format(srcs_dir, file)]
++            ["BUILD_PREFIX/bin/patchelf", "--print-rpath", "{}/{}".format(srcs_dir, file)]
          )
          .decode()
          .strip()
@@ -24,12 +24,12 @@ index 4809d5ec7a7..f6efc0cab44 100644
      new_rpath = rpath + ":" + path
      subprocess.run(
 -        ["patchelf", "--set-rpath", new_rpath, "{}/{}".format(srcs_dir, file)],
-+        ["BUILD_PREFIX/patchelf", "--set-rpath", new_rpath, "{}/{}".format(srcs_dir, file)],
++        ["BUILD_PREFIX/bin/patchelf", "--set-rpath", new_rpath, "{}/{}".format(srcs_dir, file)],
          check=True,
      )
      subprocess.run(
 -        ["patchelf", "--shrink-rpath", "{}/{}".format(srcs_dir, file)],
-+        ["BUILD_PREFIX/patchelf", "--shrink-rpath", "{}/{}".format(srcs_dir, file)],
++        ["BUILD_PREFIX/bin/patchelf", "--shrink-rpath", "{}/{}".format(srcs_dir, file)],
          check=True,
      )
  

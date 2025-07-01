@@ -7,3 +7,6 @@ ${PYTHON} -m pip install --no-deps --no-build-isolation $SRC_DIR/tensorflow_pkg/
 
 # The tensorboard package has the proper entrypoint
 rm -f ${PREFIX}/bin/tensorboard
+
+# These will come from the vendored protobuf headers output
+rm -rf $SP_DIR/tensorflow/include/google/protobuf

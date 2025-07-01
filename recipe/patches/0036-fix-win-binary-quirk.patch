@@ -1,0 +1,25 @@
+From 56319912231c1620a5a48de00cfb681c5005e89f Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 15 Jul 2025 11:22:37 -0600
+Subject: [PATCH 1/1] fix-win-binary-quirk
+
+---
+ tensorflow/compiler/mlir/quantization/tensorflow/BUILD | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tensorflow/compiler/mlir/quantization/tensorflow/BUILD b/tensorflow/compiler/mlir/quantization/tensorflow/BUILD
+index f7c231abbc7..f8a8191cf26 100644
+--- a/tensorflow/compiler/mlir/quantization/tensorflow/BUILD
++++ b/tensorflow/compiler/mlir/quantization/tensorflow/BUILD
+@@ -47,7 +47,7 @@ genrule(
+     outs = [
+         "passes/quantized_function_library.h",
+     ],
+-    cmd = "$(location gen_quantized_function_library) --output_file $(RULEDIR)/passes/quantized_function_library.h --src '$(SRCS)'",
++    cmd = "bash -c \"$(location gen_quantized_function_library) --output_file $(RULEDIR)/passes/quantized_function_library.h --src '$(SRCS)'\"",
+     compatible_with = get_compatible_with_portable(),
+     tools = ["gen_quantized_function_library"],
+ )
+-- 
+2.45.2
+

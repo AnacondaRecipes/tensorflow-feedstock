@@ -2,27 +2,9 @@
 
 set -ex
 
-# This hack is necessary because bazel produces a Python script with
-# "#! /usr/bin/python3" at the top. On CI systems this is a problem,
-# but only on Linux.
-if [[ $target_platform == linux-aarch64 ]]; then
-    if [ ! -f /usr/bin/python3 ] || [ -L /usr/bin/python3 ]; then
-        rm /usr/bin/python3 || true
-        ln -s ${PYTHON} /usr/bin/python3
-    fi
-fi
-
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
-
-# Make libprotobuf-python-headers visible for pybind11_protobuf
-# These files will be deleted at the end of the build.
-mkdir -p $PREFIX/include/python
-cp -r $PREFIX/include/google $PREFIX/include/python/
-
-sed -i "s;@@PREFIX@@;$PREFIX;" third_party/pybind11_protobuf/0001-Add-Python-include-path.patch
-sed -i "s;@@PY_VER@@;$PY_VER;" third_party/pybind11_protobuf/0001-Add-Python-include-path.patch
 
 export PATH="$PWD:$PATH"
 export CC=$(basename $CC)
@@ -62,7 +44,6 @@ export TF_SYSTEM_LIBS="
   com_github_googlecloudplatform_google_cloud_cpp
   com_github_grpc_grpc
   com_google_absl
-  com_google_protobuf
   curl
   cython
   dill_archive
@@ -94,6 +75,15 @@ export CC_OPT_FLAGS="-O2"
 # bazel query 'deps(//tensorflow/tools/lib_package:libtensorflow)' --output graph > graph.in
 if [[ "${target_platform}" == osx-* ]]; then
   export LDFLAGS="${LDFLAGS} -lz -framework CoreFoundation -Xlinker -undefined -Xlinker dynamic_lookup"
+  # Remove DEVELOPER_DIR from .bazelrc
+  sed -i.bak '/DEVELOPER_DIR=\/Applications\/Xcode.app/d' .bazelrc
+
+  # So PBP generates the graph correctly.. 
+  echo $OSX_SDK_VER
+  # Force Bazel to use the conda C++ toolchain instead of Bazel’s Apple toolchain.
+  export BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
+  export DEVELOPER_DIR=/Library/Developer/CommandLineTools
+  export SDKROOT=${CONDA_BUILD_SYSROOT}
 else
   export LDFLAGS="${LDFLAGS} -lrt"
 fi
@@ -170,15 +160,7 @@ fi
 
 source gen-bazel-toolchain
 
-if [[ "${target_platform}" == "osx-64" ]]; then
-  # Tensorflow doesn't cope yet with an explicit architecture (darwin_x86_64) on osx-64 yet.
-  TARGET_CPU=darwin
-  # See https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
-  export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
-fi
-
 # Get rid of unwanted defaults
-sed -i -e "/PROTOBUF_INCLUDE_PATH/c\ " .bazelrc
 sed -i -e "/PREFIX/c\ " .bazelrc
 # Ensure .bazelrc ends in a newline
 echo "" >> .bazelrc
@@ -232,7 +214,6 @@ build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
-build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
 build --define=xnn_enable_avx512fp16=false
@@ -284,6 +265,8 @@ rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --ex
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
 rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
+mkdir -p $SRC_DIR/libtensorflow_cc_output/include/xla/tsl/protobuf
+rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --exclude '*' bazel-bin/external/local_xla/xla/tsl/protobuf/ $SRC_DIR/libtensorflow_cc_output/include/xla/tsl/protobuf/
 
 pushd $SRC_DIR/libtensorflow_cc_output
   tar cf ../libtensorflow_cc_output.tar .

@@ -25,6 +25,6 @@ int main() {
   // Run and fetch v
   TF_CHECK_OK(session.Run({v}, &outputs));
   // Expect outputs[0] == [19; -3]
-  LOG(INFO) << outputs[0].matrix<float>();
+  LOG(INFO) << outputs[0].SummarizeValue(/*max_entries=*/10);
   return 0;
 }
