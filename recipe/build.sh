@@ -2,6 +2,12 @@
 
 set -ex
 
+# Set CPU_COUNT to 1 on linux platforms to prevent OoM errors. 
+if [[ "${target_platform}" == linux-* ]]; then
+  export CPU_COUNT=1
+fi
+
+# Override for GitHub Actions CI
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
@@ -78,8 +84,6 @@ if [[ "${target_platform}" == osx-* ]]; then
   # Remove DEVELOPER_DIR from .bazelrc
   sed -i.bak '/DEVELOPER_DIR=\/Applications\/Xcode.app/d' .bazelrc
 
-  # So PBP generates the graph correctly.. 
-  echo $OSX_SDK_VER
   # Force Bazel to use the conda C++ toolchain instead of Bazel’s Apple toolchain.
   export BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
   export DEVELOPER_DIR=/Library/Developer/CommandLineTools

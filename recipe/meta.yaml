@@ -373,6 +373,7 @@ outputs:
         - test_libtensorflow.sh
         - test_c.c
       requires:
+        - {{ stdlib('c') }}
         - {{ compiler('c') }}
       commands:
         - test -f $PREFIX/lib/libtensorflow${SHLIB_EXT}  # [cuda_compiler_version == "None"]
@@ -423,6 +424,7 @@ outputs:
         - test_libtensorflow_cc.sh
         - test_cc.cc
       requires:
+        - {{ stdlib('c') }}
         - {{ compiler('cxx') }}
       commands:
         - test -f $PREFIX/lib/libtensorflow_cc${SHLIB_EXT}  # [not win and cuda_compiler_version == "None"]
