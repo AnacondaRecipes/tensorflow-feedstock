@@ -7,11 +7,6 @@ if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 fi
 
-# Limit CPU_COUNT on linux platforms to prevent OoM errors. 
-if [[ "${target_platform}" == linux-* ]]; then
-  export CPU_COUNT=2
-fi
-
 export PATH="$PWD:$PATH"
 export CC=$(basename $CC)
 export CXX=$(basename $CXX)
@@ -74,17 +69,6 @@ mkdir -p ./bazel_output_base
 export BAZEL_STARTUP_OPTS=""
 export BAZEL_BUILD_OPTS=""
 
-# Add memory optimization flags for Linux builds to reduce memory usage
-if [[ "${target_platform}" == linux-* ]]; then
-  export BAZEL_BUILD_OPTS="--discard_analysis_cache \
-                           --notrack_incremental_state \
-                           --nokeep_state_after_build \
-                           --jobs=$CPU_COUNT \
-                           --local_ram_resources=4096"
-
-  export BAZEL_STARTUP_OPTS="--host_jvm_args=-Xmx2g"
-fi
-
 # Set this to something as otherwise, it would include CFLAGS which itself contains a host path and this then breaks bazel's include path validation.
 export CC_OPT_FLAGS="-O2"
 
@@ -103,10 +87,6 @@ if [[ "${target_platform}" == osx-* ]]; then
   export SDKROOT=${CONDA_BUILD_SYSROOT}
 else
   export LDFLAGS="${LDFLAGS} -lrt"
-  # Add memory optimization flags for linking on Linux
-  if [[ "${target_platform}" == linux-* ]]; then
-    export LDFLAGS="${LDFLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads"
-  fi
 fi
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
