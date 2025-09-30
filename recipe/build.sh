@@ -192,7 +192,7 @@ if [[ "${target_platform}" == "osx-arm64" ]]; then
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 fi
 export TF_ENABLE_XLA=1
-export BUILD_TARGET="//tensorflow/tools/pip_package:wheel //tensorflow/tools/lib_package:libtensorflow //tensorflow:libtensorflow_cc${SHLIB_EXT}"
+export BUILD_TARGET="//tensorflow/tools/pip_package:wheel"
 
 # Python settings
 export PYTHON_BIN_PATH=${PYTHON}
@@ -262,37 +262,6 @@ bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 # build a whl file
 mkdir -p $SRC_DIR/tensorflow_pkg
 cp bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl $SRC_DIR/tensorflow_pkg
-
-# Build libtensorflow(_cc)
-cp $SRC_DIR/bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz $SRC_DIR
-mkdir -p $SRC_DIR/libtensorflow_cc_output/lib
-if [[ "${target_platform}" == osx-* ]]; then
-  cp -RP bazel-bin/tensorflow/libtensorflow_cc.* $SRC_DIR/libtensorflow_cc_output/lib/
-  cp -RP bazel-bin/tensorflow/libtensorflow_framework.* $SRC_DIR/libtensorflow_cc_output/lib/
-else
-  cp -d bazel-bin/tensorflow/libtensorflow_cc.so* $SRC_DIR/libtensorflow_cc_output/lib/
-  cp -d bazel-bin/tensorflow/libtensorflow_framework.so* $SRC_DIR/libtensorflow_cc_output/lib/
-  cp -d $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so.2 $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow_framework.so
-fi
-# Make writable so patchelf can do its magic
-chmod u+w $SRC_DIR/libtensorflow_cc_output/lib/libtensorflow*
-
-mkdir -p $SRC_DIR/libtensorflow_cc_output/include/tensorflow
-
-rsync -r --chmod=D777,F666 --exclude '_solib*' --exclude '_virtual_includes/' --exclude 'pip_package/' --exclude 'lib_package/' --include '*/' --include '*.h' --include '*.inc' --exclude '*' bazel-bin/ $SRC_DIR/libtensorflow_cc_output/include
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/cc $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' tensorflow/core $SRC_DIR/libtensorflow_cc_output/include/tensorflow/
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --include '*.inc' --exclude '*' third_party/xla/third_party/tsl/ $SRC_DIR/libtensorflow_cc_output/include/
-rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.cc' third_party/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/
-rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/Eigen/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/Eigen/
-rsync -r --chmod=D777,F666 --include '*/' --include '*' --exclude '*.txt' bazel-work/external/eigen_archive/unsupported/ $SRC_DIR/libtensorflow_cc_output/include/tensorflow/third_party/unsupported/
-mkdir -p $SRC_DIR/libtensorflow_cc_output/include/xla/tsl/protobuf
-rsync -r --chmod=D777,F666 --include '*/' --include '*.h' --exclude '*' bazel-bin/external/local_xla/xla/tsl/protobuf/ $SRC_DIR/libtensorflow_cc_output/include/xla/tsl/protobuf/
-
-pushd $SRC_DIR/libtensorflow_cc_output
-  tar cf ../libtensorflow_cc_output.tar .
-popd
-rm -r $SRC_DIR/libtensorflow_cc_output
 
 bazel clean --expunge
 bazel shutdown
