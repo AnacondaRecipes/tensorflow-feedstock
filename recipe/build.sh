@@ -71,7 +71,7 @@ export TF_NEED_MKL=0
 export BAZEL_MKL_OPT=""
 
 mkdir -p ./bazel_output_base
-export BAZEL_OPTS=""
+export BAZEL_STARTUP_OPTS=""
 export BAZEL_BUILD_OPTS=""
 
 # Add memory optimization flags for Linux builds to reduce memory usage
@@ -79,8 +79,9 @@ if [[ "${target_platform}" == linux-* ]]; then
   export BAZEL_BUILD_OPTS="--discard_analysis_cache \
                            --notrack_incremental_state \
                            --nokeep_state_after_build \
-                           --host_jvm_args=-Xmx4g \
                            --jobs=$CPU_COUNT"
+
+  export BAZEL_STARTUP_OPTS="--host_jvm_args=-Xmx4g"
 fi
 
 # Set this to something as otherwise, it would include CFLAGS which itself contains a host path and this then breaks bazel's include path validation.
@@ -251,7 +252,7 @@ rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_gene
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
 
 # build using bazel
-bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
+bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 
 # build a whl file
 mkdir -p $SRC_DIR/tensorflow_pkg
