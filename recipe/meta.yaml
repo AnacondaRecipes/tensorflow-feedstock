@@ -52,7 +52,7 @@ source:
       - patches/0031-loosen-hermetic-python.patch  # [not win]
       - patches/0032-win-fix-inline-perl.patch  # [win]
       - patches/0033-fix-osx-wheel-name.patch  # [osx and arm64]
-      - patches/0034-add-missing-argument-countdown.patch
+      - patches/0034-fix-convolution-thunk-countdown-signature.patch
       - patches/0035-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
       - patches/0036-fix-win-binary-quirk.patch  # [win]
       - patches/0037-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]

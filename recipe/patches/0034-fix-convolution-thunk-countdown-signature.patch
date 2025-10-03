@@ -1,0 +1,42 @@
+From 1838e12ed46093dfb5883070bf2efd9846de78d4 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 5 May 2025 14:11:26 -0600
+Subject: [PATCH 1/1] 34
+
+Backport https://github.com/tensorflow/tensorflow/pull/87225
+
+---
+ .../xla/backends/cpu/runtime/convolution_thunk_internal.h | 19 +++++---
+ 1 file changed, 10 insertions(+), 9 deletions(-)
+
+diff --git a/third_party/xla/xla/backends/cpu/runtime/convolution_thunk_internal.h b/third_party/xla/xla/backends/cpu/runtime/convolution_thunk_internal.h
+index 84fed6bb786..5315221f9ba 100644
+--- a/third_party/xla/xla/backends/cpu/runtime/convolution_thunk_internal.h
++++ b/third_party/xla/xla/backends/cpu/runtime/convolution_thunk_internal.h
+@@ -338,15 +338,16 @@ void EigenGenericConv2D(
+     auto num_tasks = Eigen::numext::div_ceil(feature_group_count, task_size);
+ 
+     if (use_thunk_runtime) {
+-      ScheduleAll(&device, num_tasks, [=, &device](Eigen::Index task_index) {
+-        Eigen::Index start = task_index * task_size;
+-        Eigen::Index end = std::min(start + task_size, feature_group_count);
+-        for (Eigen::Index i = start; i < end; ++i) {
+-          auto on_done = [count_down]() mutable { count_down.CountDown(); };
+-          auto [output, convolved] = convolve_group(i);
+-          output.device(device, std::move(on_done)) = convolved;
+-        }
+-      });
++      ScheduleAll(
++        &device, num_tasks, [=, &device](Eigen::Index task_index) mutable {
++          Eigen::Index start = task_index * task_size;
++          Eigen::Index end = std::min(start + task_size, feature_group_count);
++          for (Eigen::Index i = start; i < end; ++i) {
++            auto on_done = [count_down]() mutable { count_down.CountDown(); };
++            auto [output, convolved] = convolve_group(i);
++            output.device(device, std::move(on_done)) = convolved;
++          }
++        });
+     } else {
+       Eigen::Barrier barrier(num_tasks);
+       ScheduleAll(
+
