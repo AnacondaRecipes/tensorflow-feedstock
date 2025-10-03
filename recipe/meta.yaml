@@ -55,6 +55,7 @@ source:
       - patches/0034-add-missing-argument-countdown.patch
       - patches/0035-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
       - patches/0036-fix-win-binary-quirk.patch  # [win]
+      - patches/0037-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
