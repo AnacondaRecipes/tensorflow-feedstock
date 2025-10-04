@@ -24,8 +24,9 @@ set BAZEL_MKL_OPT=
 :: Build in C:\b-out to make path as small as possible
 @for %%G in  ("%SRC_DIR%") DO @SET DRIVE=%%~dG
 set BAZEL_OUT_DIR=%DRIVE%\b-o
-rmdir /s /q "%BAZEL_OUT_DIR%" 2>nul
 set BAZEL_OPTS=--output_base=%BAZEL_OUT_DIR%
+bazel %BAZEL_OPTS% shutdown
+rmdir /s /q "%BAZEL_OUT_DIR%" 2>nul
 
 :: the following arguments are useful for debugging
 ::    --logging=6
