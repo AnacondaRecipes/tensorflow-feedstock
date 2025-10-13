@@ -15,22 +15,13 @@ std::make_unique<DefaultQuantParamsPass>() and ensures the pass is only construc
 
 ---
  .../compiler/mlir/lite/transforms/default_quant_params.cc | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/tensorflow/compiler/mlir/lite/transforms/default_quant_params.cc b/tensorflow/compiler/mlir/lite/transforms/default_quant_params.cc
-index f1b602a6763..90b650d5827 100644
+index a15f71fb7eb..24c995b7e98 100644
 --- a/tensorflow/compiler/mlir/lite/transforms/default_quant_params.cc
 +++ b/tensorflow/compiler/mlir/lite/transforms/default_quant_params.cc
-@@ -54,7 +54,7 @@ namespace {
- class DefaultQuantParamsPass
-     : public impl::DefaultQuantParamsPassBase<DefaultQuantParamsPass> {
-  public:
--  using DefaultQuantParamsPassBase::DefaultQuantParamsPassBase;
-+  // using DefaultQuantParamsPassBase::DefaultQuantParamsPassBase;
- 
-   explicit DefaultQuantParamsPass(double default_min, double default_max,
-                                   bool is_signed) {
-@@ -249,9 +249,9 @@ std::unique_ptr<OperationPass<func::FuncOp>> CreateDefaultQuantParamsPass(
+@@ -247,9 +247,9 @@ std::unique_ptr<OperationPass<func::FuncOp>> CreateDefaultQuantParamsPass(
    return std::make_unique<DefaultQuantParamsPass>(options);
  }
  

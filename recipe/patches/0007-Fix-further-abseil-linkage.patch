@@ -7,10 +7,10 @@ Subject: [PATCH 08/26] Fix further abseil linkage
  third_party/absl/system.absl.base.BUILD | 14 ++++++++++++--
  1 file changed, 12 insertions(+), 2 deletions(-)
 
-diff --git a/third_party/absl/system.absl.base.BUILD b/third_party/absl/system.absl.base.BUILD
-index d6bf8748dee..b3e42f4dd8b 100644
---- a/third_party/absl/system.absl.base.BUILD
-+++ b/third_party/absl/system.absl.base.BUILD
+diff --git a/third_party/xla/third_party/absl/system.absl.base.BUILD b/third_party/xla/third_party/absl/system.absl.base.BUILD
+index d6bf8748dee..2dda52128d4 100644
+--- a/third_party/xla/third_party/absl/system.absl.base.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.base.BUILD
 @@ -17,12 +17,22 @@ package(default_visibility = ["//visibility:public"])
  
  cc_library(

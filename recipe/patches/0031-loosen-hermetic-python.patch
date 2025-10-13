@@ -27,23 +27,23 @@ This removes some declared dependencies allowing the build to proceed.
  13 files changed, 14 deletions(-)
 
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
-index fb87fda9f82..5fb6d7d9182 100644
+index b58696813e7..6e86e06902c 100644
 --- a/tensorflow/BUILD
 +++ b/tensorflow/BUILD
-@@ -1734,8 +1734,6 @@ py_library(
-         "//tensorflow/lite/python:lite",
+@@ -1719,8 +1719,6 @@ py_library(
          "//tensorflow/lite/python/authoring",
          "//tensorflow/python:no_contrib",
+         "//tensorflow/python/profiler:profiler_client",
 -        "@pypi_keras//:pkg",
 -        "@pypi_tensorboard//:pkg",
      ],
  )
  # copybara:comment_end
 diff --git a/tensorflow/dtensor/python/tests/BUILD b/tensorflow/dtensor/python/tests/BUILD
-index 4acf106b14c..937dc77982e 100644
+index 7c7c78a77eb..43a8540c2ef 100644
 --- a/tensorflow/dtensor/python/tests/BUILD
 +++ b/tensorflow/dtensor/python/tests/BUILD
-@@ -489,7 +489,6 @@ pytype_strict_library(
+@@ -486,7 +486,6 @@ pytype_strict_library(
          ":test_util",
          "//tensorflow/python/platform:client_testlib",
          "@absl_py//absl/flags",
@@ -52,10 +52,10 @@ index 4acf106b14c..937dc77982e 100644
  )
  
 diff --git a/tensorflow/python/data/experimental/kernel_tests/service/BUILD b/tensorflow/python/data/experimental/kernel_tests/service/BUILD
-index 628d2e2ad06..2e6fed21cc3 100644
+index 9e6801687d3..44eb59e1ed1 100644
 --- a/tensorflow/python/data/experimental/kernel_tests/service/BUILD
 +++ b/tensorflow/python/data/experimental/kernel_tests/service/BUILD
-@@ -143,7 +143,6 @@ tf_py_strict_test(
+@@ -160,7 +160,6 @@ tf_py_strict_test(
          "//tensorflow/python/ops:array_ops",
          "//tensorflow/python/platform:client_testlib",
          "@absl_py//absl/testing:parameterized",
@@ -64,10 +64,10 @@ index 628d2e2ad06..2e6fed21cc3 100644
  )
  
 diff --git a/tensorflow/python/debug/lib/BUILD b/tensorflow/python/debug/lib/BUILD
-index 53b20deb3cd..35638e71970 100644
+index 8dc30eeee3d..1840eb20d71 100644
 --- a/tensorflow/python/debug/lib/BUILD
 +++ b/tensorflow/python/debug/lib/BUILD
-@@ -598,7 +598,6 @@ py_strict_library(
+@@ -557,7 +557,6 @@ py_strict_library(
          "//tensorflow/python/lib/io:file_io",
          "//tensorflow/python/ops:variables",
          "//tensorflow/python/util:compat",
@@ -76,10 +76,10 @@ index 53b20deb3cd..35638e71970 100644
  )
  
 diff --git a/tensorflow/python/distribute/experimental/rpc/BUILD b/tensorflow/python/distribute/experimental/rpc/BUILD
-index 3a3682cd6cf..8ed343db636 100644
+index 76482d4386c..82c9ebfdd5f 100644
 --- a/tensorflow/python/distribute/experimental/rpc/BUILD
 +++ b/tensorflow/python/distribute/experimental/rpc/BUILD
-@@ -60,6 +60,5 @@ tf_py_strict_test(
+@@ -59,6 +59,5 @@ tf_py_strict_test(
          "//tensorflow/python/ops:variables",
          "//tensorflow/python/platform:client_testlib",
          "//tensorflow/python/util:nest",
@@ -87,10 +87,10 @@ index 3a3682cd6cf..8ed343db636 100644
      ],
  )
 diff --git a/tensorflow/python/eager/BUILD b/tensorflow/python/eager/BUILD
-index 2c92adf4f1e..a8146c66b3b 100644
+index e1f87ef9032..8e274ac8aa9 100644
 --- a/tensorflow/python/eager/BUILD
 +++ b/tensorflow/python/eager/BUILD
-@@ -1238,7 +1238,6 @@ cuda_py_strict_test(
+@@ -1133,7 +1133,6 @@ cuda_py_strict_test(
          "//tensorflow/python/training:server_lib",
          "//tensorflow/python/util:compat",
          "@absl_py//absl/testing:parameterized",
@@ -99,10 +99,10 @@ index 2c92adf4f1e..a8146c66b3b 100644
  )
  
 diff --git a/tensorflow/python/framework/BUILD b/tensorflow/python/framework/BUILD
-index bac9403d63d..41f02e9252c 100644
+index 7c710576b00..a5382df1d34 100644
 --- a/tensorflow/python/framework/BUILD
 +++ b/tensorflow/python/framework/BUILD
-@@ -2150,7 +2150,6 @@ pytype_strict_library(
+@@ -2212,7 +2212,6 @@ pytype_strict_library(
          "//tensorflow/python/util/protobuf",
          "//third_party/py/numpy",
          "@absl_py//absl/testing:parameterized",
@@ -111,7 +111,7 @@ index bac9403d63d..41f02e9252c 100644
  )
  
 diff --git a/tensorflow/python/keras/BUILD b/tensorflow/python/keras/BUILD
-index 08deb3a2e9e..2ae9616c9e7 100755
+index 7786247dc7b..0ed78bde16e 100755
 --- a/tensorflow/python/keras/BUILD
 +++ b/tensorflow/python/keras/BUILD
 @@ -44,7 +44,6 @@ py_library(
@@ -123,10 +123,10 @@ index 08deb3a2e9e..2ae9616c9e7 100755
  )
  
 diff --git a/tensorflow/python/keras/engine/BUILD b/tensorflow/python/keras/engine/BUILD
-index 7f0e73372e9..d6ba7f58d7a 100644
+index a160ef5a230..6670268732a 100644
 --- a/tensorflow/python/keras/engine/BUILD
 +++ b/tensorflow/python/keras/engine/BUILD
-@@ -95,7 +95,6 @@ py_library(
+@@ -96,7 +96,6 @@ py_library(
          "//tensorflow/python/util:tf_decorator_py",
          "//tensorflow/python/util:tf_export",
          "//tensorflow/tools/docs:doc_controls",
@@ -146,10 +146,10 @@ index a8e9553946d..91cf1e68a8a 100644
      ],
  )
 diff --git a/tensorflow/python/profiler/BUILD b/tensorflow/python/profiler/BUILD
-index b1cfd6ea10c..9413aeeab8b 100644
+index 600e154d577..1bda863e394 100644
 --- a/tensorflow/python/profiler/BUILD
 +++ b/tensorflow/python/profiler/BUILD
-@@ -43,7 +43,6 @@ cuda_py_strict_test(
+@@ -40,7 +40,6 @@ cuda_py_strict_test(
          "//tensorflow/python/eager:test",
          "//tensorflow/python/framework:errors",
          "//tensorflow/python/framework:test_lib",
@@ -158,25 +158,14 @@ index b1cfd6ea10c..9413aeeab8b 100644
  )
  
 diff --git a/tensorflow/python/profiler/integration_test/BUILD b/tensorflow/python/profiler/integration_test/BUILD
-index b20698ea6ea..e7060e5a315 100644
+index a4e82101944..be5da7c4efd 100644
 --- a/tensorflow/python/profiler/integration_test/BUILD
 +++ b/tensorflow/python/profiler/integration_test/BUILD
-@@ -35,6 +35,5 @@ cuda_py_strict_test(
+@@ -33,6 +33,5 @@ cuda_py_strict_test(
          "//tensorflow/python/platform:tf_logging",
          "//tensorflow/python/profiler:profiler_client",
          "//tensorflow/python/profiler:profiler_v2",
 -        "@pypi_portpicker//:pkg",
-     ],
- )
-diff --git a/tensorflow/python/summary/BUILD b/tensorflow/python/summary/BUILD
-index 0b27c30c273..32b891eaa7e 100644
---- a/tensorflow/python/summary/BUILD
-+++ b/tensorflow/python/summary/BUILD
-@@ -122,7 +122,6 @@ tf_py_strict_test(
-         "//tensorflow/python/ops:summary_ops_v2",
-         "//tensorflow/python/platform:client_testlib",
-         "//tensorflow/python/training:training_util",
--        "@pypi_tensorboard//:pkg",
      ],
  )
  

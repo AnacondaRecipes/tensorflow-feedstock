@@ -7,10 +7,10 @@ Subject: [PATCH 25/26] add kernel_timeout_internal target
  .../absl/system.absl.synchronization.BUILD        | 15 +++++++++++++++
  1 file changed, 15 insertions(+)
 
-diff --git a/third_party/absl/system.absl.synchronization.BUILD b/third_party/absl/system.absl.synchronization.BUILD
+diff --git a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
 index c0fa37aacd7..b47309deb39 100644
---- a/third_party/absl/system.absl.synchronization.BUILD
-+++ b/third_party/absl/system.absl.synchronization.BUILD
+--- a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
 @@ -16,14 +16,29 @@ cc_library(
      ],
  )

@@ -5,26 +5,12 @@ Subject: [PATCH 26/26] remove dependencies to libcuda
 
 ---
  third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl            | 2 +-
- .../tsl/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl    | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl b/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
-index fabb310001c..8a079831b34 100644
---- a/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
-+++ b/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
-@@ -28,7 +28,7 @@ cc_import(
- %{multiline_comment}
- cc_library(
-     name = "cuda_driver",
--    %{comment}deps = [":cuda_stub"],
-+    #%{comment}deps = [":cuda_stub"],
-     visibility = ["//visibility:public"],
- )
- 
-diff --git a/third_party/xla/third_party/tsl/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl b/third_party/xla/third_party/tsl/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
-index fabb310001c..8a079831b34 100644
---- a/third_party/xla/third_party/tsl/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
-+++ b/third_party/xla/third_party/tsl/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
+diff --git a/third_party/xla/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl b/third_party/xla/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
+index ba86fe70611..22680698869 100644
+--- a/third_party/xla/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
++++ b/third_party/xla/third_party/gpus/cuda/hermetic/cuda_cudart.BUILD.tpl
 @@ -28,7 +28,7 @@ cc_import(
  %{multiline_comment}
  cc_library(

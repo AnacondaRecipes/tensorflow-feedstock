@@ -7,10 +7,10 @@ Subject: [PATCH 18/27] add absl_string_view target
  third_party/absl/system.absl.strings.BUILD | 14 +++++++++++++-
  1 file changed, 13 insertions(+), 1 deletion(-)
 
-diff --git a/third_party/absl/system.absl.strings.BUILD b/third_party/absl/system.absl.strings.BUILD
-index d04776c98bf..105aa0b4804 100644
---- a/third_party/absl/system.absl.strings.BUILD
-+++ b/third_party/absl/system.absl.strings.BUILD
+diff --git a/third_party/xla/third_party/absl/system.absl.strings.BUILD b/third_party/xla/third_party/absl/system.absl.strings.BUILD
+index d04776c98bf..f80833dfd4d 100644
+--- a/third_party/xla/third_party/absl/system.absl.strings.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.strings.BUILD
 @@ -24,9 +24,21 @@ cc_library(
      ],
  )

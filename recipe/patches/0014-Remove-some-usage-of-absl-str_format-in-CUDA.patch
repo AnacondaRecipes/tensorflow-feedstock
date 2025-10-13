@@ -13,20 +13,21 @@ yield the same results without the usage of absl.
  3 files changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/tensorflow/core/framework/resource_base.h b/tensorflow/core/framework/resource_base.h
-index c22adb559f1..8b218e6eb10 100644
+index 99a46c2f4d6..fe921c76f68 100644
 --- a/tensorflow/core/framework/resource_base.h
 +++ b/tensorflow/core/framework/resource_base.h
-@@ -18,8 +18,9 @@ limitations under the License.
+@@ -18,9 +18,10 @@ limitations under the License.
  
  #include <cstdint>
  #include <string>
 +#include <sstream>
  
+ #include "absl/status/status.h"
 -#include "absl/strings/str_format.h"
 +// #include "absl/strings/str_format.h"
  #include "tensorflow/core/lib/core/refcount.h"
- #include "tensorflow/core/lib/core/status.h"
  #include "tensorflow/core/platform/errors.h"
+ 
 @@ -41,7 +42,12 @@ class ResourceBase : public core::WeakRefCounted {
  
    // Returns a name for ref-counting handles.

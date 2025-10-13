@@ -16,12 +16,12 @@ This change clamps the tag to `macosx_11_0_arm64`, which pip will accept.
  tensorflow/tools/pip_package/utils/tf_wheel.bzl | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/tensorflow/tools/pip_package/utils/tf_awheel.bzl b/tensorflow/tools/pip_package/utils/tf_wheel.bzl
-index 057779e946e..19b14aa575e 100644
+diff --git a/tensorflow/tools/pip_package/utils/tf_wheel.bzl b/tensorflow/tools/pip_package/utils/tf_wheel.bzl
+index fa66b202821..90d679f23f3 100644
 --- a/tensorflow/tools/pip_package/utils/tf_wheel.bzl
 +++ b/tensorflow/tools/pip_package/utils/tf_wheel.bzl
-@@ -37,7 +37,12 @@ load(
- load("//tensorflow:tensorflow.bzl", "VERSION", "WHEEL_VERSION")
+@@ -41,7 +41,12 @@ load(
+ )
  
  def _get_wheel_platform_name(platform_name, platform_tag):
 -    macos_platform_version = "{}_".format(MACOSX_DEPLOYMENT_TARGET.replace(".", "_")) if MACOSX_DEPLOYMENT_TARGET else ""

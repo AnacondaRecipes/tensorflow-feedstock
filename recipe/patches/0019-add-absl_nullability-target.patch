@@ -7,10 +7,10 @@ Subject: [PATCH 21/26] add absl_nullability target
  third_party/absl/system.absl.base.BUILD | 8 ++++++++
  1 file changed, 8 insertions(+)
 
-diff --git a/third_party/absl/system.absl.base.BUILD b/third_party/absl/system.absl.base.BUILD
+diff --git a/third_party/xla/third_party/absl/system.absl.base.BUILD b/third_party/xla/third_party/absl/system.absl.base.BUILD
 index b3e42f4dd8b..ef22befa8b6 100644
---- a/third_party/absl/system.absl.base.BUILD
-+++ b/third_party/absl/system.absl.base.BUILD
+--- a/third_party/xla/third_party/absl/system.absl.base.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.base.BUILD
 @@ -25,6 +25,15 @@ cc_library(
      ],
  )
