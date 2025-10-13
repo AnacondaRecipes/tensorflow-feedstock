@@ -1,0 +1,31 @@
+From f53160c7729cb0d6bee3441744ae461e11f9e71d Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 13 Oct 2025 16:25:07 -0600
+Subject: [PATCH 1/1] add-absl-utility-if_constexpr-target
+
+---
+ .../xla/third_party/absl/system.absl.utility.BUILD       | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/xla/third_party/absl/system.absl.utility.BUILD b/third_party/xla/third_party/absl/system.absl.utility.BUILD
+index e15049e261c..25ef6810a35 100644
+--- a/third_party/xla/third_party/absl/system.absl.utility.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.utility.BUILD
+@@ -1,6 +1,13 @@
+ load("@rules_cc//cc:defs.bzl", "cc_library")
+ 
++package(default_visibility = ["//visibility:public"])
++
++licenses(["notice"])  # Apache
++
+ cc_library(
+     name = "utility",
+-    visibility = ["//visibility:public"],
++)
++
++cc_library(
++    name = "if_constexpr",
+ )
+-- 
+2.45.2
+

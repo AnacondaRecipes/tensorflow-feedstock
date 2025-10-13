@@ -1,0 +1,44 @@
+From 98a5ba70da834eba32e69c6eb95fcdad2395b0c5 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 14:47:47 -0600
+Subject: [PATCH 1/1] fix-bazel-error
+
+---
+ tensorflow/core/data/service/BUILD | 2 +-
+ third_party/coremltools.BUILD      | 2 +-
+ third_party/pprof.BUILD            | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tensorflow/core/data/service/BUILD b/tensorflow/core/data/service/BUILD
+index f2a0b0300db..c1ee61f0c77 100644
+--- a/tensorflow/core/data/service/BUILD
++++ b/tensorflow/core/data/service/BUILD
+@@ -1,4 +1,4 @@
+-load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
++load("//third_party/systemlibs:grpc.bazel.cc_grpc_library.bzl", "cc_grpc_library")
+ load(
+     "//tensorflow:tensorflow.bzl",
+     "tf_cc_test",
+diff --git a/third_party/coremltools.BUILD b/third_party/coremltools.BUILD
+index 00d73bb0999..36241434d44 100644
+--- a/third_party/coremltools.BUILD
++++ b/third_party/coremltools.BUILD
+@@ -1,4 +1,4 @@
+-load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
++load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
+diff --git a/third_party/pprof.BUILD b/third_party/pprof.BUILD
+index 0edbc9b863b..f0012d435c8 100644
+--- a/third_party/pprof.BUILD
++++ b/third_party/pprof.BUILD
+@@ -1,4 +1,4 @@
+-load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
++load("//third_party/systemlibs:protobuf.bzl", "py_proto_library")
+ 
+ package(
+     default_visibility = ["//visibility:public"],
+-- 
+2.39.5 (Apple Git-154)
+

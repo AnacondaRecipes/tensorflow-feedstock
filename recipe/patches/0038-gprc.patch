@@ -1,0 +1,114 @@
+diff --git a/tensorflow/workspace0.bzl b/tensorflow/workspace0.bzl
+index 4cf73b1ff64..fa79067e930 100644
+--- a/tensorflow/workspace0.bzl
++++ b/tensorflow/workspace0.bzl
+@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+ load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependencies")
+ load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
+ load("@build_bazel_rules_swift//swift:repositories.bzl", "swift_rules_dependencies")
+-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_extra_deps.bzl", "grpc_extra_deps")
+ load("@local_config_android//:android.bzl", "android_workspace")
+ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+ load("//third_party/googleapis:repository_rules.bzl", "config_googleapis")
+@@ -22,11 +22,11 @@ def _tf_bind():
+     # Needed by Protobuf
+     native.bind(
+         name = "grpc_cpp_plugin",
+-        actual = "@com_github_grpc_grpc//src/compiler:grpc_cpp_plugin",
++        actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
+     )
+     native.bind(
+         name = "grpc_python_plugin",
+-        actual = "@com_github_grpc_grpc//src/compiler:grpc_python_plugin",
++        actual = "@com_github_grpc_grpc//:grpc_python_plugin",
+     )
+ 
+     native.bind(
+diff --git a/tensorflow/workspace1.bzl b/tensorflow/workspace1.bzl
+index 399ff8f7579..9fc71b2d83f 100644
+--- a/tensorflow/workspace1.bzl
++++ b/tensorflow/workspace1.bzl
+@@ -1,7 +1,7 @@
+ """TensorFlow workspace initialization. Consult the WORKSPACE on how to use it."""
+ 
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_deps.bzl", "grpc_deps")
+ load("@com_google_benchmark//:bazel/benchmark_deps.bzl", "benchmark_deps")
+ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
+ load("@local_xla//third_party/llvm:setup.bzl", "llvm_setup")
+diff --git a/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl b/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
+index e427328c39b..86d95b62c19 100644
+--- a/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
++++ b/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
+@@ -1,7 +1,7 @@
+ """Generates and compiles C++ grpc stubs from proto_library rules."""
+ 
+-load("@com_github_grpc_grpc//bazel:generate_cc.bzl", "generate_cc")
+-load("@com_github_grpc_grpc//bazel:protobuf.bzl", "well_known_proto_libs")
++load("//third_party/systemlibs:grpc.bazel.generate_cc.bzl", "generate_cc")
++load("//third_party/systemlibs:grpc.bazel.protobuf.bzl", "well_known_proto_libs")
+ 
+ def cc_grpc_library(
+         name,
+diff --git a/third_party/systemlibs/grpc.bazel.generate_cc.bzl b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+index aa5d18eaa9a..0ccbb5956a0 100644
+--- a/third_party/systemlibs/grpc.bazel.generate_cc.bzl
++++ b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+@@ -5,7 +5,7 @@ directly.
+ """
+ 
+ load(
+-    "@com_github_grpc_grpc//bazel:protobuf.bzl",
++    "//third_party/systemlibs:grpc.bazel.protobuf.bzl",
+     "get_include_directory",
+     "get_plugin_args",
+     "get_proto_root",
+diff --git a/third_party/xla/workspace0.bzl b/third_party/xla/workspace0.bzl
+index 25db007e510..09a1b5a6524 100644
+--- a/third_party/xla/workspace0.bzl
++++ b/third_party/xla/workspace0.bzl
+@@ -20,11 +20,11 @@ def _tf_bind():
+     # Needed by Protobuf
+     native.bind(
+         name = "grpc_cpp_plugin",
+-        actual = "@com_github_grpc_grpc//src/compiler:grpc_cpp_plugin",
++        actual = "@com_github_grpc_grpc//:grpc_cpp_plugin",
+     )
+     native.bind(
+         name = "grpc_python_plugin",
+-        actual = "@com_github_grpc_grpc//src/compiler:grpc_python_plugin",
++        actual = "@com_github_grpc_grpc//:grpc_python_plugin",
+     )
+ 
+     native.bind(
+diff --git a/third_party/xla/xla/tsl/platform/default/build_config.bzl b/third_party/xla/xla/tsl/platform/default/build_config.bzl
+index 298607cd7f9..39d4d7982a2 100644
+--- a/third_party/xla/xla/tsl/platform/default/build_config.bzl
++++ b/third_party/xla/xla/tsl/platform/default/build_config.bzl
+@@ -3,8 +3,7 @@
+ # This file is used in OSS only. It is not transformed by copybara. Therefore all paths in this
+ # file are OSS paths.
+ 
+-load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+-load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_grpc_library")
++load("@//third_party/systemlibs:grpc.bazel.cc_grpc_library.bzl", "cc_grpc_library")
+ load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+ load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
+ load(
+@@ -279,10 +278,10 @@ def tf_proto_library(
+     if has_services:
+         py_grpc_name = name + "_py_grpc_proto"
+         py_deps.append(":{}".format(py_grpc_name))
+-        py_grpc_library(
+-            name = name + "_py_grpc_proto",
+-            srcs = [":{}".format(name)],
+-            deps = [":{}".format(py_proto_name)],
++        #Create alias for backwards compatibility
++        native.alias(
++            name = py_grpc_name,
++            actual = ":{}".format(py_proto_name),
+             testonly = testonly,
+             compatible_with = compatible_with,
+             visibility = visibility,

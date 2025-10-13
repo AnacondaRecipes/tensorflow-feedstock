@@ -27,23 +27,20 @@ export TF_PYTHON_VERSION=$PY_VER
 # https://github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/workspace<i>.bzl
 
 # Exceptions and TODOs:
-# Needs a bazel build:
-# com_google_absl
 # Build failures in tensorflow/core/platform/s3/aws_crypto.cc
 # boringssl (i.e. system openssl)
 # Most importantly: Write a patch that uses system LLVM libs for sure as well as MLIR and oneDNN/mkldnn
 # TODO(check):
 # absl_py
 # com_github_googleapis_googleapis
-# com_github_googlecloudplatform_google_cloud_cpp
 # Needs c++17, try on linux
 #  com_googlesource_code_re2
+# com_github_grpc_grpc
 export TF_SYSTEM_LIBS="
   astor_archive
   astunparse_archive
   boringssl
   com_github_googlecloudplatform_google_cloud_cpp
-  com_github_grpc_grpc
   com_google_absl
   curl
   cython
@@ -59,7 +56,7 @@ export TF_SYSTEM_LIBS="
   snappy
   zlib
   "
-sed -i -e "s/GRPCIO_VERSION/${grpc_cpp}/" tensorflow/tools/pip_package/setup.py
+# sed -i -e "s/GRPCIO_VERSION/${grpc_cpp}/" tensorflow/tools/pip_package/setup.py
 
 # do not build with MKL support
 export TF_NEED_MKL=0

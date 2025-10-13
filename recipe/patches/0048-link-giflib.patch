@@ -1,0 +1,29 @@
+From 105b6c62bda4f4bc793a41cd16fa34c4a7d8534c Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 16:55:34 -0600
+Subject: [PATCH] link-giflib
+
+---
+ third_party/systemlibs/gif.BUILD | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/systemlibs/gif.BUILD b/third_party/systemlibs/gif.BUILD
+index 5eb2c918ba4..8d2d6ad9c62 100644
+--- a/third_party/systemlibs/gif.BUILD
++++ b/third_party/systemlibs/gif.BUILD
+@@ -7,6 +7,11 @@ filegroup(
+ 
+ cc_library(
+     name = "gif",
+-    linkopts = ["-lgif"],
++    linkopts = [
++        "-lgif",
++        "-L$(LIBDIR)",
++        "-Wl,-rpath,$(LIBDIR)",
++    ],
++    alwayslink = True,
+     visibility = ["//visibility:public"],
+ )
+-- 
+2.45.2
+

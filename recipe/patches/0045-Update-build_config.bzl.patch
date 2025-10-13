@@ -1,0 +1,190 @@
+From e396f8a671eb116332654143cb13220554e2ec2c Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 14:33:53 -0600
+Subject: [PATCH 1/1] Update build_config.bzl
+
+---
+ .../xla/tsl/platform/default/build_config.bzl | 125 ++++++++++++++----
+ 1 file changed, 97 insertions(+), 28 deletions(-)
+
+diff --git a/third_party/xla/xla/tsl/platform/default/build_config.bzl b/third_party/xla/xla/tsl/platform/default/build_config.bzl
+index 298607cd7f9..97d44a381be 100644
+--- a/third_party/xla/xla/tsl/platform/default/build_config.bzl
++++ b/third_party/xla/xla/tsl/platform/default/build_config.bzl
+@@ -3,10 +3,8 @@
+ # This file is used in OSS only. It is not transformed by copybara. Therefore all paths in this
+ # file are OSS paths.
+ 
+-load("@com_github_grpc_grpc//bazel:cc_grpc_library.bzl", "cc_grpc_library")
+-load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_grpc_library")
+-load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+-load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
++load("@//third_party/systemlibs:grpc.bazel.cc_grpc_library.bzl", "cc_grpc_library")
++load("@//third_party/systemlibs:protobuf.bzl", "py_proto_library", "cc_proto_library", "proto_gen")
+ load(
+     "@local_xla//xla/tsl:tsl.bzl",
+     "clean_dep",
+@@ -238,13 +236,48 @@ def tf_proto_library(
+     )
+ 
+     cc_proto_name = name + "_cc"
+-    cc_proto_library(
+-        name = cc_proto_name,
+-        testonly = testonly,
+-        compatible_with = compatible_with,
+-        visibility = visibility,
+-        deps = [":{}".format(name)],
+-    )
++    if srcs:
++        cc_proto_library(
++            name = cc_proto_name,
++            srcs = srcs,
++            deps = [s + "_cc" if not s.startswith("@") else s + "_cc" for s in deps + protodeps],
++            testonly = testonly,
++            compatible_with = compatible_with,
++            visibility = visibility,
++        )
++    else:
++        # For aggregator targets with no sources, create a cc_library that depends on the protodeps
++        native.cc_library(
++            name = cc_proto_name,
++            deps = [s + "_cc" if not s.startswith("@") else s + "_cc" for s in deps + protodeps],
++            testonly = testonly,
++            compatible_with = compatible_with,
++            visibility = visibility,
++        )
++        
++        # Also create the _genproto target that other targets might depend on
++        # For aggregator targets, create an alias to one of the dependencies or a filegroup
++        first_dep = None
++        for dep in deps + protodeps:
++            if not dep.startswith("@"):
++                first_dep = dep
++                break
++        
++        if first_dep:
++            native.alias(
++                name = cc_proto_name + "_genproto",
++                actual = first_dep + "_cc_genproto",
++                testonly = testonly,
++                visibility = visibility
++            )
++        else:
++            # Create an empty filegroup
++            native.filegroup(
++                name = cc_proto_name + "_genproto",
++                srcs = [],
++                testonly = testonly,
++                visibility = visibility
++            )
+ 
+     native.alias(
+         name = name + "_cc_impl",
+@@ -268,21 +301,59 @@ def tf_proto_library(
+     py_deps = []
+     py_proto_name = name + "_py_proto"
+     py_deps.append(":{}".format(py_proto_name))
+-    py_proto_library(
+-        name = py_proto_name,
+-        testonly = testonly,
+-        compatible_with = compatible_with,
+-        visibility = visibility,
+-        deps = [":{}".format(name)],
+-    )
++    
++    # Only create py_proto_library if we have sources or if this is a pure dependency aggregator
++    if srcs:
++        py_proto_library(
++            name = py_proto_name,
++            srcs = srcs,
++            deps = [s + "_py_proto" if not s.startswith("@") else s + "_py_proto" for s in deps + protodeps],
++            use_grpc_plugin = has_services,
++            testonly = testonly,
++            compatible_with = compatible_with,
++            visibility = visibility,
++        )
++    else:
++        # For aggregator targets with no sources, create a py_library that depends on the protodeps
++        native.py_library(
++            name = py_proto_name,
++            deps = [s + "_py_proto" if not s.startswith("@") else s + "_py_proto" for s in deps + protodeps],
++            testonly = testonly,
++            compatible_with = compatible_with,
++            visibility = visibility,
++        )
++        
++        # Also create the _genproto target that other targets might depend on
++        # For aggregator targets, create an alias to one of the dependencies or a filegroup
++        first_dep = None
++        for dep in deps + protodeps:
++            if not dep.startswith("@"):
++                first_dep = dep
++                break
++        
++        if first_dep:
++            native.alias(
++                name = py_proto_name + "_genproto",
++                actual = first_dep + "_py_proto_genproto",
++                testonly = testonly,
++                visibility = visibility
++            )
++        else:
++            # Create an empty filegroup
++            native.filegroup(
++                name = py_proto_name + "_genproto",
++                srcs = [],
++                testonly = testonly,
++                visibility = visibility
++            )
+ 
+     if has_services:
+         py_grpc_name = name + "_py_grpc_proto"
+         py_deps.append(":{}".format(py_grpc_name))
+-        py_grpc_library(
+-            name = name + "_py_grpc_proto",
+-            srcs = [":{}".format(name)],
+-            deps = [":{}".format(py_proto_name)],
++        # Create alias for backwards compatibility
++        native.alias(
++            name = py_grpc_name,
++            actual = ":{}".format(py_proto_name),
+             testonly = testonly,
+             compatible_with = compatible_with,
+             visibility = visibility,
+@@ -290,23 +361,21 @@ def tf_proto_library(
+ 
+     py_library(
+         name = name + "_py",
+-        srcs = py_deps,
+         deps = py_deps,
+         testonly = testonly,
+         compatible_with = compatible_with,
+         visibility = visibility,
+     )
+ 
+-    if create_grpc_library:
++    if create_grpc_library and srcs:
+         cc_grpc_library(
+             name = name_sans_proto + "_cc_grpc_proto",
+             testonly = testonly,
+-            srcs = [":{}".format(name)],
++            srcs = [":{}".format(name)],  # Pass proto_library target, not raw files
++            deps = [":{}".format(cc_proto_name)] + [s + "_cc" for s in deps + protodeps if not s.startswith("@")],
+             generate_mocks = True,
+             visibility = visibility,
+             compatible_with = compatible_with,
+-            deps = [":{}".format(cc_proto_name)],
+-            plugin_flags = ["services_namespace=grpc"],
+             grpc_only = True,
+         )
+ 
+@@ -574,4 +643,4 @@ def tf_google_mobile_srcs_only_runtime():
+     return []
+ 
+ def tf_cuda_root_path_deps():
+-    return tf_platform_deps("cuda_root_path")
++    return tf_platform_deps("cuda_root_path")
+\ No newline at end of file
+-- 
+2.39.5 (Apple Git-154)
+

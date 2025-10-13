@@ -1,0 +1,160 @@
+diff --git a/.bazelrc b/.bazelrc
+index 6e4bc245e4a..409d3cbecac 100644
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -211,18 +211,18 @@ build:macos --linkopt=-Wl,-undefined,dynamic_lookup
+ build:macos --host_linkopt=-Wl,-undefined,dynamic_lookup
+ 
+ # Use the Apple toolchain for MacOS builds.
+-build:macos --config=apple-toolchain
++# build:macos --config=apple-toolchain
+ 
+ # Use cc toolchains from apple_support for Apple builds (ios, macos, etc).
+ # https://github.com/bazelbuild/apple_support/tree/master?tab=readme-ov-file#bazel-6-setup
+-build:apple-toolchain --apple_crosstool_top=@local_config_apple_cc//:toolchain
+-build:apple-toolchain --crosstool_top=@local_config_apple_cc//:toolchain
+-build:apple-toolchain --host_crosstool_top=@local_config_apple_cc//:toolchain
++# build:apple-toolchain --apple_crosstool_top=@local_config_apple_cc//:toolchain
++# build:apple-toolchain --crosstool_top=@local_config_apple_cc//:toolchain
++# build:apple-toolchain --host_crosstool_top=@local_config_apple_cc//:toolchain
+ 
+ # Settings for MacOS on ARM CPUs.
+ build:macos_arm64 --cpu=darwin_arm64
+ build:macos_arm64 --macos_minimum_os=11.0
+-build:macos_arm64 --platforms=@build_bazel_apple_support//configs/platforms:darwin_arm64
++build:macos_arm64 --platforms=@build_bazel_apple_support//platforms:darwin_arm64
+ 
+ # iOS configs for each architecture and the fat binary builds.
+ build:ios --apple_platform_type=ios
+diff --git a/tensorflow/workspace0.bzl b/tensorflow/workspace0.bzl
+index 4cf73b1ff64..ba00c8599d6 100644
+--- a/tensorflow/workspace0.bzl
++++ b/tensorflow/workspace0.bzl
+@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+ load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependencies")
+ load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
+ load("@build_bazel_rules_swift//swift:repositories.bzl", "swift_rules_dependencies")
+-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_extra_deps.bzl", "grpc_extra_deps")
+ load("@local_config_android//:android.bzl", "android_workspace")
+ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+ load("//third_party/googleapis:repository_rules.bzl", "config_googleapis")
+diff --git a/tensorflow/workspace1.bzl b/tensorflow/workspace1.bzl
+index 399ff8f7579..9fc71b2d83f 100644
+--- a/tensorflow/workspace1.bzl
++++ b/tensorflow/workspace1.bzl
+@@ -1,7 +1,7 @@
+ """TensorFlow workspace initialization. Consult the WORKSPACE on how to use it."""
+ 
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_deps.bzl", "grpc_deps")
+ load("@com_google_benchmark//:bazel/benchmark_deps.bzl", "benchmark_deps")
+ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
+ load("@local_xla//third_party/llvm:setup.bzl", "llvm_setup")
+diff --git a/third_party/googleapis/build_rules.bzl b/third_party/googleapis/build_rules.bzl
+index 3715b85da29..2a3af809dc3 100644
+--- a/third_party/googleapis/build_rules.bzl
++++ b/third_party/googleapis/build_rules.bzl
+@@ -16,7 +16,7 @@
+ Utilities for building grpc and proto libraries from googleapis.
+ """
+ 
+-load("@com_github_grpc_grpc//bazel:generate_cc.bzl", "generate_cc")
++load("//third_party/systemlibs:grpc.bazel.generate_cc.bzl", "generate_cc")
+ load("@rules_cc//cc:defs.bzl", native_cc_proto_library = "cc_proto_library")
+ 
+ def _tf_cc_headers(ctx):
+diff --git a/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl b/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
+index e427328c39b..86d95b62c19 100644
+--- a/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
++++ b/third_party/systemlibs/grpc.bazel.cc_grpc_library.bzl
+@@ -1,7 +1,7 @@
+ """Generates and compiles C++ grpc stubs from proto_library rules."""
+ 
+-load("@com_github_grpc_grpc//bazel:generate_cc.bzl", "generate_cc")
+-load("@com_github_grpc_grpc//bazel:protobuf.bzl", "well_known_proto_libs")
++load("//third_party/systemlibs:grpc.bazel.generate_cc.bzl", "generate_cc")
++load("//third_party/systemlibs:grpc.bazel.protobuf.bzl", "well_known_proto_libs")
+ 
+ def cc_grpc_library(
+         name,
+diff --git a/third_party/systemlibs/grpc.bazel.generate_cc.bzl b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+index aa5d18eaa9a..0ccbb5956a0 100644
+--- a/third_party/systemlibs/grpc.bazel.generate_cc.bzl
++++ b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+@@ -5,7 +5,7 @@ directly.
+ """
+ 
+ load(
+-    "@com_github_grpc_grpc//bazel:protobuf.bzl",
++    "//third_party/systemlibs:grpc.bazel.protobuf.bzl",
+     "get_include_directory",
+     "get_plugin_args",
+     "get_proto_root",
+diff --git a/third_party/systemlibs/grpc.bazel.protobuf.bzl b/third_party/systemlibs/grpc.bazel.protobuf.bzl
+index cfb124ce43b..d37672c0a1f 100644
+--- a/third_party/systemlibs/grpc.bazel.protobuf.bzl
++++ b/third_party/systemlibs/grpc.bazel.protobuf.bzl
+@@ -1,7 +1,5 @@
+ """Utility functions for generating protobuf code."""
+ 
+-load("@rules_proto//proto:defs.bzl", "ProtoInfo")
+-
+ _PROTO_EXTENSION = ".proto"
+ _VIRTUAL_IMPORTS = "/_virtual_imports/"
+ 
+@@ -243,4 +241,4 @@ def is_in_virtual_imports(source_file, virtual_folder = _VIRTUAL_IMPORTS):
+     Returns:
+         True if source_file is located under _virtual_imports, False otherwise.
+     """
+-    return not source_file.is_source and virtual_folder in source_file.path
++    return not source_file.is_source and virtual_folder in source_file.path
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/BUILD.bazel b/third_party/xla/third_party/BUILD.bazel
+index fe756e1be26..49823b158e1 100644
+--- a/third_party/xla/third_party/BUILD.bazel
++++ b/third_party/xla/third_party/BUILD.bazel
+@@ -1 +1,3 @@
+ licenses(["notice"])  # Apache 2.0
++
++package(default_visibility = ["//visibility:public"])
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/absl/system.absl.base.BUILD b/third_party/xla/third_party/absl/system.absl.base.BUILD
+index a0ff1f6492a..7b79ceea5f7 100644
+--- a/third_party/xla/third_party/absl/system.absl.base.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.base.BUILD
+@@ -13,6 +13,7 @@ package(default_visibility = ["//visibility:public"])
+     "errno_saver",
+     "fast_type_id",
+     "pretty_function",
++    "no_destructor",
+ ]]
+ 
+ cc_library(
+diff --git a/third_party/xla/workspace0.bzl b/third_party/xla/workspace0.bzl
+index 25db007e510..030c1313e12 100644
+--- a/third_party/xla/workspace0.bzl
++++ b/third_party/xla/workspace0.bzl
+@@ -5,7 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+ load("@build_bazel_apple_support//lib:repositories.bzl", "apple_support_dependencies")
+ load("@build_bazel_rules_apple//apple:repositories.bzl", "apple_rules_dependencies")
+ load("@build_bazel_rules_swift//swift:repositories.bzl", "swift_rules_dependencies")
+-load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_extra_deps.bzl", "grpc_extra_deps")
+ load("@com_google_benchmark//:bazel/benchmark_deps.bzl", "benchmark_deps")
+ 
+ def _tf_bind():
+diff --git a/third_party/xla/workspace1.bzl b/third_party/xla/workspace1.bzl
+index 05121708fc5..83583b2ec83 100644
+--- a/third_party/xla/workspace1.bzl
++++ b/third_party/xla/workspace1.bzl
+@@ -1,7 +1,7 @@
+ """TensorFlow workspace initialization. Consult the WORKSPACE on how to use it."""
+ 
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+-load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
++load("//third_party/systemlibs:grpc.bazel.grpc_deps.bzl", "grpc_deps")
+ load("@io_bazel_rules_closure//closure:defs.bzl", "closure_repositories")
+ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+ load("//third_party/llvm:setup.bzl", "llvm_setup")
