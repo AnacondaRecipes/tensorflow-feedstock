@@ -46,8 +46,6 @@ source:
       - patches/0025-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
       - patches/0026-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
       - patches/0027-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
-      # Note that this patch generates two patches in the third_party directory. Which then get applied via bazel.
-      # - patches/0028-Protobuf-5-compatability.patch  # [not win]
       - patches/0029-Avoid-linking-with-internal-nvrtc.patch  
       - patches/0030-remove-dependencies-to-libcuda.patch   
       - patches/0031-loosen-hermetic-python.patch  # [not win]
@@ -78,7 +76,7 @@ source:
       - patches/0044-fix-xla-namespace.patch
       # - patches/0045-Update-build_config.bzl.patch
       - patches/0046-fix-bazel-error.patch
-      # - patches/0048-link-giflib.patch
+      - patches/0048-link-giflib.patch
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']

@@ -212,12 +212,15 @@ build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
+build --define=LIBDIR=${LIBDIR}
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
 build --define=xnn_enable_avx512fp16=false
 build --define=xnn_enable_avxvnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_cpu_resources=${CPU_COUNT}
+build --linkopt=-lgif
+build --linkopt=-L${LIBDIR}
 
 EOF
 
