@@ -36,12 +36,12 @@ export TF_PYTHON_VERSION=$PY_VER
 # Needs c++17, try on linux
 #  com_googlesource_code_re2
 # com_github_grpc_grpc
+# com_google_absl
 export TF_SYSTEM_LIBS="
   astor_archive
   astunparse_archive
   boringssl
   com_github_googlecloudplatform_google_cloud_cpp
-  com_google_absl
   curl
   cython
   dill_archive

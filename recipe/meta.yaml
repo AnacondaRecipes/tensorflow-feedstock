@@ -19,30 +19,10 @@ source:
     sha256: a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0
     patches:
       - patches/0001-loosen-requirements.patch
-      # - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
-      - patches/0003-Fix-missing-abseil-linkages.patch
-      # - patches/0004-Fix-protobuf_python-for-systemlibs.patch  # [not win]
-      - patches/0005-Add-absl_log-systemlib.patch  # [not win]
-      # - patches/0006-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch  # [not win]
-      - patches/0007-Fix-further-abseil-linkage.patch  # [not win]
       - patches/0008-Add-constraint-to-pybind11-systemlib.patch  # [not win]
       - patches/0009-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
       - patches/0010-Use-correct-hermetic-python.patch  # [not win]
-      # - patches/0011-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
-      # - patches/0012-Add-protobuf-toolchain.patch  # [not win]
-      # - patches/0013-fix-genproto.patch  # [not win]
-      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
       - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
-      # - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
-      - patches/0018-add-absl_string_view-target.patch  # [not win]
-      - patches/0019-add-absl_nullability-target.patch  # [not win]
-      - patches/0020-add-absl_prefetch-target.patch  # [not win]
-      - patches/0021-add-absl_die_if_null-target.patch  # [not win]
-      - patches/0022-add-absl_crc32c-targets.patch  # [not win]
-      - patches/0023-add-absl-tracing-target.patch  # [not win]
-      - patches/0024-add-kernel_timeout_internal-target.patch  # [not win]
-      - patches/0025-add-absl-utility-if_constexpr-target.patch  # [not win]
       - patches/0025-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
       - patches/0026-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
       - patches/0027-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
@@ -54,34 +34,30 @@ source:
       - patches/0035-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
       - patches/0036-fix-win-binary-quirk.patch  # [win]
       - patches/0037-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
-      # 2.20
-      # work/tensorflow/workspace1.bzl:4:6: Label '@@com_github_grpc_grpc//bazel:grpc_deps.bzl' is invalid
-      # work/tensorflow/workspace0.bzl:8:6: Label '@@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl'
-      # external/local_xla/xla/tsl/platform/default/build_config.bzl:7:6: Label '@@com_github_grpc_grpc//bazel:python_rules.bzl' is invalid because 'bazel' is not a package; perhaps you meant to put the colon here: '@@com_github_grpc_grpc//:bazel/python_rules.bzl'?
-
-      # - patches/0038-gprc.patch
-      # ERROR: /Users/lundby/anaconda/patching_tens/tensorflow-split_1760381551629/work/tensorflow/tools/pip_package/BUILD:292:9: com.google.devtools.build.lib.packages.BuildFileNotFoundException: no such package '@@build_bazel_apple_support//configs/platforms': BUILD file not found in directory 'configs/platforms' of external repository @@build_bazel_apple_support. Add a BUILD file to a directory to mark it as a package.
-      # ERROR: Analysis of target '//tensorflow/tools/pip_package:wheel' failed; build aborted
-      - patches/0039-system-python.patch
-
-
-      # abel '@@com_github_grpc_grpc//bazel:grpc_deps.bzl' is invalid because 'bazel' is not a package; perhaps you meant to put the colon here: '@@com_github_grpc_grpc//:bazel/grpc_deps.bzl'
-      # - patches/0099-2.20.patch
-      # ERROR: error loading package 'tensorflow': at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372491179/work/tensorflow/core/platform/build_config.bzl:4:5: at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372491179/_build_env/share/bazel/cc7c310c755f7b2b71eec87c7d5c4a8c/external/local_xla/xla/tsl/platform/build_config.bzl:9:5: at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372491179/_build_env/share/bazel/cc7c310c755f7b2b71eec87c7d5c4a8c/external/local_xla/xla/tsl/platform/default/build_config.bzl:6:6: Label '@@com_github_grpc_grpc//bazel:cc_grpc_library.bzl' is invalid because 'bazel' is not a package; perhaps you meant to put the colon here: '@@com_github_grpc_grpc//:bazel/cc_grpc_library.bzl'?
-      # - patches/0039-fix_grpc_namespace.patch
-      # ERROR: error loading package 'tensorflow': at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372626061/work/tensorflow/core/platform/build_config.bzl:4:5: at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372626061/_build_env/share/bazel/71fb87124b9016ac0d8f51858c130c2c/external/local_xla/xla/tsl/platform/build_config.bzl:9:5: at /Users/lundby/anaconda/patching_tens/tensorflow-split_1760372626061/_build_env/share/bazel/71fb87124b9016ac0d8f51858c130c2c/external/local_xla/xla/tsl/platform/default/build_config.bzl:7:6: Label '@@com_github_grpc_grpc//bazel:python_rules.bzl' is invalid because 'bazel' is not a package; perhaps you meant to put the colon here: '@@com_github_grpc_grpc//:bazel/python_rules.bzl'?
-      - patches/0040-absl-add-targets.patch
-      # - patches/0042-icu-unicode-changes.patch
-      # - patches/0043-xla-use-system-lib.patch
+      - patches/0039-system-python.patch  # [osx]
       - patches/0044-fix-xla-namespace.patch
-      # - patches/0045-Update-build_config.bzl.patch
-      - patches/0046-fix-bazel-error.patch
       - patches/0048-link-giflib.patch
+      # - patches/0003-Fix-missing-abseil-linkages.patch
+      # - patches/0046-fix-bazel-error.patch
+      # - patches/0049-patch_so_macos.patch
+      # - patches/0005-Add-absl_log-systemlib.patch  # [not win]
+      # - patches/0007-Fix-further-abseil-linkage.patch  # [not win]
+      # - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
+      # - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
+      # - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
+      # - patches/0018-add-absl_string_view-target.patch  # [not win]
+      # - patches/0019-add-absl_nullability-target.patch  # [not win]
+      # - patches/0020-add-absl_prefetch-target.patch  # [not win]
+      # - patches/0021-add-absl_die_if_null-target.patch  # [not win]
+      # - patches/0022-add-absl_crc32c-targets.patch  # [not win]
+      # - patches/0023-add-absl-tracing-target.patch  # [not win]
+      # - patches/0024-add-kernel_timeout_internal-target.patch  # [not win]
+      # - patches/0025-add-absl-utility-if_constexpr-target.patch  # [not win]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
-  skip: true  # [py<39 or py>312]
+  skip: true  # [py<39 or py>313]
   skip: true  # [skip_cuda_pbp and (gpu_variant or "").startswith('cuda')]
 
 requirements:
