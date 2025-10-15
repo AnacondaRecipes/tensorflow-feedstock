@@ -272,8 +272,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.19.0,<2.20.0
-        - keras >=3.5.0
+        - tensorboard >=2.20.0,<2.21.0
+        - keras >=3.10.0
       run:
         - python
         - packaging
@@ -294,8 +294,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.19.0,<2.20.0
-        - keras >=3.5.0
+        - tensorboard >=2.20.0,<2.21.0
+        - keras >=3.10.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
