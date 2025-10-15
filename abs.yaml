@@ -1,0 +1,4 @@
+task_timeout: 54000
+
+channels:
+  - https://staging.continuum.io/pbp/fs/tensorboard-feedstock/pr6/08c71b4
