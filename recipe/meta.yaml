@@ -81,7 +81,6 @@ requirements:
     - {{ stdlib('c') }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - libcxx {{ cxx_compiler_version }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
