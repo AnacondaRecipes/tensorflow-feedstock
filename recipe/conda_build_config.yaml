@@ -33,3 +33,8 @@ c_compiler_version:        # [win]
   - 17.0.6                 # [win]
 cxx_compiler_version:      # [win]
   - 17.0.6                 # [win]
+
+c_compiler_version:        # [osx]
+  - 19                     # [osx]
+cxx_compiler_version:      # [osx]
+  - 19                     # [osx]
