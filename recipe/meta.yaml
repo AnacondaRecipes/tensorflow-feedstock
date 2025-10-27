@@ -37,6 +37,7 @@ source:
       - patches/0039-system-python.patch  # [osx]
       - patches/0044-fix-xla-namespace.patch
       - patches/0048-link-giflib.patch
+      - patches/0021-is_signed-cannot-be-specialized.patch
       # - patches/0003-Fix-missing-abseil-linkages.patch
       # - patches/0046-fix-bazel-error.patch
       # - patches/0049-patch_so_macos.patch
