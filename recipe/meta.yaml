@@ -38,15 +38,26 @@ source:
       - patches/0044-fix-xla-namespace.patch
       - patches/0048-link-giflib.patch
       - patches/0021-is_signed-cannot-be-specialized.patch
+      # Abseil un-vendoring
+      # Take 2
+      - patches/22.patch
+
+      # Take 1
+      
+      # - patches/0022-add-absl_crc32c-targets.patch  # [not win]
+      # - patches/23.patch
+      # - patches/0018-add-absl_string_view-target.patch  # [not win]
+
+
+
+      # - patches/99.patch # [not win]
       # - patches/0003-Fix-missing-abseil-linkages.patch
       # - patches/0046-fix-bazel-error.patch
-      # - patches/0049-patch_so_macos.patch
       # - patches/0005-Add-absl_log-systemlib.patch  # [not win]
       # - patches/0007-Fix-further-abseil-linkage.patch  # [not win]
       # - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
       # - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
       # - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
-      # - patches/0018-add-absl_string_view-target.patch  # [not win]
       # - patches/0019-add-absl_nullability-target.patch  # [not win]
       # - patches/0020-add-absl_prefetch-target.patch  # [not win]
       # - patches/0021-add-absl_die_if_null-target.patch  # [not win]

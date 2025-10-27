@@ -221,6 +221,124 @@ build --local_resources=cpu=${CPU_COUNT}
 build --linkopt=-lgif
 build --linkopt=-L${LIBDIR}
 
+# Base libraries
+build --linkopt=-labsl_base
+build --linkopt=-labsl_log_severity
+build --linkopt=-labsl_raw_logging_internal
+build --linkopt=-labsl_spinlock_wait
+build --linkopt=-labsl_malloc_internal
+build --linkopt=-labsl_throw_delegate
+build --linkopt=-labsl_exponential_biased
+build --linkopt=-labsl_periodic_sampler
+
+# String libraries
+build --linkopt=-labsl_strings
+build --linkopt=-labsl_strings_internal
+build --linkopt=-labsl_string_view
+build --linkopt=-labsl_str_format_internal
+build --linkopt=-labsl_int128
+build --linkopt=-labsl_utf8_for_code_point
+
+# Cord (rope) libraries
+build --linkopt=-labsl_cord
+build --linkopt=-labsl_cord_internal
+build --linkopt=-labsl_cordz_functions
+build --linkopt=-labsl_cordz_handle
+build --linkopt=-labsl_cordz_info
+build --linkopt=-labsl_cordz_sample_token
+
+# Synchronization libraries
+build --linkopt=-labsl_synchronization
+build --linkopt=-labsl_graphcycles_internal
+build --linkopt=-labsl_kernel_timeout_internal
+
+# Time libraries
+build --linkopt=-labsl_time
+build --linkopt=-labsl_time_zone
+build --linkopt=-labsl_civil_time
+
+# Status libraries
+build --linkopt=-labsl_status
+build --linkopt=-labsl_statusor
+
+# Hash and container libraries
+build --linkopt=-labsl_hash
+build --linkopt=-labsl_city
+build --linkopt=-labsl_low_level_hash
+build --linkopt=-labsl_raw_hash_set
+build --linkopt=-labsl_hashtablez_sampler
+
+# Flags libraries (command-line flag parsing)
+build --linkopt=-labsl_flags_internal
+build --linkopt=-labsl_flags_reflection
+build --linkopt=-labsl_flags_config
+build --linkopt=-labsl_flags_marshalling
+build --linkopt=-labsl_flags_commandlineflag
+build --linkopt=-labsl_flags_commandlineflag_internal
+build --linkopt=-labsl_flags_private_handle_accessor
+build --linkopt=-labsl_flags_program_name
+build --linkopt=-labsl_flags_parse
+build --linkopt=-labsl_flags_usage
+build --linkopt=-labsl_flags_usage_internal
+
+# Random number generation libraries
+build --linkopt=-labsl_random_distributions
+build --linkopt=-labsl_random_seed_sequences
+build --linkopt=-labsl_random_internal_pool_urbg
+build --linkopt=-labsl_random_internal_platform
+build --linkopt=-labsl_random_internal_seed_material
+build --linkopt=-labsl_random_internal_randen
+build --linkopt=-labsl_random_internal_randen_hwaes
+build --linkopt=-labsl_random_internal_randen_hwaes_impl
+build --linkopt=-labsl_random_internal_randen_slow
+build --linkopt=-labsl_random_seed_gen_exception
+build --linkopt=-labsl_random_internal_distribution_test_util
+
+# Debugging libraries
+build --linkopt=-labsl_stacktrace
+build --linkopt=-labsl_symbolize
+build --linkopt=-labsl_debugging_internal
+build --linkopt=-labsl_demangle_internal
+build --linkopt=-labsl_demangle_rust
+build --linkopt=-labsl_decode_rust_punycode
+build --linkopt=-labsl_examine_stack
+build --linkopt=-labsl_failure_signal_handler
+build --linkopt=-labsl_leak_check
+
+# Logging libraries
+build --linkopt=-labsl_log_internal_message
+build --linkopt=-labsl_log_internal_check_op
+build --linkopt=-labsl_log_internal_conditions
+build --linkopt=-labsl_log_internal_format
+build --linkopt=-labsl_log_internal_globals
+build --linkopt=-labsl_log_internal_proto
+build --linkopt=-labsl_log_internal_nullguard
+build --linkopt=-labsl_log_internal_log_sink_set
+build --linkopt=-labsl_log_internal_fnmatch
+build --linkopt=-labsl_log_internal_structured_proto
+build --linkopt=-labsl_log_globals
+build --linkopt=-labsl_log_flags
+build --linkopt=-labsl_log_initialize
+build --linkopt=-labsl_log_entry
+build --linkopt=-labsl_log_sink
+build --linkopt=-labsl_vlog_config_internal
+
+# CRC libraries
+build --linkopt=-labsl_crc32c
+build --linkopt=-labsl_crc_internal
+build --linkopt=-labsl_crc_cpu_detect
+build --linkopt=-labsl_crc_cord_state
+
+# Utility libraries
+build --linkopt=-labsl_bad_any_cast_impl
+build --linkopt=-labsl_bad_optional_access
+build --linkopt=-labsl_bad_variant_access
+build --linkopt=-labsl_die_if_null
+build --linkopt=-labsl_strerror
+build --linkopt=-labsl_tracing_internal
+build --linkopt=-labsl_scoped_set_env
+build --linkopt=-labsl_poison
+
 EOF
 
 if [[ ${cuda_compiler_version} != "None" ]]; then

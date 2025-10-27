@@ -29,7 +29,7 @@ index d04776c98bf..f80833dfd4d 100644
 +
  cc_library(
      name = "cord",
--    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info"],
+-    linkopts = ["-labsl_cord"],
 +    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info", "-labsl_cord_internal"],
      deps = [
          ":str_format",
