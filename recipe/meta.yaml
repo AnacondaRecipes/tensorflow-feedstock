@@ -134,7 +134,7 @@ requirements:
     # but so far there have been no problems with leaving these
     # unpinned; though some restrictions come in for packages
     # that are also listed as a requirement for the pip_package.
-    - libabseil {{ libabseil }}
+    - libabseil 20250127.1
     - astor
     - cython
     - dill
@@ -212,7 +212,7 @@ outputs:
         - packaging
         - wheel
         # TF_SYSTEM_LIBS
-        - libabseil {{ libabseil }}
+        - libabseil 20250127.1
         - astor
         - cython
         - dill
