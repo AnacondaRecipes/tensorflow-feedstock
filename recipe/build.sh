@@ -234,6 +234,8 @@ flatc --cpp --gen-object-api schema.fbs
 popd
 rm -f tensorflow/lite/schema/conversion_metadata_generated.h
 rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h
+
+# Replace placeholders from xxxx-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
 
 # build using bazel
@@ -242,6 +244,15 @@ bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 # build a whl file
 mkdir -p $SRC_DIR/tensorflow_pkg
 cp bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl $SRC_DIR/tensorflow_pkg
+
+if [[ "${target_platform}" == osx-* ]]; then
+  cp -RP bazel-bin/tensorflow/python/libtensorflow_cc.* $PREFIX/lib/
+  cp -RP bazel-bin/tensorflow/python/libtensorflow_framework.* $PREFIX/lib/
+else
+  cp -d bazel-bin/tensorflow/python/libtensorflow_cc.so* $PREFIX/lib/
+  cp -d bazel-bin/tensorflow/python/libtensorflow_framework.so* $PREFIX/lib/
+  ln -sf $PREFIX/lib/libtensorflow_framework.so.2 $PREFIX/lib/libtensorflow_framework.so
+fi
 
 bazel clean --expunge
 bazel shutdown
