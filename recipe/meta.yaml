@@ -40,7 +40,8 @@ source:
       - patches/0021-is_signed-cannot-be-specialized.patch
       # Abseil un-vendoring
       # Take 2
-      - patches/22.patch
+      - patches/22.patch  # [not win]
+      - patches/23.patch  # [not win]
 
       # Take 1
       

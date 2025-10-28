@@ -1,446 +1,101 @@
-From 715f793a2ba85b30a1907bfcf1dd81642cef8483 Mon Sep 17 00:00:00 2001
+From 181bb5966a93aa9a61fd76dc7373519a7c4ff4cd Mon Sep 17 00:00:00 2001
 From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Mon, 20 Oct 2025 17:13:01 -0600
-Subject: [PATCH 1/1] 23_2
+Date: Tue, 28 Oct 2025 09:48:22 -0600
+Subject: [PATCH 2/2] 23
 
+ERROR: Flag 'leave_barriers_on_recoverable_agent_restart' was defined more than once but with differing types. Defined in files 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc' and 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc'.
 ---
- tensorflow/workspace2.bzl                     |   6 +-
- .../xla/third_party/protobuf/protobuf.patch   | 335 ++++++++++++------
- third_party/xla/workspace2.bzl                |   6 +-
- 3 files changed, 235 insertions(+), 112 deletions(-)
+ tensorflow/core/distributed_runtime/rpc/BUILD |  2 +-
+ third_party/xla/xla/service/BUILD             |  2 +-
+ .../distributed_runtime/coordination/BUILD    | 42 ++++++++++++++++++-
+ 3 files changed, 43 insertions(+), 3 deletions(-)
 
-diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
-index 9e49ab40b25..aada730af26 100644
---- a/tensorflow/workspace2.bzl
-+++ b/tensorflow/workspace2.bzl
-@@ -397,9 +397,9 @@ def _tf_repositories():
-     tf_http_archive(
-         name = "com_google_protobuf",
-         patch_file = ["@local_xla//third_party/protobuf:protobuf.patch"],
--        sha256 = "f645e6e42745ce922ca5388b1883ca583bafe4366cc74cf35c3c9299005136e2",
--        strip_prefix = "protobuf-5.28.3",
--        urls = tf_mirror_urls("https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.28.3.zip"),
-+        sha256 = "e7a50ac2a8ae3754c6f1ab6123424627920e4abddd894ee4bc47d6506e86aeb9",
-+        strip_prefix = "protobuf-5.29.3",
-+        urls = tf_mirror_urls("https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.29.3.zip"),
-     )
+diff --git a/tensorflow/core/distributed_runtime/rpc/BUILD b/tensorflow/core/distributed_runtime/rpc/BUILD
+index c0351bbe448..cb454aa38b5 100644
+--- a/tensorflow/core/distributed_runtime/rpc/BUILD
++++ b/tensorflow/core/distributed_runtime/rpc/BUILD
+@@ -335,7 +335,7 @@ cc_library(
+         "//tensorflow/core/nccl:collective_communicator",
+         "//tensorflow/core/profiler/rpc:profiler_service_impl",
+         "@com_google_absl//absl/strings",
+-        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "@local_xla//xla/tsl/distributed_runtime/rpc:async_service_interface",
+     ] + tf_protos_profiler_service() + tf_grpc_dependencies() + tf_grpc_cc_dependencies(),
+     alwayslink = 1,
+diff --git a/third_party/xla/xla/service/BUILD b/third_party/xla/xla/service/BUILD
+index ce859c54227..d735e675cad 100644
+--- a/third_party/xla/xla/service/BUILD
++++ b/third_party/xla/xla/service/BUILD
+@@ -5279,7 +5279,7 @@ cc_library(
+     hdrs = ["global_device_id.h"],
+     deps = [
+         "//xla/runtime:device_id",
+-        "//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "@com_google_absl//absl/strings",
+         "@com_google_absl//absl/types:span",
+     ],
+diff --git a/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD b/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
+index 962640f01dd..73df692198f 100644
+--- a/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
++++ b/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
+@@ -50,7 +50,7 @@ cc_library(
+ )
  
-     tf_http_archive(
-diff --git a/third_party/xla/third_party/protobuf/protobuf.patch b/third_party/xla/third_party/protobuf/protobuf.patch
-index 0c8e1cbfc6d..b462072311e 100644
---- a/third_party/xla/third_party/protobuf/protobuf.patch
-+++ b/third_party/xla/third_party/protobuf/protobuf.patch
-@@ -1,30 +1,118 @@
--diff --git a/src/google/protobuf/map_field.h b/src/google/protobuf/map_field.h
----- a/src/google/protobuf/map_field.h	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/map_field.h	(date 1748033655723)
--@@ -710,7 +710,7 @@
--   typedef MapField<T, Key, Value, kKeyFieldType, kValueFieldType> MapFieldType;
-- };
-+From 8eda1a17d7ae2ebee428d4e44505dc2f802aa403 Mon Sep 17 00:00:00 2001
-+From: Eric Lundby <Eric.Lundby@gmail.com>
-+Date: Mon, 20 Oct 2025 17:12:33 -0600
-+Subject: [PATCH 1/1] protobuf.patch
+ cc_library(
+-    name = "coordination_service",
++    name = "coordination_service_impl",
+     srcs = ["coordination_service.cc"],
+     hdrs = ["coordination_service.h"],
+     deps = [
+@@ -84,6 +84,46 @@ cc_library(
+     ],
+ )
  
---class PROTOBUF_EXPORT DynamicMapField final
--+class DynamicMapField final
--     : public TypeDefinedMapFieldBase<MapKey, MapValueRef> {
--  public:
--   explicit DynamicMapField(const Message* default_entry);
-+---
-+ BUILD.bazel                                | 23 ++++++++++++++++++----
-+ bazel/private/bazel_proto_library_rule.bzl | 12 +++++------
-+ build_defs/BUILD.bazel                     | 15 ++++++++++++++
-+ python/dist/system_python.bzl              | 11 +++++------
-+ python/google/protobuf/__init__.py         |  6 ++++++
-+ src/google/protobuf/BUILD.bazel            | 22 +++++++++++++++++++++
-+ src/google/protobuf/arena.cc               |  2 +-
-+ src/google/protobuf/compiler/BUILD.bazel   |  6 ++++++
-+ src/google/protobuf/io/BUILD.bazel         |  7 +++++++
-+ src/google/protobuf/map_field.h            |  2 +-
-+ src/google/protobuf/port_def.inc           |  2 +-
-+ src/google/protobuf/thread_safe_arena.h    |  2 +-
-+ 12 files changed, 90 insertions(+), 20 deletions(-)
++cc_library(
++    name = "coordination_service",
++    deps = [":coordination_service_impl"],
++    visibility = ["//visibility:public"],
++)
 +
-+diff --git a/BUILD.bazel b/BUILD.bazel
-+index 32b26cbdc..4b2b91b65 100644
-+--- a/BUILD.bazel
-++++ b/BUILD.bazel
-+@@ -232,9 +232,20 @@ alias(
-+ cc_binary(
-+     name = "protoc",
-+     copts = COPTS,
-+-    linkopts = LINK_OPTS,
-++    linkopts = LINK_OPTS + select({
-++        "@platforms//os:osx": [
-++            "-labsl_throw_delegate",
-++            "-labsl_base",
-++            "-labsl_strings",
-++            "-labsl_strings_internal",
-++        ],
-++        "//conditions:default": [],
-++    }),
-+     visibility = ["//visibility:public"],
-+-    deps = ["//src/google/protobuf/compiler:protoc_lib"],
-++    deps = [
-++        "//src/google/protobuf/compiler:protoc_lib",
-++        "@com_google_absl//absl/base:throw_delegate",
-++    ],
-+ )
-+ 
-+ cc_binary(
-+@@ -249,7 +260,10 @@ cc_binary(
-+     }),
-+     linkopts = LINK_OPTS,
-+     visibility = ["//visibility:public"],
-+-    deps = ["//src/google/protobuf/compiler:protoc_lib"],
-++    deps = [
-++        "//src/google/protobuf/compiler:protoc_lib",
-++        "@com_google_absl//absl/base:throw_delegate",
-++    ],
-+ )
-+ 
-+ ################################################################################
-+@@ -431,7 +445,8 @@ proto_lang_toolchain(
-+         "//:cpp_features_proto",
-+         "//:descriptor_proto",
-+     ],
-+-    command_line = "--cpp_out=$(OUT)",
-++    # command_line = "--cpp_out=$(OUT)",
-++    command_line = "--cpp_out=dllexport_decl=PROTOBUF_EXPORT:$(OUT)",
-+     runtime = "//src/google/protobuf",
-+     visibility = ["//visibility:public"],
-+ )
-+diff --git a/bazel/private/bazel_proto_library_rule.bzl b/bazel/private/bazel_proto_library_rule.bzl
-+index cdf1a832e..8731c0da0 100644
-+--- a/bazel/private/bazel_proto_library_rule.bzl
-++++ b/bazel/private/bazel_proto_library_rule.bzl
-+@@ -36,10 +36,10 @@ def _get_import_prefix(ctx):
-+ 
-+     import_prefix = ctx.attr.import_prefix
-+ 
-+-    if not paths.is_normalized(import_prefix):
-+-        fail("should be normalized (without uplevel references or '.' path segments)", attr = "import_prefix")
-+-    if paths.is_absolute(import_prefix):
-+-        fail("should be a relative path", attr = "import_prefix")
-++    # if not _is_normalized(import_prefix):
-++    #     fail("should be normalized (without uplevel references or '.' path segments)", attr = "import_prefix")
-++    # if paths.is_absolute(import_prefix):
-++    #     fail("should be a relative path", attr = "import_prefix")
-+ 
-+     return import_prefix
-+ 
-+@@ -48,8 +48,8 @@ def _get_strip_import_prefix(ctx):
-+ 
-+     strip_import_prefix = ctx.attr.strip_import_prefix
-+ 
-+-    if not paths.is_normalized(strip_import_prefix):
-+-        fail("should be normalized (without uplevel references or '.' path segments)", attr = "strip_import_prefix")
-++    # if not _is_normalized(strip_import_prefix):
-++    #     fail("should be normalized (without uplevel references or '.' path segments)", attr = "strip_import_prefix")
-+ 
-+     if paths.is_absolute(strip_import_prefix):
-+         strip_import_prefix = strip_import_prefix[1:]
- diff --git a/build_defs/BUILD.bazel b/build_defs/BUILD.bazel
----- a/build_defs/BUILD.bazel	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/build_defs/BUILD.bazel	(date 1748034990268)
-+index 8745e1d61..efa137275 100644
-+--- a/build_defs/BUILD.bazel
-++++ b/build_defs/BUILD.bazel
- @@ -1,6 +1,7 @@
-  # Internal Starlark definitions for Protobuf.
--
-+ 
-  load("@bazel_skylib//lib:selects.bzl", "selects")
- +load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-  load("@rules_pkg//pkg:mappings.bzl", "pkg_files", "strip_prefix")
-  load("//bazel:cc_proto_library.bzl", starlark_cc_proto_library = "cc_proto_library")
-  load(":cc_proto_blacklist_test.bzl", "cc_proto_blacklist_test")
--@@ -13,6 +14,20 @@
-+@@ -13,6 +14,20 @@ package(
-      ],
-  )
--
-+ 
- +bool_flag(
- +    name = "use_dlls",
- +    build_setting_default = False,
-@@ -43,12 +131,13 @@ diff --git a/build_defs/BUILD.bazel b/build_defs/BUILD.bazel
-      name = "config_msvc_cl",
-      value = "msvc-cl",
- diff --git a/python/dist/system_python.bzl b/python/dist/system_python.bzl
----- a/python/dist/system_python.bzl	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/python/dist/system_python.bzl	(date 1746939979885)
--@@ -73,11 +73,10 @@
-+index 9367dd00f..d962397ce 100644
-+--- a/python/dist/system_python.bzl
-++++ b/python/dist/system_python.bzl
-+@@ -73,11 +73,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
-  load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-  load("@bazel_tools//tools/python:toolchain.bzl", "py_runtime_pair")
--
-+ 
- -cc_library(
- -   name = "python_headers",
- -   hdrs = glob(["python/**/*.h"], allow_empty = True),
-@@ -59,87 +148,37 @@ diff --git a/python/dist/system_python.bzl b/python/dist/system_python.bzl
- +    actual = "@python//:python_headers",
- +    visibility = ["//visibility:public"],
-  )
--
-+ 
-  string_flag(
--@@ -219,7 +218,7 @@
-+@@ -219,7 +218,7 @@ def _system_python_impl(repository_ctx):
-      python3 = repository_ctx.which("python3")
-      python_version = _get_python_version(repository_ctx)
--
-+ 
- -    if path and python_version[0] == "3":
- +    if False:
-          _populate_package(repository_ctx, path, python3, python_version)
-      else:
-          # buildifier: disable=print
--diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
----- a/src/google/protobuf/arena.cc	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/arena.cc	(date 1748042877047)
--@@ -554,7 +554,7 @@
--       new internal::ThreadLocalStorage<ThreadCache>();
--   return *thread_cache_->Get();
-- }
---#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
--+#elif defined(_WIN32)
-- ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
--   static PROTOBUF_THREAD_LOCAL ThreadCache thread_cache;
--   return thread_cache;
--diff --git a/BUILD.bazel b/BUILD.bazel
----- a/BUILD.bazel	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/BUILD.bazel	(date 1746940994484)
--@@ -424,7 +424,8 @@
--         "//:cpp_features_proto",
--         "//:descriptor_proto",
--     ],
---    command_line = "--cpp_out=$(OUT)",
--+    command_line = "--cpp_out=dllexport_decl=PROTOBUF_EXPORT:$(OUT)",
--+#    command_line = "--cpp_out=$(OUT)",
--     runtime = "//src/google/protobuf",
--     visibility = ["//visibility:public"],
-- )
--diff --git a/src/google/protobuf/io/BUILD.bazel b/src/google/protobuf/io/BUILD.bazel
----- a/src/google/protobuf/io/BUILD.bazel	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/io/BUILD.bazel	(date 1748038681727)
--@@ -22,6 +22,13 @@
--         "zero_copy_stream_impl.h",
--         "zero_copy_stream_impl_lite.h",
--     ],
--+    local_defines = select({
--+        "//build_defs:config_use_dlls": [
--+            "PROTOBUF_USE_DLLS",
--+            "LIBPROTOBUF_EXPORTS",
--+        ],
--+        "//conditions:default": [],
--+    }),
--     copts = COPTS,
--     strip_include_prefix = "/src",
--     deps = [
--diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
----- a/src/google/protobuf/port_def.inc	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/port_def.inc	(date 1748019340115)
--@@ -456,7 +456,7 @@
-- #endif
--
-- // Lexan sets both MSV_VER and clang, so handle it with the clang path.
---#if defined(_MSC_VER) && !defined(__clang__)
--+#if defined(_MSC_VER)
-- // MSVC 17 currently seems to raise an error about constant-initialized pointers.
-- # if PROTOBUF_MSC_VER_MIN(1930)
-- #  define PROTOBUF_CONSTINIT
--diff --git a/src/google/protobuf/thread_safe_arena.h b/src/google/protobuf/thread_safe_arena.h
----- a/src/google/protobuf/thread_safe_arena.h	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/thread_safe_arena.h	(date 1748042886641)
--@@ -248,7 +248,7 @@
--   // iOS does not support __thread keyword so we use a custom thread local
--   // storage class we implemented.
--   static ThreadCache& thread_cache();
---#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
--+#elif defined(_WIN32)
--   // Thread local variables cannot be exposed through MSVC DLL interface but we
--   // can wrap them in static functions.
--   static ThreadCache& thread_cache();
-+diff --git a/python/google/protobuf/__init__.py b/python/google/protobuf/__init__.py
-+index 92052b280..10a910baa 100755
-+--- a/python/google/protobuf/__init__.py
-++++ b/python/google/protobuf/__init__.py
-+@@ -8,3 +8,9 @@
-+ # Copyright 2007 Google Inc. All Rights Reserved.
-+ 
-+ __version__ = '5.29.3'
-++
-++if __name__ != '__main__':
-++  try:
-++    __import__('pkg_resources').declare_namespace(__name__)
-++  except ImportError:
-++    __path__ = __import__('pkgutil').extend_path(__path__, __name__)
-+\ No newline at end of file
- diff --git a/src/google/protobuf/BUILD.bazel b/src/google/protobuf/BUILD.bazel
----- a/src/google/protobuf/BUILD.bazel	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/src/google/protobuf/BUILD.bazel	(date 1748038617126)
--@@ -411,6 +411,13 @@
-+index 5cfd160d9..405420865 100644
-+--- a/src/google/protobuf/BUILD.bazel
-++++ b/src/google/protobuf/BUILD.bazel
-+@@ -432,6 +432,13 @@ cc_library(
-          "serial_arena.h",
-          "thread_safe_arena.h",
-      ],
-@@ -153,7 +192,7 @@ diff --git a/src/google/protobuf/BUILD.bazel b/src/google/protobuf/BUILD.bazel
-      strip_include_prefix = "/src",
-      visibility = [
-          "//:__subpackages__",
--@@ -509,7 +516,15 @@
-+@@ -531,7 +538,15 @@ cc_library(
-          "serial_arena.h",
-          "thread_safe_arena.h",
-          "wire_format_lite.h",
-@@ -169,7 +208,7 @@ diff --git a/src/google/protobuf/BUILD.bazel b/src/google/protobuf/BUILD.bazel
-      copts = COPTS + select({
-          "//build_defs:config_msvc": [],
-          "//conditions:default": [
--@@ -615,6 +630,13 @@
-+@@ -639,6 +654,13 @@ cc_library(
-      ],
-      hdrs = PROTOBUF_HEADERS,
-      copts = COPTS,
-@@ -183,16 +222,100 @@ diff --git a/src/google/protobuf/BUILD.bazel b/src/google/protobuf/BUILD.bazel
-      linkopts = LINK_OPTS,
-      strip_include_prefix = "/src",
-      visibility = [
--diff --git a/python/google/protobuf/__init__.py b/python/google/protobuf/__init__.py
----- a/python/google/protobuf/__init__.py	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
--+++ b/python/google/protobuf/__init__.py	(date 1746939979902)
--@@ -8,3 +8,9 @@
-- # Copyright 2007 Google Inc. All Rights Reserved.
-+diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
-+index 55d87ab6b..0df4f9670 100644
-+--- a/src/google/protobuf/arena.cc
-++++ b/src/google/protobuf/arena.cc
-+@@ -554,7 +554,7 @@ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
-+       new internal::ThreadLocalStorage<ThreadCache>();
-+   return *thread_cache_->Get();
-+ }
-+-#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
-++#elif defined(_WIN32)
-+ ThreadSafeArena::ThreadCache& ThreadSafeArena::thread_cache() {
-+   static PROTOBUF_THREAD_LOCAL ThreadCache thread_cache;
-+   return thread_cache;
-+diff --git a/src/google/protobuf/compiler/BUILD.bazel b/src/google/protobuf/compiler/BUILD.bazel
-+index 5012ee793..e96b53da1 100644
-+--- a/src/google/protobuf/compiler/BUILD.bazel
-++++ b/src/google/protobuf/compiler/BUILD.bazel
-+@@ -229,6 +229,9 @@ cc_library(
-+         "//src/google/protobuf/compiler/python",
-+         "//src/google/protobuf/compiler/ruby",
-+         "//src/google/protobuf/compiler/rust",
-++        "@com_google_absl//absl/base",
-++        "@com_google_absl//absl/base:core_headers",
-++        "@com_google_absl//absl/base:throw_delegate",
-+         "@com_google_absl//absl/log:initialize",
-+     ],
-+ )
-+@@ -246,6 +249,9 @@ cc_binary(
-+     deps = [
-+         ":command_line_interface",
-+         "//src/google/protobuf:port",
-++        "@com_google_absl//absl/base",
-++        "@com_google_absl//absl/base:core_headers",
-++        "@com_google_absl//absl/base:throw_delegate",
-+         "@com_google_absl//absl/log:initialize",
-+     ],
-+ )
-+diff --git a/src/google/protobuf/io/BUILD.bazel b/src/google/protobuf/io/BUILD.bazel
-+index 192fec3ab..e89abff3e 100644
-+--- a/src/google/protobuf/io/BUILD.bazel
-++++ b/src/google/protobuf/io/BUILD.bazel
-+@@ -22,6 +22,13 @@ cc_library(
-+         "zero_copy_stream_impl.h",
-+         "zero_copy_stream_impl_lite.h",
-+     ],
-++    local_defines = select({
-++        "//build_defs:config_use_dlls": [
-++            "PROTOBUF_USE_DLLS",
-++            "LIBPROTOBUF_EXPORTS",
-++        ],
-++        "//conditions:default": [],
-++    }),
-+     copts = COPTS,
-+     strip_include_prefix = "/src",
-+     deps = [
-+diff --git a/src/google/protobuf/map_field.h b/src/google/protobuf/map_field.h
-+index 0e37a16d7..069cd62e6 100644
-+--- a/src/google/protobuf/map_field.h
-++++ b/src/google/protobuf/map_field.h
-+@@ -692,7 +692,7 @@ bool AllAreInitialized(const TypeDefinedMapFieldBase<Key, T>& field) {
-+   return true;
-+ }
-+ 
-+-class PROTOBUF_EXPORT DynamicMapField final
-++class DynamicMapField final
-+     : public TypeDefinedMapFieldBase<MapKey, MapValueRef> {
-+  public:
-+   explicit DynamicMapField(const Message* default_entry);
-+diff --git a/src/google/protobuf/port_def.inc b/src/google/protobuf/port_def.inc
-+index 56f995e45..675a2184e 100644
-+--- a/src/google/protobuf/port_def.inc
-++++ b/src/google/protobuf/port_def.inc
-+@@ -435,7 +435,7 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
-+ #endif
-+ 
-+ // Lexan sets both MSV_VER and clang, so handle it with the clang path.
-+-#if defined(_MSC_VER) && !defined(__clang__)
-++#if defined(_MSC_VER)
-+ // MSVC 17 currently seems to raise an error about constant-initialized pointers.
-+ # if PROTOBUF_MSC_VER_MIN(1930)
-+ #  define PROTOBUF_CONSTINIT
-+diff --git a/src/google/protobuf/thread_safe_arena.h b/src/google/protobuf/thread_safe_arena.h
-+index 2065ee98e..609c1645d 100644
-+--- a/src/google/protobuf/thread_safe_arena.h
-++++ b/src/google/protobuf/thread_safe_arena.h
-+@@ -248,7 +248,7 @@ class PROTOBUF_EXPORT ThreadSafeArena {
-+   // iOS does not support __thread keyword so we use a custom thread local
-+   // storage class we implemented.
-+   static ThreadCache& thread_cache();
-+-#elif defined(PROTOBUF_USE_DLLS) && defined(_WIN32)
-++#elif defined(_WIN32)
-+   // Thread local variables cannot be exposed through MSVC DLL interface but we
-+   // can wrap them in static functions.
-+   static ThreadCache& thread_cache();
-+-- 
-+2.45.2
- 
-- __version__ = '5.28.3'
--+
--+if __name__ != '__main__':
--+  try:
--+    __import__('pkg_resources').declare_namespace(__name__)
--+  except ImportError:
--+    __path__ = __import__('pkgutil').extend_path(__path__, __name__)
-diff --git a/third_party/xla/workspace2.bzl b/third_party/xla/workspace2.bzl
-index 9e4166034d0..1394319708e 100644
---- a/third_party/xla/workspace2.bzl
-+++ b/third_party/xla/workspace2.bzl
-@@ -310,9 +310,9 @@ def _tf_repositories():
-     tf_http_archive(
-         name = "com_google_protobuf",
-         patch_file = ["//third_party/protobuf:protobuf.patch"],
--        sha256 = "f645e6e42745ce922ca5388b1883ca583bafe4366cc74cf35c3c9299005136e2",
--        strip_prefix = "protobuf-5.28.3",
--        urls = tf_mirror_urls("https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.28.3.zip"),
-+        sha256 = "e7a50ac2a8ae3754c6f1ab6123424627920e4abddd894ee4bc47d6506e86aeb9",
-+        strip_prefix = "protobuf-5.29.3",
-+        urls = tf_mirror_urls("https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.29.3.zip"),
-     )
- 
-     tf_http_archive(
++cc_library(
++    name = "coordination_service_hdrs_only",
++    hdrs = ["coordination_service.h"],
++    deps = [
++        ":coordination_client",
++        ":coordination_service_error_util",
++        ":key_value_store",
++        "//xla/tsl/distributed_runtime:call_options",
++        "//xla/tsl/lib/gtl:int_type",
++        "//xla/tsl/platform:env",
++        "//xla/tsl/platform:status",
++        "//xla/tsl/protobuf:coordination_config_proto_cc",
++        "//xla/tsl/protobuf:coordination_service_proto_cc",
++        "//xla/tsl/util:device_name_utils",
++        "@com_google_absl//absl/algorithm:container",
++        "@com_google_absl//absl/base:core_headers",
++        "@com_google_absl//absl/container:flat_hash_map",
++        "@com_google_absl//absl/container:flat_hash_set",
++        "@com_google_absl//absl/hash",
++        "@com_google_absl//absl/log",
++        "@com_google_absl//absl/log:check",
++        "@com_google_absl//absl/status",
++        "@com_google_absl//absl/status:statusor",
++        "@com_google_absl//absl/strings",
++        "@com_google_absl//absl/strings:str_format",
++        "@com_google_absl//absl/strings:string_view",
++        "@com_google_absl//absl/synchronization",
++        "@com_google_absl//absl/time",
++        "@com_google_absl//absl/types:span",
++        "@local_tsl//tsl/platform:random",
++    ],
++    visibility = ["//visibility:public"],
++)
++
+ tf_proto_library(
+     name = "test_device_proto",
+     testonly = 1,
 -- 
-2.45.2
+2.50.1 (Apple Git-155)
 

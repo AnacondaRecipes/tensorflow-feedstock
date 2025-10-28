@@ -1,7 +1,7 @@
-From e036004c17a7a9e7d9e5d7b116060e5540b515f5 Mon Sep 17 00:00:00 2001
+From 1ea138f68f0b2388aa6f3b9d6e0d9208a15ccdd0 Mon Sep 17 00:00:00 2001
 From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Mon, 27 Oct 2025 08:22:28 -0600
-Subject: [PATCH 1/1] 22
+Date: Tue, 28 Oct 2025 09:20:13 -0600
+Subject: [PATCH 1/2] 22
 
 no such package '@@com_google_absl//absl/log': BUILD file not found in directory 'absl/log' of external repository @@com_google_absl.
 
@@ -34,11 +34,10 @@ _pywrap_tensorflow_internal.so, 0x000A): symbol not found in flat namespace '__Z
  .../third_party/absl/system.absl.flags.BUILD  | 30 +++++---
  .../absl/system.absl.functional.BUILD         |  5 ++
  .../third_party/absl/system.absl.log.BUILD    | 71 +++++++++++++++++++
- .../absl/system.absl.strings.BUILD            | 12 ++++
+ .../absl/system.absl.strings.BUILD            | 14 +++-
  .../absl/system.absl.utility.BUILD            |  7 +-
  .../xla/third_party/absl/workspace.bzl        | 31 ++++++++
- .../xla/xla/tsl/platform/default/logging.h    | 35 +++++++++
- 11 files changed, 262 insertions(+), 14 deletions(-)
+ 10 files changed, 228 insertions(+), 15 deletions(-)
  create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
  create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
 
@@ -359,10 +358,10 @@ index 00000000000..3cc52453752
 +)
 \ No newline at end of file
 diff --git a/third_party/xla/third_party/absl/system.absl.strings.BUILD b/third_party/xla/third_party/absl/system.absl.strings.BUILD
-index fa9a7a84f67..0d1272d9d00 100644
+index fa9a7a84f67..0b7ca228662 100644
 --- a/third_party/xla/third_party/absl/system.absl.strings.BUILD
 +++ b/third_party/xla/third_party/absl/system.absl.strings.BUILD
-@@ -24,6 +24,18 @@ cc_library(
+@@ -24,9 +24,21 @@ cc_library(
      ],
  )
  
@@ -380,7 +379,11 @@ index fa9a7a84f67..0d1272d9d00 100644
 +
  cc_library(
      name = "cord",
-     linkopts = ["-labsl_cord"],
+-    linkopts = ["-labsl_cord"],
++    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info"],
+     deps = [
+         ":str_format",
+         "//absl/container:compressed_tuple",
 diff --git a/third_party/xla/third_party/absl/system.absl.utility.BUILD b/third_party/xla/third_party/absl/system.absl.utility.BUILD
 index e15049e261c..e9c25fe3714 100644
 --- a/third_party/xla/third_party/absl/system.absl.utility.BUILD
@@ -444,3 +447,6 @@ index 9144c5bd5b6..e24a2b08b9c 100644
          strip_prefix = "abseil-cpp-{commit}".format(commit = ABSL_COMMIT),
          urls = tf_mirror_urls("https://github.com/abseil/abseil-cpp/archive/{commit}.tar.gz".format(commit = ABSL_COMMIT)),
          patch_file = [
+-- 
+2.50.1 (Apple Git-155)
+
