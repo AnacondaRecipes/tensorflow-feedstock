@@ -42,6 +42,7 @@ export TF_SYSTEM_LIBS="
   boringssl
   com_github_googlecloudplatform_google_cloud_cpp
   com_google_absl
+  com_github_grpc_grpc
   curl
   cython
   dill_archive

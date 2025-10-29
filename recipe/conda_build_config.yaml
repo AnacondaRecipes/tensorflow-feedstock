@@ -33,6 +33,3 @@ c_compiler_version:        # [win]
   - 20                     # [win]
 cxx_compiler_version:      # [win]
   - 20                     # [win]
-
-# TODO This should be in abs.yaml. Testing if this works for now. 
-task_timeout: 54000

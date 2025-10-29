@@ -43,10 +43,12 @@ source:
       - patches/22.patch  # [not win]
       - patches/23.patch  # [not win]
 
+      # gRPC un-vendoring
+      - patches/0038-gprc.patch  # [not win]
+
       # Take 1
       
       # - patches/0022-add-absl_crc32c-targets.patch  # [not win]
-      # - patches/23.patch
       # - patches/0018-add-absl_string_view-target.patch  # [not win]
 
 

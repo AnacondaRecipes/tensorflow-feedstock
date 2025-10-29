@@ -380,7 +380,7 @@ index fa9a7a84f67..0b7ca228662 100644
  cc_library(
      name = "cord",
 -    linkopts = ["-labsl_cord"],
-+    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info"],
++    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info", "-labsl_cord_internal"],
      deps = [
          ":str_format",
          "//absl/container:compressed_tuple",
