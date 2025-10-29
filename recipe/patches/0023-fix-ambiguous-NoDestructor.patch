@@ -1,0 +1,29 @@
+From d604aaded967964cfe36e1cea869a8352a218123 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Wed, 29 Oct 2025 15:25:17 -0600
+Subject: [PATCH] 00023-fix-ambiguous-NoDestructor
+
+external/local_xla/xla/tsl/profiler/utils/group_events.cc: In function 'bool tsl::profiler::IsImplicitRootEvent(const tsl::profiler::XEventVisitor&)':
+external/local_xla/xla/tsl/profiler/utils/group_events.cc:176:8: error: call of overloaded 'NoDestructor(<brace-enclosed initializer list>)' is ambiguous
+  176 |       });
+
+---
+ third_party/xla/xla/tsl/profiler/utils/group_events.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/third_party/xla/xla/tsl/profiler/utils/group_events.cc b/third_party/xla/xla/tsl/profiler/utils/group_events.cc
+index fc8c041c640..3eccbd2a919 100644
+--- a/third_party/xla/xla/tsl/profiler/utils/group_events.cc
++++ b/third_party/xla/xla/tsl/profiler/utils/group_events.cc
+@@ -168,7 +168,7 @@ void ConnectContextGroups(const ContextGroupMap& context_groups) {
+ 
+ bool IsImplicitRootEvent(const XEventVisitor& event) {
+   static const absl::NoDestructor<absl::flat_hash_set<int64_t>>
+-      kImplicitRootEvents({
++      kImplicitRootEvents(absl::flat_hash_set<int64_t>{
+           HostEventType::kFunctionRun,
+           HostEventType::kSessionRun,
+           HostEventType::kRunGraph,
+-- 
+2.50.1 (Apple Git-155)
+
