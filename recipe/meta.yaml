@@ -40,9 +40,10 @@ source:
       - patches/0020-is_signed-cannot-be-specialized.patch
       # Abseil un-vendoring
       - patches/0021-consolidated-abseil-unvendoring.patch  # [not win]
+      - patches/0022-fix-multiple-flag-defs.patch  # [not win]
       # gRPC un-vendoring
-      - patches/0022-gprc-systemlib-repair.patch  # [not win]
-      - patches/0023-fix-ambiguous-NoDestructor.patch  # [linux]
+      - patches/0023-gprc-systemlib-repair.patch  # [not win]
+      - patches/0024-fix-ambiguous-NoDestructor.patch  # [linux]
 
 build:
   number: {{ build }}
