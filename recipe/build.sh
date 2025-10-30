@@ -5,6 +5,8 @@ set -ex
 # Override for GitHub Actions CI
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
+elif [[ "${target_platform}" == "linux-aarch64" ]]; then
+  export CPU_COUNT=8
 fi
 
 export PATH="$PWD:$PATH"
