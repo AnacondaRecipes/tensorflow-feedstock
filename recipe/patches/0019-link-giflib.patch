@@ -3,27 +3,46 @@ From: Eric Lundby <Eric.Lundby@gmail.com>
 Date: Mon, 15 Sep 2025 16:55:34 -0600
 Subject: [PATCH] link-giflib
 
+from tensorflow.python._pywrap_tensorflow_internal import *
+ImportError: dlopen(/env/lib/python3.12/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so, 0x000A): 
+    symbol not found in flat namespace '_DGifCloseFile'
+
 ---
  third_party/systemlibs/gif.BUILD | 7 ++++++-
  1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/third_party/systemlibs/gif.BUILD b/third_party/systemlibs/gif.BUILD
-index 5eb2c918ba4..8d2d6ad9c62 100644
---- a/third_party/systemlibs/gif.BUILD
-+++ b/third_party/systemlibs/gif.BUILD
-@@ -7,6 +7,11 @@ filegroup(
+diff --git a/tensorflow/BUILD b/tensorflow/BUILD
+index 40af51839d1..5db37bfe23a 100644
+--- a/tensorflow/BUILD
++++ b/tensorflow/BUILD
+@@ -1187,6 +1187,8 @@ tf_cc_shared_library(
+                 "//tensorflow/core/framework:tensor",
+                 "//tensorflow/core/grappler/optimizers:custom_graph_optimizer_registry_impl",
+                 "//tensorflow/core:lib_internal_impl",
++                "//tensorflow/core/lib/gif:gif_internal",
++                "//tensorflow/core/lib/jpeg:jpeg_internal",
+                 "//tensorflow/core/profiler:profiler_impl",
+                 "//tensorflow/core/util:determinism",  # Must be linked and exported to libtensorflow_framework.so.
+                 "//tensorflow/lite/kernels/shim:tf_kernel_shim",
+diff --git a/tensorflow/core/lib/gif/BUILD b/tensorflow/core/lib/gif/BUILD
+index ca18730828f..f1521db9674 100644
+--- a/tensorflow/core/lib/gif/BUILD
++++ b/tensorflow/core/lib/gif/BUILD
+@@ -15,7 +15,7 @@ load(
  
- cc_library(
-     name = "gif",
--    linkopts = ["-lgif"],
-+    linkopts = [
-+        "-lgif",
-+        "-L$(LIBDIR)",
-+        "-Wl,-rpath,$(LIBDIR)",
-+    ],
-+    alwayslink = True,
-     visibility = ["//visibility:public"],
+ package(
+     # copybara:uncomment default_applicable_licenses = ["//tensorflow:license"],
+-    default_visibility = ["//tensorflow/core:__pkg__"],
++    default_visibility = ["//tensorflow:__subpackages__"],
+     licenses = ["notice"],
  )
--- 
-2.45.2
+ 
+@@ -58,6 +58,7 @@ cc_library(
+     copts = tf_copts(),
+     features = ["-layering_check"],
+     linkopts = if_android(["-ldl"]),
++    visibility = ["//tensorflow:__subpackages__"],
+     deps = [
+         "//tensorflow/core/platform:dynamic_annotations",
+         "//tensorflow/core/platform:gif",
 
