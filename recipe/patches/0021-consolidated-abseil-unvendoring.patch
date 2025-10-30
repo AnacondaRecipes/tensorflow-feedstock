@@ -54,6 +54,7 @@ _pywrap_tensorflow_internal.so, 0x000A): symbol not found in flat namespace '__Z
  .../absl/system.absl.strings.BUILD            | 14 +++-
  .../absl/system.absl.utility.BUILD            |  7 +-
  .../xla/third_party/absl/workspace.bzl        | 31 ++++++++
+ .../third_party/systemlibs/grpc.BUILD         | 4 ++++
  10 files changed, 228 insertions(+), 15 deletions(-)
  create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
  create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
@@ -464,6 +465,43 @@ index 9144c5bd5b6..e24a2b08b9c 100644
          strip_prefix = "abseil-cpp-{commit}".format(commit = ABSL_COMMIT),
          urls = tf_mirror_urls("https://github.com/abseil/abseil-cpp/archive/{commit}.tar.gz".format(commit = ABSL_COMMIT)),
          patch_file = [
+
+diff --git a/third_party/systemlibs/grpc.BUILD b/third_party/systemlibs/grpc.BUILD
+index 0e4e862ce4c..c53b4727aa9 100644
+--- a/third_party/systemlibs/grpc.BUILD
++++ b/third_party/systemlibs/grpc.BUILD
+@@ -10,6 +10,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -19,6 +20,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc++",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -33,6 +35,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc_unsecure",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -42,6 +45,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc++_unsecure",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
 -- 
 2.50.1 (Apple Git-155)
 
