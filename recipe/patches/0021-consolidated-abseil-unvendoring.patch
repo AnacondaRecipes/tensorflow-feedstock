@@ -16,6 +16,7 @@ Consolidated patches from:
      - 0021-add-absl_die_if_null-target.patch
      - 0022-add-absl_crc32c-targets.patch
      - 0023-add-absl-tracing-target.patch
+     - 0024-add-kernel_timeout_internal-target.patch
      - 0025-add-absl-utility-if_constexpr-target.patch
      
 
@@ -502,6 +503,41 @@ index 0e4e862ce4c..c53b4727aa9 100644
      ],
      visibility = ["//visibility:public"],
  )
+
+diff --git a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
+index c0fa37aacd7..b47309deb39 100644
+--- a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
+@@ -16,14 +16,29 @@ cc_library(
+     ],
+ )
+ 
++cc_library(
++    name = "kernel_timeout_internal",
++    visibility = [
++    ],
++    deps = [
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:raw_logging_internal",
++        "//absl/time",
++    ],
++)
++
+ cc_library(
+     name = "synchronization",
+     linkopts = [
+         "-labsl_synchronization",
++        "-labsl_kernel_timeout_internal",
+         "-pthread",
+     ],
+     deps = [
+         ":graphcycles_internal",
++        ":kernel_timeout_internal",
+         "//absl/base",
+         "//absl/base:atomic_hook",
+         "//absl/base:dynamic_annotations",
 -- 
 2.50.1 (Apple Git-155)
 
