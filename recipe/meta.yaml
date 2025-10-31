@@ -44,6 +44,7 @@ source:
       # gRPC un-vendoring
       - patches/0023-gprc-systemlib-repair.patch  # [not win]
       - patches/0024-fix-ambiguous-NoDestructor.patch  # [linux]
+      - patches/0025-add-missing-namespace.patch  # [linux]
 
 build:
   number: {{ build }}
