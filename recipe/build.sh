@@ -221,6 +221,7 @@ build --define=xnn_enable_avx512fp16=false
 build --define=xnn_enable_avxvnniint8=false
 build --cpu=${TARGET_CPU}
 build --local_resources=cpu=${CPU_COUNT}
+build --experimental_ui_max_stdouterr_bytes=104857600
 
 EOF
 
