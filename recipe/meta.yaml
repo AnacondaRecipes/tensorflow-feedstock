@@ -168,6 +168,7 @@ outputs:
       missing_dso_whitelist:
         - "**/_pywrap_tensorflow_internal.*" # loaded by python wrapper pywrap_tensorflow.py
         - "**/_pywrap_tensorflow_common.*"
+        - "**/pywrap_tflite_common.dll"  # [win]
         # some .sos look for other .sos in different site-packages directories. Root cause is probably
         # similar to with pytorch, that it loads libraries manually in the python code (TBC)
         - "**/libtensorflow_framework.so.2"
