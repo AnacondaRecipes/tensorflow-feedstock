@@ -1,32 +1,16 @@
-From 7a8c6aa19044999d42064a8cedd1ddc644a77ddf Mon Sep 17 00:00:00 2001
+From f700400dd0facdec8cfc92fac3350c17ab1584f0 Mon Sep 17 00:00:00 2001
 From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Sun, 2 Nov 2025 08:21:54 -0700
-Subject: [PATCH] linux-linking-errors
+Date: Thu, 6 Nov 2025 12:21:34 -0700
+Subject: [PATCH 1/2] link-snappy
 
 undefined reference to `snappy::GetUncompressedLength(char const*, unsigned long, unsigned long*)'
 undefined reference to `snappy::RawUncompress(char const*, unsigned long, char*)'
 undefined reference to `snappy::MaxCompressedLength(unsigned long)'
-undefined reference to `snappy::RawCompress(char const*, unsigned long, char*, unsigned long*)'
-undefined reference to `absl::lts_20250127::numbers_internal::FastIntToBuffer(unsigned long, char*)'
-undefined reference to `absl::lts_20250127::StrCat[abi:cxx11](absl::lts_20250127::AlphaNum const&, absl::lts_20250127::AlphaNum const&)'
-undefined reference to `absl::lts_20250127::numbers_internal::SixDigitsToBuffer(double, char*)'
+undefined reference to `snappy::RawCompress(char const*, unsigned lo
 ---
- tensorflow/core/data/service/BUILD | 1 +
- tensorflow/core/lib/db/BUILD       | 1 +
- 2 files changed, 2 insertions(+)
+ tensorflow/core/lib/db/BUILD | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tensorflow/core/data/service/BUILD b/tensorflow/core/data/service/BUILD
-index 87fb4f45f9b..cf56b4ba286 100644
---- a/tensorflow/core/data/service/BUILD
-+++ b/tensorflow/core/data/service/BUILD
-@@ -142,6 +142,7 @@ cc_library(
-     srcs = ["byte_size.cc"],
-     hdrs = ["byte_size.h"],
-     deps = [
-+        "@com_google_absl//absl/base",
-         "@com_google_absl//absl/strings",
-     ],
- )
 diff --git a/tensorflow/core/lib/db/BUILD b/tensorflow/core/lib/db/BUILD
 index c79a73c1a5e..12ff607f476 100644
 --- a/tensorflow/core/lib/db/BUILD
