@@ -46,6 +46,7 @@ source:
       - patches/0024-fix-ambiguous-NoDestructor.patch  # [linux]
       - patches/0025-add-missing-namespace.patch  # [linux]
       - patches/0026-link-snappy.patch  # [linux]
+      - patches/0027-additional-abseil-linking.patch  # [linux]
 
 build:
   number: {{ build }}
