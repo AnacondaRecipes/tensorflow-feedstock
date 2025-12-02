@@ -2,8 +2,6 @@ task_timeout: 54000
 
 channels:
   - https://staging.continuum.io/pbp/fs/tensorboard-feedstock/pr6/08c71b4
-  - https://staging.continuum.io/pbp/fs/re2-feedstock/pr5/ec2a05c
-  - https://staging.continuum.io/pbp/fs/abseil-cpp-feedstock/pr14/18d2ecf
-  - https://staging.continuum.io/pbp/fs/protobuf-feedstock/pr27/b8cd6e1
-  - https://staging.continuum.io/pbp/fs/libprotobuf-feedstock/pr31/04cbf99
-  - https://staging.continuum.io/pbp/fs/grpc-cpp-feedstock/pr36/a36e7c3
+  - https://staging.continuum.io/pbp/fs/singlejar-feedstock/pr3/7062f26
+  - https://staging.continuum.io/pbp/fs/grpc_java_plugin-feedstock/pr5/2bc7bca
+  - https://staging.continuum.io/pbp/fs/bazel-feedstock/pr25/8fc7f12
