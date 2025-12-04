@@ -230,18 +230,23 @@ EOF
 
 echo "build:linux --linkopt=-labsl_raw_hash_set" >> .bazelrc
 echo "build:linux --linkopt=-labsl_hash" >> .bazelrc
-echo "build:linux --linkopt=-labsl_low_level_hash" >> .bazelrc
 echo "build:linux --linkopt=-labsl_city" >> .bazelrc  
 echo "build:linux --linkopt=-labsl_status" >> .bazelrc
 echo "build:linux --linkopt=-labsl_statusor" >> .bazelrc
 echo "build:linux --linkopt=-labsl_strings" >> .bazelrc
 echo "build:linux --linkopt=-labsl_strings_internal" >> .bazelrc
 echo "build:linux --linkopt=-labsl_str_format_internal" >> .bazelrc
+
 echo "build:linux --linkopt=-labsl_cord" >> .bazelrc
 echo "build:linux --linkopt=-labsl_cord_internal" >> .bazelrc
 echo "build:linux --linkopt=-labsl_cordz_functions" >> .bazelrc
 echo "build:linux --linkopt=-labsl_cordz_info" >> .bazelrc
 echo "build:linux --linkopt=-labsl_cordz_handle" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_info'  >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cord_internal'      >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_functions'    >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_handle'       >> .bazelrc
+
 echo "build:linux --linkopt=-labsl_log_internal_message" >> .bazelrc
 echo "build:linux --linkopt=-labsl_log_internal_check_op" >> .bazelrc
 echo "build:linux --linkopt=-labsl_log_internal_nullguard" >> .bazelrc
@@ -259,8 +264,10 @@ echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes" >> .bazelrc
 echo "build:linux --linkopt=-labsl_random_internal_randen_slow" >> .bazelrc
 echo "build:linux --linkopt=-labsl_throw_delegate" >> .bazelrc
 echo "build:linux --linkopt=-labsl_spinlock_wait" >> .bazelrc
+
 echo "build:linux --linkopt=-labsl_kernel_timeout_internal" >> .bazelrc
-echo "build:linux --linkopt=-labsl_random_internal_pool_urbg" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_kernel_timeout_internal' >> .bazelrc
+
 echo "build:linux --linkopt=-labsl_random_internal_randen" >> .bazelrc
 echo "build:linux --linkopt=-labsl_die_if_null" >> .bazelrc
 echo "build:linux --linkopt=-labsl_flags_internal" >> .bazelrc
@@ -274,6 +281,15 @@ echo "build:linux --linkopt=-labsl_flags_private_handle_accessor" >> .bazelrc
 echo "build:linux --linkopt=-labsl_random_internal_platform" >> .bazelrc
 echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes_impl" >> .bazelrc
 
+# Trace hook used by AbslInternalTraceObserved_lts_20250814
+echo 'build:linux --linkopt=-labsl_examine_stack'             >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_examine_stack'        >> .bazelrc
+
+echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
+
+echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
 
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
