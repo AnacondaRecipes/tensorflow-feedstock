@@ -57,13 +57,14 @@ _pywrap_tensorflow_internal.so, 0x000A): symbol not found in flat namespace '__Z
  .../third_party/absl/system.absl.hash.BUILD   |  2 +-
  .../third_party/absl/system.absl.log.BUILD    | 73 +++++++++++++++++
  .../third_party/absl/system.absl.random.BUILD |  7 +-
+ .../third_party/absl/system.absl.status.BUILD |  2 +-
  .../absl/system.absl.strings.BUILD            | 16 +++-
  .../absl/system.absl.synchronization.BUILD    | 17 +++-
  .../third_party/absl/system.absl.types.BUILD  |  8 +-
  .../absl/system.absl.utility.BUILD            |  7 +-
  .../xla/third_party/absl/workspace.bzl        | 31 +++++++
  .../xla/third_party/protobuf/protobuf.patch   | 82 +++++++++++++++++++
- 18 files changed, 358 insertions(+), 30 deletions(-)
+ 19 files changed, 359 insertions(+), 31 deletions(-)
  create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
  create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
 
@@ -538,6 +539,19 @@ index ac17ce6343b..f3a4bcfce41 100644
          "-pthread",
      ],
      deps = [
+diff --git a/third_party/xla/third_party/absl/system.absl.status.BUILD b/third_party/xla/third_party/absl/system.absl.status.BUILD
+index e50e9790c82..c5d591f872b 100644
+--- a/third_party/xla/third_party/absl/system.absl.status.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.status.BUILD
+@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
+     name = "status",
+-    linkopts = ["-labsl_status"],
++    linkopts = ["-labsl_status", "-labsl_status_internal"],
+     deps = [
+         "//absl/base:atomic_hook",
+         "//absl/base:raw_logging_internal",
 diff --git a/third_party/xla/third_party/absl/system.absl.strings.BUILD b/third_party/xla/third_party/absl/system.absl.strings.BUILD
 index fa9a7a84f67..4fb9a61299a 100644
 --- a/third_party/xla/third_party/absl/system.absl.strings.BUILD
