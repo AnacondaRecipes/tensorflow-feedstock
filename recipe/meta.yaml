@@ -43,10 +43,13 @@ source:
       - patches/0022-fix-multiple-flag-defs.patch  # [not win]
       # gRPC un-vendoring
       - patches/0023-gprc-systemlib-repair.patch  # [not win]
-      - patches/0024-fix-ambiguous-NoDestructor.patch  # [linux]
-      - patches/0025-add-missing-namespace.patch  # [linux]
-      - patches/0026-link-snappy.patch  # [linux]
-      - patches/0027-make-proto_cast_util-visible.patch  # [linux]
+      # Linux specific patches
+      - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
+      - patches/0025-add-missing-namespace.patch            # [linux]
+      - patches/0026-link-snappy.patch                      # [linux]
+      # For pybind11_* targets, the default is "-fvisibility=hidden". 
+      # Make necessary symbols visible.
+      - patches/0027-make-proto_cast_util-visible.patch     # [linux]
       - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
 
 build:
