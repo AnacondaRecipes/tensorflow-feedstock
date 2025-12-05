@@ -47,6 +47,7 @@ source:
       - patches/0025-add-missing-namespace.patch  # [linux]
       - patches/0026-link-snappy.patch  # [linux]
       - patches/0027-make-proto_cast_util-visible.patch  # [linux]
+      - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
 
 build:
   number: {{ build }}
