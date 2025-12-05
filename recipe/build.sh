@@ -37,7 +37,6 @@ export TF_PYTHON_VERSION=$PY_VER
 # com_github_googleapis_googleapis
 # Needs c++17, try on linux
 #  com_googlesource_code_re2
-# com_github_grpc_grpc
 export TF_SYSTEM_LIBS="
   astor_archive
   astunparse_archive
@@ -59,7 +58,6 @@ export TF_SYSTEM_LIBS="
   snappy
   zlib
   "
-# sed -i -e "s/GRPCIO_VERSION/${grpc_cpp}/" tensorflow/tools/pip_package/setup.py
 
 # do not build with MKL support
 export TF_NEED_MKL=0
@@ -214,7 +212,6 @@ build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
-build --define=LIBDIR=${LIBDIR}
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
 build --define=xnn_enable_avx512fp16=false
