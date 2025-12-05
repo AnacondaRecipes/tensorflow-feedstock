@@ -58,6 +58,8 @@ build:
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<310 or py>313]
   skip: true  # [skip_cuda_pbp and (gpu_variant or "").startswith('cuda')]
+  # TODO re-enable windows once PBP can handle symlinks again. 
+  skip: true  # [win]
 
 requirements:
   build:
