@@ -289,8 +289,8 @@ echo 'build:linux --linkopt=-labsl_examine_stack'             >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_examine_stack'        >> .bazelrc
 echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
-echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
-echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+# echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+# echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
 
 # build using bazel
 bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}

@@ -1,6 +1,6 @@
-From 815570be15ff13416649a4063ed60ab099cd8c9c Mon Sep 17 00:00:00 2001
+From 86e91620446217de65cb687abf42d270f79de773 Mon Sep 17 00:00:00 2001
 From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Fri, 5 Dec 2025 15:30:10 -0700
+Date: Sat, 6 Dec 2025 08:15:24 -0700
 Subject: [PATCH 1/1] 0021
 
 ---
@@ -24,7 +24,8 @@ Subject: [PATCH 1/1] 0021
  .../absl/system.absl.utility.BUILD            |  7 +-
  .../xla/third_party/absl/workspace.bzl        | 31 +++++++
  .../xla/third_party/protobuf/protobuf.patch   | 82 +++++++++++++++++++
- 20 files changed, 367 insertions(+), 31 deletions(-)
+ third_party/xla/xla/pjrt/BUILD                |  3 +
+ 21 files changed, 370 insertions(+), 31 deletions(-)
  create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
  create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
 
@@ -798,6 +799,20 @@ index 0c8e1cbfc6d..8d7c838edb9 100644
  diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
  --- a/src/google/protobuf/arena.cc	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
  +++ b/src/google/protobuf/arena.cc	(date 1748042877047)
+diff --git a/third_party/xla/xla/pjrt/BUILD b/third_party/xla/xla/pjrt/BUILD
+index 19afe80f290..e0f7f0f600a 100644
+--- a/third_party/xla/xla/pjrt/BUILD
++++ b/third_party/xla/xla/pjrt/BUILD
+@@ -116,6 +116,9 @@ cc_library(
+         "common_pjrt_client.cc",
+         "host_to_device_transfer_manager.cc",
+     ],
++    linkopts = [
++        "-labsl_random_internal_entropy_pool",
++    ],
+     hdrs = [
+         "common_pjrt_client.h",
+         "host_to_device_transfer_manager.h",
 -- 
 2.50.1 (Apple Git-155)
 
