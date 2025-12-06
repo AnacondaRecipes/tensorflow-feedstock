@@ -287,8 +287,8 @@ echo "build:linux --linkopt=-labsl_random_internal_platform" >> .bazelrc
 echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes_impl" >> .bazelrc
 echo 'build:linux --linkopt=-labsl_examine_stack'             >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_examine_stack'        >> .bazelrc
-echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
-echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
+# echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
+# echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
 # echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
 # echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
 
