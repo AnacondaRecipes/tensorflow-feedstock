@@ -237,6 +237,61 @@ rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_gene
 # Replace placeholders from xxxx-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
 
+echo "build:linux --linkopt=-labsl_raw_hash_set" >> .bazelrc
+echo "build:linux --linkopt=-labsl_hash" >> .bazelrc
+echo "build:linux --linkopt=-labsl_city" >> .bazelrc  
+echo "build:linux --linkopt=-labsl_status" >> .bazelrc
+echo "build:linux --linkopt=-labsl_statusor" >> .bazelrc
+echo "build:linux --linkopt=-labsl_strings" >> .bazelrc
+echo "build:linux --linkopt=-labsl_strings_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_str_format_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cord" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cord_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_functions" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_info" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_handle" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_info'  >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cord_internal'      >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_functions'    >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_handle'       >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_message" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_check_op" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_nullguard" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_conditions" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_format" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_globals" >> .bazelrc
+echo "build:linux --linkopt=-labsl_vlog_config_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc32c" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_cord_state" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_cpu_detect" >> .bazelrc
+echo "build:linux --linkopt=-labsl_time" >> .bazelrc
+echo "build:linux --linkopt=-labsl_time_zone" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_slow" >> .bazelrc
+echo "build:linux --linkopt=-labsl_throw_delegate" >> .bazelrc
+echo "build:linux --linkopt=-labsl_spinlock_wait" >> .bazelrc
+echo "build:linux --linkopt=-labsl_kernel_timeout_internal" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_kernel_timeout_internal' >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen" >> .bazelrc
+echo "build:linux --linkopt=-labsl_die_if_null" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_commandlineflag" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_commandlineflag_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_config" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_marshalling" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_reflection" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_parse" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_private_handle_accessor" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_platform" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes_impl" >> .bazelrc
+echo 'build:linux --linkopt=-labsl_examine_stack'             >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_examine_stack'        >> .bazelrc
+echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
+echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+
 # build using bazel
 bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 
