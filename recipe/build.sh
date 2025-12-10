@@ -237,6 +237,11 @@ rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_gene
 # Replace placeholders from xxxx-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
 
+# For reasons unknown, the linkopts from the systemlib shims are not propogating on linux.
+# It's possible to manually add the link flags for each target, but that results 
+# in hundreds of patched files. This seems to be related to the change between
+# 2.19 and 2.20 where /third_party/absl/* was moved into /third_party/xla/third_party/absl/*.
+# Remove this bandaid once TF_SYSTEM_LIBS properly handles absl again.
 echo "build:linux --linkopt=-labsl_raw_hash_set" >> .bazelrc
 echo "build:linux --linkopt=-labsl_hash" >> .bazelrc
 echo "build:linux --linkopt=-labsl_city" >> .bazelrc  
