@@ -10,8 +10,7 @@ elif [[ "${target_platform}" == "linux-aarch64" ]]; then
 fi
 
 export PATH="$PWD:$PATH"
-export CC=$(basename $CC)
-export CXX=$(basename $CXX)
+
 export LIBDIR=$PREFIX/lib
 export INCLUDEDIR=$PREFIX/include
 
@@ -85,6 +84,9 @@ if [[ "${target_platform}" == osx-* ]]; then
   export SDKROOT=${CONDA_BUILD_SYSROOT}
 else
   export LDFLAGS="${LDFLAGS} -lrt"
+  # See https://github.com/llvm/llvm-project/issues/85656
+  # Otherwise, this will cause linkage errors with a GCC-built abseil
+  export CXXFLAGS="${CXXFLAGS} -fclang-abi-compat=17"
 fi
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
@@ -157,6 +159,10 @@ else
     export TF_NEED_CUDA=0
 fi
 
+export TF_NEED_CLANG=1
+export TF_CUDA_CLANG=1
+export CLANG_COMPILER_PATH=${BUILD_PREFIX}/bin/clang
+
 source gen-bazel-toolchain
 
 # Get rid of unwanted defaults
@@ -180,10 +186,7 @@ export USE_DEFAULT_PYTHON_LIB_PATH=1
 export TF_NEED_OPENCL=0
 export TF_NEED_OPENCL_SYCL=0
 export TF_NEED_COMPUTECPP=0
-export TF_CUDA_CLANG=0
-if [[ "${target_platform}" == linux-* ]]; then
-  export TF_NEED_CLANG=0
-fi
+
 export TF_NEED_TENSORRT=0
 export TF_NEED_ROCM=0
 export TF_NEED_MPI=0
@@ -236,6 +239,15 @@ rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_gene
 
 # Replace placeholders from xxxx-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
+
+
+# Fix missing stdint.h types in tf_runtime external dependency
+# The tf_runtime headers use int64_t, uint32_t, etc. but don't include <stdint>
+# Force include it globally to avoid compilation errors
+if [[ "${target_platform}" == linux-* ]]; then
+    echo "build:linux --cxxopt=-include --cxxopt=stdint.h" >> .bazelrc
+    echo "build:linux --host_cxxopt=-include --host_cxxopt=stdint.h" >> .bazelrc
+fi
 
 # For reasons unknown, the linkopts from the systemlib shims are not propogating on linux.
 # It's possible to manually add the link flags for each target, but that results 

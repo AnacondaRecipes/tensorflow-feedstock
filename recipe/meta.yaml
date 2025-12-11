@@ -85,7 +85,7 @@ requirements:
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
-    - bazel-toolchain >=0.2.0b1  # [not win]
+    - bazel-toolchain >=0.4  # [not win]
     - libgrpc {{ libgrpc }}
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
