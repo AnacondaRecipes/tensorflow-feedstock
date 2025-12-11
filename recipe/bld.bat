@@ -16,6 +16,7 @@ set BAZEL_VS="%VSINSTALLDIR%"
 set BAZEL_VC="%VSINSTALLDIR%/VC"
 set CLANG_COMPILER_PATH=%BUILD_PREFIX:\=/%/Library/bin/clang.exe
 set BAZEL_LLVM=%BUILD_PREFIX:\=/%/Library/
+set ML_WHEEL_TYPE=release
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
@@ -79,6 +80,7 @@ bazel shutdown
 
 call configure
 
+ECHO build --repo_env=ML_WHEEL_TYPE=release>>.bazelrc
 ECHO build --features=layering_check>>.bazelrc
 ECHO build --features=parse_headers>>.bazelrc
 ECHO build --enable_runfiles>>.bazelrc
