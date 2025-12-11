@@ -51,6 +51,7 @@ source:
       # Make necessary symbols visible.
       - patches/0027-make-proto_cast_util-visible.patch     # [linux]
       - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
+      - patches/0029-fix-unused-nodiscard-return-value.patch  # [linux]
 
 build:
   number: {{ build }}

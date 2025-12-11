@@ -1,0 +1,29 @@
+From 3a5e2c7c9f8b4f9d8c3c5c7b3e9f5d5a5c7b5e9f Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 2 Dec 2025 11:30:00 -0700
+Subject: [PATCH] Fix unused result warning in resolve_tensorflow_matmul.cc
+
+model->operators.emplace(matmul_it, fc_op) + 1;
+was computing + 1 on the iterator returned by emplace() but never using the result. 
+With modern C++ standard library implementations marking iterator arithmetic with [[nodiscard]], 
+this triggers -Wunused-result (which is promoted to an error via -Werror).
+Since the code later refreshes matmul_it by iterating from the beginning anyway (lines 195-200), 
+the + 1 was dead code. Simply removing it fixes the build error while preserving the intended behavior.
+---
+ .../resolve_tensorflow_matmul.cc              | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tensorflow/lite/toco/graph_transformations/resolve_tensorflow_matmul.cc b/tensorflow/lite/toco/graph_transformations/resolve_tensorflow_matmul.cc
+index ceacf0378ff..892462551d2 100644
+--- a/tensorflow/lite/toco/graph_transformations/resolve_tensorflow_matmul.cc
++++ b/tensorflow/lite/toco/graph_transformations/resolve_tensorflow_matmul.cc
+@@ -173,7 +173,7 @@ absl::Status ResolveTensorFlowMatMul::Run(Model* model, std::size_t op_index,
+   fc_op->outputs = matmul_op->outputs;
+ 
+   // Insert the newly constructed FullyConnectedOperator.
+-  model->operators.emplace(matmul_it, fc_op) + 1;
++  model->operators.emplace(matmul_it, fc_op);
+ 
+   // Find the op producing the array passed to this MatMul
+   auto previous_op_it = model->operators.begin();
+
