@@ -1,7 +1,13 @@
-From 450b6d067e5fe8044aaf979e3ac77194cc96091a Mon Sep 17 00:00:00 2001
-From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Wed, 22 Oct 2025 10:24:17 -0600
-Subject: [PATCH 1/1] is_signed cannot be specialized as of clang 20
+From b9c263c3df2bb4926618a9c63e1dac45dc39c48a Mon Sep 17 00:00:00 2001
+From: "A. Unique TensorFlower" <gardener@tensorflow.org>
+Date: Tue, 5 Aug 2025 07:26:36 -0700
+Subject: [PATCH] Remove specializations of `std::is_signed`.
+
+This is disallowed starting in LLVM 20.
+
+PiperOrigin-RevId: 791204694
+
+https://github.com/tensorflow/tensorflow/pull/98321
 
 external/local_xla/xla/tsl/framework/type_traits.h:111:8: error: 'is_signed' cannot be specialized: Users are not allowed to specialize this standard library entity [-Winvalid-specialization]
 ---
