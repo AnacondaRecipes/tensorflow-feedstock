@@ -5,6 +5,8 @@ set -ex
 # Override for GitHub Actions CI
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
+elif [[ "${target_platform}" == "linux-aarch64" ]]; then
+  export CPU_COUNT=8
 fi
 
 export PATH="$PWD:$PATH"
@@ -27,15 +29,12 @@ export TF_PYTHON_VERSION=$PY_VER
 # https://github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/workspace<i>.bzl
 
 # Exceptions and TODOs:
-# Needs a bazel build:
-# com_google_absl
 # Build failures in tensorflow/core/platform/s3/aws_crypto.cc
 # boringssl (i.e. system openssl)
 # Most importantly: Write a patch that uses system LLVM libs for sure as well as MLIR and oneDNN/mkldnn
 # TODO(check):
 # absl_py
 # com_github_googleapis_googleapis
-# com_github_googlecloudplatform_google_cloud_cpp
 # Needs c++17, try on linux
 #  com_googlesource_code_re2
 export TF_SYSTEM_LIBS="
@@ -43,8 +42,8 @@ export TF_SYSTEM_LIBS="
   astunparse_archive
   boringssl
   com_github_googlecloudplatform_google_cloud_cpp
-  com_github_grpc_grpc
   com_google_absl
+  com_github_grpc_grpc
   curl
   cython
   dill_archive
@@ -59,7 +58,6 @@ export TF_SYSTEM_LIBS="
   snappy
   zlib
   "
-sed -i -e "s/GRPCIO_VERSION/${grpc_cpp}/" tensorflow/tools/pip_package/setup.py
 
 # do not build with MKL support
 export TF_NEED_MKL=0
@@ -168,9 +166,8 @@ echo "" >> .bazelrc
 
 if [[ "${target_platform}" == "osx-arm64" ]]; then
   echo "build --config=macos_arm64" >> .bazelrc
-  # See https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
-  export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
 fi
+
 export TF_ENABLE_XLA=1
 export BUILD_TARGET="//tensorflow/tools/pip_package:wheel"
 
@@ -215,12 +212,15 @@ build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
+build --repo_env=ML_WHEEL_TYPE=release
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
 build --define=xnn_enable_avx512fp16=false
 build --define=xnn_enable_avxvnniint8=false
 build --cpu=${TARGET_CPU}
-build --local_cpu_resources=${CPU_COUNT}
+build --local_resources=cpu=${CPU_COUNT}
+# If the final linking fails, stderr is trucated. Increase the size of the buffer.
+build --experimental_ui_max_stdouterr_bytes=104857600
 
 EOF
 
@@ -234,7 +234,73 @@ flatc --cpp --gen-object-api schema.fbs
 popd
 rm -f tensorflow/lite/schema/conversion_metadata_generated.h
 rm -f tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h
+
+# Replace placeholders from xxxx-Hardcode-BUILD_PREFIX-in-build_pip_package.patch
 sed -ie "s;BUILD_PREFIX;${BUILD_PREFIX};g" tensorflow/tools/pip_package/build_pip_package.py
+
+# For reasons unknown, the linkopts from the systemlib shims are not propogating on linux.
+# It's possible to manually add the link flags for each target, but that results 
+# in hundreds of patched files. This seems to be related to the change between
+# 2.19 and 2.20 where /third_party/absl/* was moved into /third_party/xla/third_party/absl/*.
+# Remove this bandaid once TF_SYSTEM_LIBS properly handles absl again.
+echo "build:linux --linkopt=-labsl_raw_hash_set" >> .bazelrc
+echo "build:linux --linkopt=-labsl_hash" >> .bazelrc
+echo "build:linux --linkopt=-labsl_city" >> .bazelrc  
+echo "build:linux --linkopt=-labsl_status" >> .bazelrc
+echo "build:linux --linkopt=-labsl_statusor" >> .bazelrc
+echo "build:linux --linkopt=-labsl_strings" >> .bazelrc
+echo "build:linux --linkopt=-labsl_strings_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_str_format_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cord" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cord_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_functions" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_info" >> .bazelrc
+echo "build:linux --linkopt=-labsl_cordz_handle" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_info'  >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cord_internal'      >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_functions'    >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_cordz_handle'       >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_message" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_check_op" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_nullguard" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_conditions" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_format" >> .bazelrc
+echo "build:linux --linkopt=-labsl_log_internal_globals" >> .bazelrc
+echo "build:linux --linkopt=-labsl_vlog_config_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc32c" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_cord_state" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_crc_cpu_detect" >> .bazelrc
+echo "build:linux --linkopt=-labsl_time" >> .bazelrc
+echo "build:linux --linkopt=-labsl_time_zone" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_slow" >> .bazelrc
+echo "build:linux --linkopt=-labsl_throw_delegate" >> .bazelrc
+echo "build:linux --linkopt=-labsl_spinlock_wait" >> .bazelrc
+echo "build:linux --linkopt=-labsl_kernel_timeout_internal" >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_kernel_timeout_internal' >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen" >> .bazelrc
+echo "build:linux --linkopt=-labsl_die_if_null" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_commandlineflag" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_commandlineflag_internal" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_config" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_marshalling" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_reflection" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_parse" >> .bazelrc
+echo "build:linux --linkopt=-labsl_flags_private_handle_accessor" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_platform" >> .bazelrc
+echo "build:linux --linkopt=-labsl_random_internal_randen_hwaes_impl" >> .bazelrc
+echo 'build:linux --linkopt=-labsl_examine_stack'             >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_examine_stack'        >> .bazelrc
+echo 'build:linux --linkopt=-labsl_tracing_internal' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_tracing_internal' >> .bazelrc
+echo 'build:linux --linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_random_internal_entropy_pool' >> .bazelrc
+echo 'build:linux --linkopt=-labsl_leak_check' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_leak_check' >> .bazelrc
+echo 'build:linux --linkopt=-labsl_int128' >> .bazelrc
+echo 'build:linux --host_linkopt=-labsl_int128' >> .bazelrc
 
 # build using bazel
 bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
@@ -242,6 +308,15 @@ bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 # build a whl file
 mkdir -p $SRC_DIR/tensorflow_pkg
 cp bazel-bin/tensorflow/tools/pip_package/wheel_house/tensorflow*.whl $SRC_DIR/tensorflow_pkg
+
+if [[ "${target_platform}" == osx-* ]]; then
+  cp -RP bazel-bin/tensorflow/python/libtensorflow_cc.* $PREFIX/lib/
+  cp -RP bazel-bin/tensorflow/python/libtensorflow_framework.* $PREFIX/lib/
+else
+  cp -d bazel-bin/tensorflow/python/libtensorflow_cc.so* $PREFIX/lib/
+  cp -d bazel-bin/tensorflow/python/libtensorflow_framework.so* $PREFIX/lib/
+  ln -sf $PREFIX/lib/libtensorflow_framework.so.2 $PREFIX/lib/libtensorflow_framework.so
+fi
 
 bazel clean --expunge
 bazel shutdown

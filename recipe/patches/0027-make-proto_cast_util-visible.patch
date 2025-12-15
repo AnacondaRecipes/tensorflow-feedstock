@@ -1,0 +1,108 @@
+From c512503ab67bf9a4f24eaaf9e0cc4e9dce047ba4 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 5 Dec 2025 08:26:51 -0700
+Subject: [PATCH 1/1] make-proto_cast_util-visible
+
+---
+ tensorflow/workspace2.bzl                     |  1 +
+ .../0001-make-proto_cast_util-visible.patch   | 63 +++++++++++++++++++
+ third_party/xla/workspace2.bzl                |  1 +
+ 3 files changed, 65 insertions(+)
+ create mode 100644 third_party/pybind11_protobuf/0001-make-proto_cast_util-visible.patch
+
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+index 335c2a6271e..9347595efbb 100644
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -798,6 +798,7 @@ def _tf_repositories():
+         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
+         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
+         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
++        patch_file = ["//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch"],
+     )
+ 
+     tf_http_archive(
+diff --git a/third_party/pybind11_protobuf/0001-make-proto_cast_util-visible.patch b/third_party/pybind11_protobuf/0001-make-proto_cast_util-visible.patch
+new file mode 100644
+index 00000000000..a7ab8ba7d4e
+--- /dev/null
++++ b/third_party/pybind11_protobuf/0001-make-proto_cast_util-visible.patch
+@@ -0,0 +1,63 @@
++diff --git a/pybind11_protobuf/proto_cast_util.h b/pybind11_protobuf/proto_cast_util.h
++index 503f94f..5527b42 100644
++--- a/pybind11_protobuf/proto_cast_util.h
+++++ b/pybind11_protobuf/proto_cast_util.h
++@@ -14,6 +14,15 @@
++ #include "google/protobuf/descriptor.h"
++ #include "google/protobuf/message.h"
++ 
+++// Macro to ensure symbols are exported even when built with -fvisibility=hidden
+++#if defined(_WIN32) || defined(__CYGWIN__)
+++  #define PYBIND11_PROTOBUF_EXPORT __declspec(dllexport)
+++#elif defined(__GNUC__) || defined(__clang__)
+++  #define PYBIND11_PROTOBUF_EXPORT __attribute__((visibility("default")))
+++#else
+++  #define PYBIND11_PROTOBUF_EXPORT
+++#endif
+++
++ // PYBIND11_PROTOBUF_ASSUME_FULL_ABI_COMPATIBILITY can be defined by users
++ // certain about ABI compatibility between all Python extensions in their
++ // environment using protobufs. If defined, passing protos from Python to C++
++@@ -43,28 +52,28 @@ std::string InferPythonModuleNameFromDescriptorFileName(
++ 
++ // Simple helper. Caller has to ensure that the py_bytes argument outlives the
++ // returned string_view.
++-absl::string_view PyBytesAsStringView(pybind11::bytes py_bytes);
+++PYBIND11_PROTOBUF_EXPORT absl::string_view PyBytesAsStringView(pybind11::bytes py_bytes);
++ 
++ // Initialize internal proto cast dependencies, which includes importing
++ // various protobuf-related modules.
++-void InitializePybindProtoCastUtil();
+++PYBIND11_PROTOBUF_EXPORT void InitializePybindProtoCastUtil();
++ 
++ // Imports a module pertaining to a given ::google::protobuf::Descriptor, if possible.
++ void ImportProtoDescriptorModule(const ::google::protobuf::Descriptor *);
++ 
++ // Returns a ::google::protobuf::Message* from a cpp_fast_proto, if backed by C++.
++-const ::google::protobuf::Message *PyProtoGetCppMessagePointer(pybind11::handle src);
+++PYBIND11_PROTOBUF_EXPORT const ::google::protobuf::Message *PyProtoGetCppMessagePointer(pybind11::handle src);
++ 
++ // Returns the protocol buffer's py_proto.DESCRIPTOR.full_name attribute.
++ absl::optional<std::string> PyProtoDescriptorFullName(
++     pybind11::handle py_proto);
++ 
++ // Returns true if py_proto full name matches descriptor full name.
++-bool PyProtoHasMatchingFullName(pybind11::handle py_proto,
+++PYBIND11_PROTOBUF_EXPORT bool PyProtoHasMatchingFullName(pybind11::handle py_proto,
++                                 const ::google::protobuf::Descriptor *descriptor);
++ 
++ // Caller should enforce any type identity that is required.
++-pybind11::bytes PyProtoSerializePartialToString(pybind11::handle py_proto,
+++PYBIND11_PROTOBUF_EXPORT pybind11::bytes PyProtoSerializePartialToString(pybind11::handle py_proto,
++                                                 bool raise_if_error);
++ 
++ // Allocates a C++ protocol buffer for a given name.
++@@ -85,7 +94,7 @@ pybind11::handle GenericPyProtoCast(::google::protobuf::Message *src,
++                                     pybind11::return_value_policy policy,
++                                     pybind11::handle parent, bool is_const);
++ 
++-pybind11::handle GenericProtoCast(::google::protobuf::Message *src,
+++PYBIND11_PROTOBUF_EXPORT pybind11::handle GenericProtoCast(::google::protobuf::Message *src,
++                                   pybind11::return_value_policy policy,
++                                   pybind11::handle parent, bool is_const);
++ 
+diff --git a/third_party/xla/workspace2.bzl b/third_party/xla/workspace2.bzl
+index 1f3a4524dd2..f357eb5d93e 100644
+--- a/third_party/xla/workspace2.bzl
++++ b/third_party/xla/workspace2.bzl
+@@ -522,6 +522,7 @@ def _tf_repositories():
+         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
+         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
+         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
++        patch_file = ["//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch"],
+     )
+ 
+     java_import_external(
+-- 
+2.50.1 (Apple Git-155)
+

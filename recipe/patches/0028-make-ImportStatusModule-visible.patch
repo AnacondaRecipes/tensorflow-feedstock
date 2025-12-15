@@ -1,0 +1,71 @@
+From 8a53e1aa1d937c0abe508260455e6d46cafa544f Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 5 Dec 2025 10:36:46 -0700
+Subject: [PATCH 1/1] make-ImportStatusModule-visible
+
+---
+ .../make-ImportStatusModule-visible.patch     | 40 +++++++++++++++++++
+ .../third_party/pybind11_abseil/workspace.bzl |  2 +-
+ 2 files changed, 41 insertions(+), 1 deletion(-)
+ create mode 100644 third_party/xla/third_party/pybind11_abseil/make-ImportStatusModule-visible.patch
+
+diff --git a/third_party/xla/third_party/pybind11_abseil/make-ImportStatusModule-visible.patch b/third_party/xla/third_party/pybind11_abseil/make-ImportStatusModule-visible.patch
+new file mode 100644
+index 00000000000..719a4e7c4e7
+--- /dev/null
++++ b/third_party/xla/third_party/pybind11_abseil/make-ImportStatusModule-visible.patch
+@@ -0,0 +1,40 @@
++From 10bc536412646cee7ef58b5866578b94b67a86c4 Mon Sep 17 00:00:00 2001
++From: Eric Lundby <Eric.Lundby@gmail.com>
++Date: Fri, 5 Dec 2025 10:34:41 -0700
++Subject: [PATCH 1/1] make-ImportStatusModule-visible
++
++---
++ pybind11_abseil/import_status_module.h | 11 ++++++++++-
++ 1 file changed, 10 insertions(+), 1 deletion(-)
++
++diff --git a/pybind11_abseil/import_status_module.h b/pybind11_abseil/import_status_module.h
++index 812b817..a65e9ca 100644
++--- a/pybind11_abseil/import_status_module.h
+++++ b/pybind11_abseil/import_status_module.h
++@@ -12,13 +12,22 @@
++   pybind11_abseil.status
++ #endif
++ 
+++// Macro to ensure symbols are exported even when built with -fvisibility=hidden
+++#if defined(_WIN32) || defined(__CYGWIN__)
+++  #define PYBIND11_ABSEIL_EXPORT __declspec(dllexport)
+++#elif defined(__GNUC__) || defined(__clang__)
+++  #define PYBIND11_ABSEIL_EXPORT __attribute__((visibility("default")))
+++#else
+++  #define PYBIND11_ABSEIL_EXPORT
+++#endif
+++
++ namespace pybind11 {
++ namespace google {
++ 
++ // Imports the bindings for the status types. This is meant to only be called
++ // from a PYBIND11_MODULE definition. The Python GIL must be held when calling
++ // this function (enforced).
++-module_ ImportStatusModule(bool bypass_regular_import = true);
+++PYBIND11_ABSEIL_EXPORT module_ ImportStatusModule(bool bypass_regular_import = true);
++ 
++ }  // namespace google
++ }  // namespace pybind11
++-- 
++2.50.1 (Apple Git-155)
++
+diff --git a/third_party/xla/third_party/pybind11_abseil/workspace.bzl b/third_party/xla/third_party/pybind11_abseil/workspace.bzl
+index c12f0ba77f8..838fc1e9570 100644
+--- a/third_party/xla/third_party/pybind11_abseil/workspace.bzl
++++ b/third_party/xla/third_party/pybind11_abseil/workspace.bzl
+@@ -16,5 +16,5 @@ def repo():
+         strip_prefix = "pybind11_abseil-{commit}".format(commit = PA_COMMIT),
+         urls = tf_mirror_urls("https://github.com/pybind/pybind11_abseil/archive/{commit}.tar.gz".format(commit = PA_COMMIT)),
+         build_file = "//third_party/pybind11_abseil:BUILD.bazel",
+-        patch_file = ["//third_party/pybind11_abseil:remove_license.patch"],
++        patch_file = ["//third_party/pybind11_abseil:remove_license.patch", "//third_party/pybind11_abseil:make-ImportStatusModule-visible.patch"],
+     )
+-- 
+2.50.1 (Apple Git-155)
+

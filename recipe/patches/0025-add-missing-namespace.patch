@@ -1,0 +1,48 @@
+From e8473066ffad5888e8c5a803fd473ab7ea337d5b Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 31 Oct 2025 10:42:02 -0600
+Subject: [PATCH] add-missing-namespace
+
+---
+ tensorflow/dtensor/mlir/shape_utils.cc    | 2 +-
+ tensorflow/dtensor/mlir/spmd_expansion.cc | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tensorflow/dtensor/mlir/shape_utils.cc b/tensorflow/dtensor/mlir/shape_utils.cc
+index 27f9fc5f7f0..18678b92b69 100644
+--- a/tensorflow/dtensor/mlir/shape_utils.cc
++++ b/tensorflow/dtensor/mlir/shape_utils.cc
+@@ -73,7 +73,7 @@ StatusOr<llvm::ArrayRef<int64_t>> ExtractGlobalInputShape(
+         return errors::Internal("global_shape does not have static rank");
+       return *global_shape;
+     }
+-    return ExtractGlobalOutputShape(cast<mlir::OpResult>(input_value.get()));
++    return ExtractGlobalOutputShape(llvm::cast<mlir::OpResult>(input_value.get()));
+   }
+ 
+   // If we reach this point, we're working with a function argument.
+diff --git a/tensorflow/dtensor/mlir/spmd_expansion.cc b/tensorflow/dtensor/mlir/spmd_expansion.cc
+index 434bf869a4e..62f49651f1e 100644
+--- a/tensorflow/dtensor/mlir/spmd_expansion.cc
++++ b/tensorflow/dtensor/mlir/spmd_expansion.cc
+@@ -188,7 +188,7 @@ bool GetResourceArgIndexIfUsedInAssignmentOp(
+           GetForwardedDTensorLayoutInput(assign_variable_op.getResource());
+       if (llvm::isa<mlir::BlockArgument>(resource)) {
+         *resource_argument_index_for_assign_variable =
+-            cast<mlir::BlockArgument>(resource).getArgNumber();
++            llvm::cast<mlir::BlockArgument>(resource).getArgNumber();
+         return true;
+       }
+     }
+@@ -221,7 +221,7 @@ mlir::LogicalResult UpdateFunctionArgsUsingLayout(mlir::func::FuncOp function) {
+ 
+     // If argument is a resource type update the subtype shape information
+     // to reflect local shape of resources.
+-    if (isa<mlir::TF::ResourceType>(arg_type)) {
++    if (llvm::isa<mlir::TF::ResourceType>(arg_type)) {
+       if (mlir::failed(UpdateResourceArgumentType(argument_index, function)))
+         return mlir::failure();
+       continue;
+-- 
+2.50.1 (Apple Git-155)
+

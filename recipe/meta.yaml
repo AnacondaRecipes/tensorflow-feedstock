@@ -1,4 +1,4 @@
-{% set version = "2.19.1" %}
+{% set version = "2.20.0" %}
 {% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
@@ -16,57 +16,55 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: fcfb3e88ab3eebdbab98a03c869a4d2616d52ea166c8d8021de1ef921b47be8d
+    sha256: a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0
     patches:
       - patches/0001-loosen-requirements.patch
-      # - patches/0002-Add-additional-absl_synchronization-linkage-to-gRPC.patch
-      - patches/0003-Fix-missing-abseil-linkages.patch
-      # - patches/0004-Fix-protobuf_python-for-systemlibs.patch  # [not win]
-      - patches/0005-Add-absl_log-systemlib.patch  # [not win]
-      # - patches/0006-Omit-linking-to-layout_proto_cc-if-protobuf-linkage-.patch  # [not win]
-      - patches/0007-Fix-further-abseil-linkage.patch  # [not win]
-      - patches/0008-Add-constraint-to-pybind11-systemlib.patch  # [not win]
-      - patches/0009-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
-      - patches/0010-Use-correct-hermetic-python.patch  # [not win]
-      # - patches/0011-Add-well_known_types_py_pb2-to-protobuf-systemlib.patch  # [not win]
-      # - patches/0012-Add-protobuf-toolchain.patch  # [not win]
-      # - patches/0013-fix-genproto.patch  # [not win]
-      - patches/0014-Remove-some-usage-of-absl-str_format-in-CUDA.patch  # [(cuda_compiler_version or "").startswith("11")]
-      - patches/0015-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0016-Link-to-absl_log_flags-instead-of-absl_flags.patch  # [not win]
-      - patches/0017-Update-ABSL-Log-Definition-for-libabsl_vlog_config_i.patch  # [not win]
-      - patches/0018-add-absl_string_view-target.patch  # [not win]
-      - patches/0019-add-absl_nullability-target.patch  # [not win]
-      - patches/0020-add-absl_prefetch-target.patch  # [not win]
-      - patches/0021-add-absl_die_if_null-target.patch  # [not win]
-      - patches/0022-add-absl_crc32c-targets.patch  # [not win]
-      - patches/0023-add-absl-tracing-target.patch  # [not win]
-      - patches/0024-add-kernel_timeout_internal-target.patch  # [not win]
-      - patches/0025-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
-      - patches/0026-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
-      - patches/0027-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
-      # Note that this patch generates two patches in the third_party directory. Which then get applied via bazel.
-      # - patches/0028-Protobuf-5-compatability.patch  # [not win]
-      - patches/0029-Avoid-linking-with-internal-nvrtc.patch  
-      - patches/0030-remove-dependencies-to-libcuda.patch   
-      - patches/0031-loosen-hermetic-python.patch  # [not win]
-      - patches/0032-win-fix-inline-perl.patch  # [win]
-      - patches/0033-fix-osx-wheel-name.patch  # [osx and arm64]
-      - patches/0034-fix-convolution-thunk-countdown-signature.patch
-      - patches/0035-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
-      - patches/0036-fix-win-binary-quirk.patch  # [win]
-      - patches/0037-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
+      - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
+      - patches/0003-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
+      - patches/0004-Use-correct-hermetic-python.patch  # [not win]
+      - patches/0005-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
+      - patches/0006-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
+      - patches/0007-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
+      - patches/0008-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      - patches/0009-Avoid-linking-with-internal-nvrtc.patch  
+      - patches/0010-remove-dependencies-to-libcuda.patch   
+      - patches/0011-loosen-hermetic-python.patch  # [not win]
+      - patches/0012-win-fix-inline-perl.patch  # [win]
+      - patches/0013-fix-osx-wheel-name.patch  # [osx and arm64]
+      - patches/0014-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
+      - patches/0015-fix-win-binary-quirk.patch  # [win]
+      - patches/0016-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
+      - patches/0017-system-python.patch  # [osx]
+      - patches/0018-fix-xla-namespace.patch
+      - patches/0019-link-giflib.patch
+      - patches/0020-is_signed-cannot-be-specialized.patch
+      # Abseil un-vendoring
+      - patches/0021-consolidated-abseil-unvendoring.patch  # [not win]
+      - patches/0022-fix-multiple-flag-defs.patch  # [not win]
+      # gRPC un-vendoring
+      - patches/0023-grpc-systemlib-repair.patch  # [not win]
+      # Linux specific patches
+      - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
+      - patches/0025-add-missing-namespace.patch            # [linux]
+      - patches/0026-link-snappy.patch                      # [linux]
+      # For pybind11_* targets, the default is "-fvisibility=hidden". 
+      # Make necessary symbols visible.
+      - patches/0027-make-proto_cast_util-visible.patch     # [linux]
+      - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
+
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
-  skip: true  # [py<39 or py>312]
+  skip: true  # [py<310 or py>313]
   skip: true  # [skip_cuda_pbp and (gpu_variant or "").startswith('cuda')]
+  # TODO re-enable windows once PBP can handle symlinks again. 
+  skip: true  # [win]
 
 requirements:
   build:
     - perl                                   # [linux]
-    - m2-perl                                # [win]
+    - msys2-perl                             # [win]
     - python                                 # [build_platform != target_platform]
     - cython                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -85,7 +83,7 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
-    - bazel 6.*
+    - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
@@ -95,8 +93,6 @@ requirements:
     # realpath is not available from the docker image for cuda <= 10.2
     # so we install coreutils here
     - coreutils  # [cuda_compiler_version != "None"]
-    - patch      # [unix]
-    - m2-patch   # [win]
     - rsync      # [unix]
     - sqlite     # [win]
   host:
@@ -127,8 +123,8 @@ requirements:
     - curl {{ libcurl }}        # [win]
     - unzip 6.0    # [not win]
     - zip   3.0    # [not win]
-    - m2-unzip     # [win]
-    - m2-zip       # [win]
+    - msys2-unzip     # [win]
+    - msys2-zip       # [win]
     - openjdk >=8
     - nsync 1.24
     # TF_SYSTEM_LIBS, see usage in
@@ -178,6 +174,8 @@ outputs:
         - tf_upgrade_v2 = tensorflow.tools.compatibility.tf_upgrade_v2_main:main
       missing_dso_whitelist:
         - "**/_pywrap_tensorflow_internal.*" # loaded by python wrapper pywrap_tensorflow.py
+        - "**/_pywrap_tensorflow_common.*"
+        - "**/pywrap_tflite_common.dll"  # [win]
         # some .sos look for other .sos in different site-packages directories. Root cause is probably
         # similar to with pytorch, that it loads libraries manually in the python code (TBC)
         - "**/libtensorflow_framework.so.2"
@@ -251,8 +249,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.19.0,<2.20.0
-        - keras >=3.5.0
+        - tensorboard >=2.20.0,<2.21.0
+        - keras >=3.10.0
       run:
         - python
         - packaging
@@ -273,8 +271,8 @@ outputs:
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
         # TF-API needs to move in sync
-        - tensorboard >=2.19.0,<2.20.0
-        - keras >=3.5.0
+        - tensorboard >=2.20.0,<2.21.0
+        - keras >=3.10.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851

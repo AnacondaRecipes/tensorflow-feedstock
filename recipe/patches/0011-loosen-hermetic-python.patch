@@ -1,0 +1,174 @@
+From 7117a31a1b8dda2e0313b276a5697a5ce09fcff2 Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Tue, 3 Sep 2024 09:01:50 -0400
+Subject: [PATCH] loosen hermetic python
+
+Tensorflow registers python dependencies using rules_python in order
+to be hermetic to system installed python packages.
+Even if packages are installed, packages are downloaded from pypi at 
+build time.
+On linux-aarch64, a number of requested packages are not available.
+This removes some declared dependencies allowing the build to proceed.
+
+---
+ tensorflow/BUILD                                               | 2 --
+ tensorflow/dtensor/python/tests/BUILD                          | 1 -
+ tensorflow/python/data/experimental/kernel_tests/service/BUILD | 1 -
+ tensorflow/python/debug/lib/BUILD                              | 1 -
+ tensorflow/python/distribute/experimental/rpc/BUILD            | 1 -
+ tensorflow/python/eager/BUILD                                  | 1 -
+ tensorflow/python/framework/BUILD                              | 1 -
+ tensorflow/python/keras/BUILD                                  | 1 -
+ tensorflow/python/keras/engine/BUILD                           | 1 -
+ tensorflow/python/keras/saving/BUILD                           | 1 -
+ tensorflow/python/profiler/BUILD                               | 1 -
+ tensorflow/python/profiler/integration_test/BUILD              | 1 -
+ tensorflow/python/summary/BUILD                                | 1 -
+ 13 files changed, 14 deletions(-)
+
+diff --git a/tensorflow/BUILD b/tensorflow/BUILD
+index b58696813e7..6e86e06902c 100644
+--- a/tensorflow/BUILD
++++ b/tensorflow/BUILD
+@@ -1719,8 +1719,6 @@ py_library(
+         "//tensorflow/lite/python/authoring",
+         "//tensorflow/python:no_contrib",
+         "//tensorflow/python/profiler:profiler_client",
+-        "@pypi_keras//:pkg",
+-        "@pypi_tensorboard//:pkg",
+     ],
+ )
+ # copybara:comment_end
+diff --git a/tensorflow/dtensor/python/tests/BUILD b/tensorflow/dtensor/python/tests/BUILD
+index 7c7c78a77eb..43a8540c2ef 100644
+--- a/tensorflow/dtensor/python/tests/BUILD
++++ b/tensorflow/dtensor/python/tests/BUILD
+@@ -486,7 +486,6 @@ pytype_strict_library(
+         ":test_util",
+         "//tensorflow/python/platform:client_testlib",
+         "@absl_py//absl/flags",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/data/experimental/kernel_tests/service/BUILD b/tensorflow/python/data/experimental/kernel_tests/service/BUILD
+index 9e6801687d3..44eb59e1ed1 100644
+--- a/tensorflow/python/data/experimental/kernel_tests/service/BUILD
++++ b/tensorflow/python/data/experimental/kernel_tests/service/BUILD
+@@ -160,7 +160,6 @@ tf_py_strict_test(
+         "//tensorflow/python/ops:array_ops",
+         "//tensorflow/python/platform:client_testlib",
+         "@absl_py//absl/testing:parameterized",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/debug/lib/BUILD b/tensorflow/python/debug/lib/BUILD
+index 8dc30eeee3d..1840eb20d71 100644
+--- a/tensorflow/python/debug/lib/BUILD
++++ b/tensorflow/python/debug/lib/BUILD
+@@ -557,7 +557,6 @@ py_strict_library(
+         "//tensorflow/python/lib/io:file_io",
+         "//tensorflow/python/ops:variables",
+         "//tensorflow/python/util:compat",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/distribute/experimental/rpc/BUILD b/tensorflow/python/distribute/experimental/rpc/BUILD
+index 76482d4386c..82c9ebfdd5f 100644
+--- a/tensorflow/python/distribute/experimental/rpc/BUILD
++++ b/tensorflow/python/distribute/experimental/rpc/BUILD
+@@ -59,6 +59,5 @@ tf_py_strict_test(
+         "//tensorflow/python/ops:variables",
+         "//tensorflow/python/platform:client_testlib",
+         "//tensorflow/python/util:nest",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+diff --git a/tensorflow/python/eager/BUILD b/tensorflow/python/eager/BUILD
+index e1f87ef9032..8e274ac8aa9 100644
+--- a/tensorflow/python/eager/BUILD
++++ b/tensorflow/python/eager/BUILD
+@@ -1133,7 +1133,6 @@ cuda_py_strict_test(
+         "//tensorflow/python/training:server_lib",
+         "//tensorflow/python/util:compat",
+         "@absl_py//absl/testing:parameterized",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/framework/BUILD b/tensorflow/python/framework/BUILD
+index 7c710576b00..a5382df1d34 100644
+--- a/tensorflow/python/framework/BUILD
++++ b/tensorflow/python/framework/BUILD
+@@ -2212,7 +2212,6 @@ pytype_strict_library(
+         "//tensorflow/python/util/protobuf",
+         "//third_party/py/numpy",
+         "@absl_py//absl/testing:parameterized",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/keras/BUILD b/tensorflow/python/keras/BUILD
+index 7786247dc7b..0ed78bde16e 100755
+--- a/tensorflow/python/keras/BUILD
++++ b/tensorflow/python/keras/BUILD
+@@ -44,7 +44,6 @@ py_library(
+         "//tensorflow/python/saved_model",
+         "//tensorflow/python/training",
+         "//tensorflow/python/util:nest",
+-        "@pypi_h5py//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/keras/engine/BUILD b/tensorflow/python/keras/engine/BUILD
+index a160ef5a230..6670268732a 100644
+--- a/tensorflow/python/keras/engine/BUILD
++++ b/tensorflow/python/keras/engine/BUILD
+@@ -96,7 +96,6 @@ py_library(
+         "//tensorflow/python/util:tf_decorator_py",
+         "//tensorflow/python/util:tf_export",
+         "//tensorflow/tools/docs:doc_controls",
+-        "@pypi_h5py//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/keras/saving/BUILD b/tensorflow/python/keras/saving/BUILD
+index a8e9553946d..91cf1e68a8a 100644
+--- a/tensorflow/python/keras/saving/BUILD
++++ b/tensorflow/python/keras/saving/BUILD
+@@ -55,6 +55,5 @@ py_library(
+         "//tensorflow/python/platform:tf_logging",
+         "//tensorflow/python/saved_model",
+         "//tensorflow/python/training:saver",
+-        "@pypi_h5py//:pkg",
+     ],
+ )
+diff --git a/tensorflow/python/profiler/BUILD b/tensorflow/python/profiler/BUILD
+index 600e154d577..1bda863e394 100644
+--- a/tensorflow/python/profiler/BUILD
++++ b/tensorflow/python/profiler/BUILD
+@@ -40,7 +40,6 @@ cuda_py_strict_test(
+         "//tensorflow/python/eager:test",
+         "//tensorflow/python/framework:errors",
+         "//tensorflow/python/framework:test_lib",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+diff --git a/tensorflow/python/profiler/integration_test/BUILD b/tensorflow/python/profiler/integration_test/BUILD
+index a4e82101944..be5da7c4efd 100644
+--- a/tensorflow/python/profiler/integration_test/BUILD
++++ b/tensorflow/python/profiler/integration_test/BUILD
+@@ -33,6 +33,5 @@ cuda_py_strict_test(
+         "//tensorflow/python/platform:tf_logging",
+         "//tensorflow/python/profiler:profiler_client",
+         "//tensorflow/python/profiler:profiler_v2",
+-        "@pypi_portpicker//:pkg",
+     ],
+ )
+ 
+-- 
+2.40.1
+

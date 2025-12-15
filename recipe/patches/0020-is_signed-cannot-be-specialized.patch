@@ -1,0 +1,47 @@
+From b9c263c3df2bb4926618a9c63e1dac45dc39c48a Mon Sep 17 00:00:00 2001
+From: "A. Unique TensorFlower" <gardener@tensorflow.org>
+Date: Tue, 5 Aug 2025 07:26:36 -0700
+Subject: [PATCH] Remove specializations of `std::is_signed`.
+
+This is disallowed starting in LLVM 20.
+
+PiperOrigin-RevId: 791204694
+
+https://github.com/tensorflow/tensorflow/pull/98321
+
+external/local_xla/xla/tsl/framework/type_traits.h:111:8: error: 'is_signed' cannot be specialized: Users are not allowed to specialize this standard library entity [-Winvalid-specialization]
+---
+ third_party/xla/xla/tsl/framework/type_traits.h | 17 -----------------
+ 1 file changed, 17 deletions(-)
+
+diff --git a/third_party/xla/xla/tsl/framework/type_traits.h b/third_party/xla/xla/tsl/framework/type_traits.h
+index 60fc28c81ce..b5d1c64dfb9 100644
+--- a/third_party/xla/xla/tsl/framework/type_traits.h
++++ b/third_party/xla/xla/tsl/framework/type_traits.h
+@@ -99,23 +99,6 @@ class numeric_limits<tsl::quint16> : public numeric_limits<tsl::uint16> {};
+ template <>
+ class numeric_limits<tsl::qint32> : public numeric_limits<tsl::int32> {};
+ 
+-// Templates from <type_traits> are not permitted to be specialized by users,
+-// and doing so may be ignored or cause an error. As a transitional measure,
+-// since tensorflow was specializing is_signed for some time, poison uses by
+-// specializing with an empty struct (missing the `value` member).
+-//
+-// TODO(b/392034954): Delete these invalid specializations.
+-template <>
+-struct is_signed<tsl::qint8> {};
+-template <>
+-struct is_signed<tsl::quint8> {};
+-template <>
+-struct is_signed<tsl::qint16> {};
+-template <>
+-struct is_signed<tsl::quint16> {};
+-template <>
+-struct is_signed<tsl::qint32> {};
+-
+ }  // namespace std
+ 
+ #endif  // XLA_TSL_FRAMEWORK_TYPE_TRAITS_H_
+-- 
+2.45.2
+

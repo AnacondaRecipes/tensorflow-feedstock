@@ -16,6 +16,7 @@ set BAZEL_VS="%VSINSTALLDIR%"
 set BAZEL_VC="%VSINSTALLDIR%/VC"
 set CLANG_COMPILER_PATH=%BUILD_PREFIX:\=/%/Library/bin/clang.exe
 set BAZEL_LLVM=%BUILD_PREFIX:\=/%/Library/
+set ML_WHEEL_TYPE=release
 
 :: do not build with MKL support
 set TF_NEED_MKL=0
@@ -48,7 +49,7 @@ set BUILD_OPTS=^
  --copt=-D__PRFCHWINTRIN_H
 
 set TF_ENABLE_XLA=1
-set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow_cpu
+set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow
 
 @REM TF_SYSTEM_LIBS don't work on Windows: https://github.com/openxla/xla/blob/edf18ce242f234fbd20d1fbf4e9c96dfa5be2847/.bazelrc#L383
 @REM set TF_SYSTEM_LIBS=
@@ -79,6 +80,7 @@ bazel shutdown
 
 call configure
 
+ECHO build --repo_env=ML_WHEEL_TYPE=release>>.bazelrc
 ECHO build --features=layering_check>>.bazelrc
 ECHO build --features=parse_headers>>.bazelrc
 ECHO build --enable_runfiles>>.bazelrc

@@ -1,0 +1,28 @@
+From f700400dd0facdec8cfc92fac3350c17ab1584f0 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Thu, 6 Nov 2025 12:21:34 -0700
+Subject: [PATCH 1/2] link-snappy
+
+undefined reference to `snappy::GetUncompressedLength(char const*, unsigned long, unsigned long*)'
+undefined reference to `snappy::RawUncompress(char const*, unsigned long, char*)'
+undefined reference to `snappy::MaxCompressedLength(unsigned long)'
+undefined reference to `snappy::RawCompress(char const*, unsigned lo
+---
+ tensorflow/core/lib/db/BUILD | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tensorflow/core/lib/db/BUILD b/tensorflow/core/lib/db/BUILD
+index c79a73c1a5e..12ff607f476 100644
+--- a/tensorflow/core/lib/db/BUILD
++++ b/tensorflow/core/lib/db/BUILD
+@@ -34,6 +34,7 @@ cc_library(
+     srcs = ["snapfn.cc"],
+     copts = tf_copts() + ["-DSQLITE_OMIT_LOAD_EXTENSION"],
+     linkstatic = 1,
++    linkopts = ["-lsnappy"],
+     deps = [
+         "@org_sqlite",
+         "@snappy",
+-- 
+2.50.1 (Apple Git-155)
+

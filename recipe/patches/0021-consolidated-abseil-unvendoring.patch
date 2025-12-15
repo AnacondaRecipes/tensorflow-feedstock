@@ -1,0 +1,803 @@
+From 815570be15ff13416649a4063ed60ab099cd8c9c Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 5 Dec 2025 15:30:10 -0700
+Subject: [PATCH 1/1] 0021
+
+---
+ tensorflow/BUILD                              | 26 +++++-
+ tensorflow/core/kernels/batching_util/BUILD   |  3 +
+ tensorflow/python/BUILD                       |  8 ++
+ tensorflow/tools/graph_transforms/BUILD       |  1 +
+ third_party/systemlibs/grpc.BUILD             |  4 +
+ .../third_party/absl/system.absl.base.BUILD   | 27 ++++++
+ .../third_party/absl/system.absl.crc.BUILD    | 33 ++++++++
+ .../absl/system.absl.debugging.BUILD          |  6 +-
+ .../third_party/absl/system.absl.flags.BUILD  | 33 +++++---
+ .../absl/system.absl.functional.BUILD         |  5 ++
+ .../third_party/absl/system.absl.hash.BUILD   |  2 +-
+ .../third_party/absl/system.absl.log.BUILD    | 73 +++++++++++++++++
+ .../third_party/absl/system.absl.random.BUILD |  7 +-
+ .../third_party/absl/system.absl.status.BUILD |  9 +-
+ .../absl/system.absl.strings.BUILD            | 16 +++-
+ .../absl/system.absl.synchronization.BUILD    | 17 +++-
+ .../third_party/absl/system.absl.types.BUILD  |  8 +-
+ .../absl/system.absl.utility.BUILD            |  7 +-
+ .../xla/third_party/absl/workspace.bzl        | 31 +++++++
+ .../xla/third_party/protobuf/protobuf.patch   | 82 +++++++++++++++++++
+ 20 files changed, 367 insertions(+), 31 deletions(-)
+ create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
+ create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
+
+diff --git a/tensorflow/BUILD b/tensorflow/BUILD
+index b58696813e7..ce878664539 100644
+--- a/tensorflow/BUILD
++++ b/tensorflow/BUILD
+@@ -1203,6 +1203,10 @@ tf_cc_shared_library(
+             }),
+     soversion = VERSION,
+     static_deps = PACKAGE_STATIC_DEPS,
++    deps = [
++        "@com_google_absl//absl/flags:flag",
++        "@com_google_absl//absl/flags:reflection",
++    ],
+     visibility = ["//visibility:public"],
+ )
+ 
+@@ -1292,8 +1296,14 @@ tf_cc_shared_library(
+         "//tensorflow:tf_version_script.lds",
+     ],
+     dynamic_deps = select({
+-        "//tensorflow:macos": ["//tensorflow:libtensorflow_framework.%s.dylib" % VERSION],
+-        "//conditions:default": ["//tensorflow:libtensorflow_framework.so.%s" % VERSION],
++        "//tensorflow:macos": [
++            "//tensorflow:libtensorflow_framework.%s.dylib" % VERSION,
++            "@com_google_absl//absl/flags:flag",
++        ],
++        "//conditions:default": [
++            "//tensorflow:libtensorflow_framework.so.%s" % VERSION,
++            "@com_google_absl//absl/flags:flag",
++        ],
+     }),
+     exports_filter = [
+         "//:__subpackages__",
+@@ -1304,11 +1314,23 @@ tf_cc_shared_library(
+     linkopts = select({
+         "//tensorflow:macos": [
+             "-Wl,-exported_symbols_list,$(location //tensorflow:tf_exported_symbols.lds)",
++            "-labsl_flags_internal",
++            "-labsl_flags_commandlineflag",
++            "-labsl_flags_commandlineflag_internal",
++            "-labsl_flags_config",
++            "-labsl_flags_marshalling",
++            "-labsl_flags_reflection",
+         ],
+         "//tensorflow:windows": [],
+         "//conditions:default": [
+             "-Wl,-z,defs",
+             "-Wl,--version-script,$(location //tensorflow:tf_version_script.lds)",
++            "-labsl_flags_internal",
++            "-labsl_flags_commandlineflag",
++            "-labsl_flags_commandlineflag_internal",
++            "-labsl_flags_config",
++            "-labsl_flags_marshalling",
++            "-labsl_flags_reflection",
+         ],
+     }),
+     per_os_targets = True,
+diff --git a/tensorflow/core/kernels/batching_util/BUILD b/tensorflow/core/kernels/batching_util/BUILD
+index 9a66862779e..a893a935951 100644
+--- a/tensorflow/core/kernels/batching_util/BUILD
++++ b/tensorflow/core/kernels/batching_util/BUILD
+@@ -19,6 +19,7 @@ cc_library(
+         "//tensorflow/core:portable_gif_internal",
+         "//tensorflow/core/lib/core:notification",
+         "@com_google_absl//absl/functional:any_invocable",
++        "@com_google_absl//absl/base:tracing_internal",
+     ],
+ )
+ 
+@@ -138,6 +139,7 @@ cc_library(
+         "@com_google_absl//absl/status:statusor",
+         "@com_google_absl//absl/strings:str_format",
+         "@com_google_absl//absl/strings:string_view",
++        "@com_google_absl//absl/base:tracing_internal",
+         "@local_tsl//tsl/profiler/lib:traceme",
+         "@local_xla//xla/tsl/platform:criticality",
+     ],
+@@ -465,6 +467,7 @@ cc_library(
+         "@com_google_absl//absl/synchronization",
+         "@com_google_absl//absl/time",
+         "@com_google_absl//absl/types:optional",
++        "@com_google_absl//absl/base:tracing_internal",
+         "@local_xla//xla/tsl/platform:criticality",
+     ],
+ )
+diff --git a/tensorflow/python/BUILD b/tensorflow/python/BUILD
+index 8fea090dc44..0a2a3761408 100644
+--- a/tensorflow/python/BUILD
++++ b/tensorflow/python/BUILD
+@@ -850,6 +850,14 @@ pywrap_tensorflow_macro(
+         "@com_google_absl//absl/container:inlined_vector",
+         "@com_google_absl//absl/types:optional",
+         "@com_google_absl//absl/types:span",
++        "@com_google_absl//absl/flags:parse",
++        "@com_google_absl//absl/random/internal:pool_urbg",
++        "@com_google_absl//absl/flags:flag",
++        "@com_google_absl//absl/flags:reflection",
++        "@com_google_absl//absl/flags:config",
++        "@com_google_absl//absl/flags:marshalling",
++        "@com_google_absl//absl/flags:program_name",
++        "@com_google_absl//absl/flags:private_handle_accessor",
+         "@local_xla//third_party/python_runtime:headers",
+         "@local_xla//xla/backends/profiler/cpu:python_tracer",
+         "@local_xla//xla/stream_executor:stream_executor_impl",
+diff --git a/tensorflow/tools/graph_transforms/BUILD b/tensorflow/tools/graph_transforms/BUILD
+index 57627d37b0d..8e1d2402cb4 100644
+--- a/tensorflow/tools/graph_transforms/BUILD
++++ b/tensorflow/tools/graph_transforms/BUILD
+@@ -69,6 +69,7 @@ cc_library(
+     deps = [
+         "//tensorflow/core:lib",
+         "//tensorflow/core:protos_all_cc",
++        "@com_google_absl//absl/status",
+     ],
+ )
+ 
+diff --git a/third_party/systemlibs/grpc.BUILD b/third_party/systemlibs/grpc.BUILD
+index 0e4e862ce4c..c53b4727aa9 100644
+--- a/third_party/systemlibs/grpc.BUILD
++++ b/third_party/systemlibs/grpc.BUILD
+@@ -10,6 +10,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -19,6 +20,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc++",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -33,6 +35,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc_unsecure",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+@@ -42,6 +45,7 @@ cc_library(
+     linkopts = [
+         "-lgrpc++_unsecure",
+         "-lgpr",
++        "-labsl_synchronization",
+     ],
+     visibility = ["//visibility:public"],
+ )
+diff --git a/third_party/xla/third_party/absl/system.absl.base.BUILD b/third_party/xla/third_party/absl/system.absl.base.BUILD
+index d6bf8748dee..f88bef771d0 100644
+--- a/third_party/xla/third_party/absl/system.absl.base.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.base.BUILD
+@@ -13,6 +13,7 @@ package(default_visibility = ["//visibility:public"])
+     "errno_saver",
+     "fast_type_id",
+     "pretty_function",
++    "no_destructor",
+ ]]
+ 
+ cc_library(
+@@ -64,6 +65,23 @@ cc_library(
+     ],
+ )
+ 
++cc_library(
++    name = "nullability",
++    defines = [
++        "absl_nonnull=",
++        "absl_nullable=", 
++        "absl_nullability_unknown=",
++    ],
++)
++
++cc_library(
++    name = "prefetch",
++    deps = [
++        ":config",
++        ":core_headers",
++    ],
++)
++
+ cc_library(
+     name = "throw_delegate",
+     linkopts = ["-labsl_throw_delegate"],
+@@ -105,3 +123,12 @@ cc_library(
+         "//absl:__subpackages__",
+     ],
+ )
++
++cc_library(
++    name = "tracing_internal",
++    linkopts = ["-labsl_base", "-labsl_tracing_internal"],
++    deps = [
++        ":config",
++        ":core_headers",
++    ],
++)
+diff --git a/third_party/xla/third_party/absl/system.absl.crc.BUILD b/third_party/xla/third_party/absl/system.absl.crc.BUILD
+new file mode 100644
+index 00000000000..aa7b1e8b58d
+--- /dev/null
++++ b/third_party/xla/third_party/absl/system.absl.crc.BUILD
+@@ -0,0 +1,33 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++package(default_visibility = ["//visibility:public"])
++
++licenses(["notice"])  # Apache
++
++cc_library(
++    name = "crc",
++    linkopts = ["-labsl_crc32c"],
++    deps = [
++        "//absl/base:raw_logging_internal",
++    ],
++)
++
++cc_library(
++    name = "crc32c",
++    linkopts = ["-labsl_crc32c"],
++)
++
++cc_library(
++    name = "crc_cord_state",
++    linkopts = ["-labsl_crc_cord_state"],
++)
++
++cc_library(
++    name = "crc_internal",
++    linkopts = ["-labsl_crc32c", "-labsl_crc_internal", "-labsl_crc_cpu_detect"],
++)
++
++cc_library(
++    name = "non_temporal_memcpy",
++    linkopts = ["-labsl_base"],
++)
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/absl/system.absl.debugging.BUILD b/third_party/xla/third_party/absl/system.absl.debugging.BUILD
+index 931ffdc9e92..3fc97a4569c 100644
+--- a/third_party/xla/third_party/absl/system.absl.debugging.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.debugging.BUILD
+@@ -4,7 +4,7 @@ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
+     name = "stacktrace",
+-    linkopts = ["-labsl_stacktrace"],
++    linkopts = ["-labsl_stacktrace", "-labsl_examine_stack"],
+     deps = [
+         ":debugging_internal",
+     ],
+@@ -41,7 +41,7 @@ cc_library(
+ 
+ cc_library(
+     name = "debugging_internal",
+-    linkopts = ["-labsl_debugging_internal"],
++    linkopts = ["-labsl_stacktrace"],
+     deps = [
+         "//absl/base:dynamic_annotations",
+         "//absl/base:errno_saver",
+@@ -51,7 +51,7 @@ cc_library(
+ 
+ cc_library(
+     name = "demangle_internal",
+-    linkopts = ["-labsl_demangle_internal"],
++    linkopts = ["-labsl_symbolize"],
+     deps = [
+         "//absl/base",
+     ],
+diff --git a/third_party/xla/third_party/absl/system.absl.flags.BUILD b/third_party/xla/third_party/absl/system.absl.flags.BUILD
+index aff653c7e5b..2378fe2b2cb 100644
+--- a/third_party/xla/third_party/absl/system.absl.flags.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.flags.BUILD
+@@ -5,9 +5,7 @@ package(default_visibility = ["//visibility:public"])
+ cc_library(
+     name = "program_name",
+     linkopts = ["-labsl_flags_program_name"],
+-    visibility = [
+-        "//absl/flags:__pkg__",
+-    ],
++    visibility = ["//visibility:public"],
+     deps = [
+         "//absl/strings",
+         "//absl/synchronization",
+@@ -36,7 +34,7 @@ cc_library(
+ 
+ cc_library(
+     name = "commandlineflag_internal",
+-    linkopts = ["-labsl_flags_commandlineflag_internal"],
++    linkopts = ["-labsl_flags_commandlineflag", "-labsl_flags_commandlineflag_internal"],
+ )
+ 
+ cc_library(
+@@ -52,9 +50,7 @@ cc_library(
+ cc_library(
+     name = "private_handle_accessor",
+     linkopts = ["-labsl_flags_private_handle_accessor"],
+-    visibility = [
+-        "//absl/flags:__pkg__",
+-    ],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":commandlineflag",
+         ":commandlineflag_internal",
+@@ -79,7 +75,7 @@ cc_library(
+ cc_library(
+     name = "flag_internal",
+     linkopts = ["-labsl_flags_internal"],
+-    visibility = ["//absl/base:__subpackages__"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":commandlineflag",
+         ":commandlineflag_internal",
+@@ -97,11 +93,24 @@ cc_library(
+ 
+ cc_library(
+     name = "flag",
+-    linkopts = ["-labsl_flags"],
++    linkopts = [
++        "-labsl_flags_internal",
++        "-labsl_flags_commandlineflag",
++        "-labsl_flags_config",
++        "-labsl_flags_marshalling",
++        "-labsl_flags_reflection",
++        "-labsl_flags_private_handle_accessor",
++        "-labsl_flags_program_name",
++    ],
+     deps = [
+         ":config",
+         ":flag_internal",
+         ":reflection",
++        ":commandlineflag",
++        ":commandlineflag_internal",
++        ":marshalling",
++        ":private_handle_accessor",
++        ":program_name",
+         "//absl/base",
+         "//absl/strings",
+     ],
+@@ -109,10 +118,8 @@ cc_library(
+ 
+ cc_library(
+     name = "usage_internal",
+-    linkopts = ["-labsl_flags_usage_internal"],
+-    visibility = [
+-        "//absl/flags:__pkg__",
+-    ],
++    linkopts = ["-labsl_flags_usage"],
++    visibility = ["//visibility:public"],
+     deps = [
+         ":commandlineflag",
+         ":config",
+diff --git a/third_party/xla/third_party/absl/system.absl.functional.BUILD b/third_party/xla/third_party/absl/system.absl.functional.BUILD
+index 9439bd0ba22..a12a44668d1 100644
+--- a/third_party/xla/third_party/absl/system.absl.functional.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.functional.BUILD
+@@ -13,3 +13,8 @@ cc_library(
+ cc_library(
+     name = "function_ref",
+ )
++
++cc_library(
++    name = "overload",
++    linkopts = ["-labsl_base"],
++)
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/absl/system.absl.hash.BUILD b/third_party/xla/third_party/absl/system.absl.hash.BUILD
+index 3367340cb25..316693e1793 100644
+--- a/third_party/xla/third_party/absl/system.absl.hash.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.hash.BUILD
+@@ -28,7 +28,7 @@ cc_library(
+ 
+ cc_library(
+     name = "low_level_hash",
+-    linkopts = ["-labsl_low_level_hash"],
++    linkopts = ["-labsl_hash"],
+     visibility = ["//visibility:private"],
+     deps = [
+         "//absl/base:endian",
+diff --git a/third_party/xla/third_party/absl/system.absl.log.BUILD b/third_party/xla/third_party/absl/system.absl.log.BUILD
+new file mode 100644
+index 00000000000..ae2a0045cc6
+--- /dev/null
++++ b/third_party/xla/third_party/absl/system.absl.log.BUILD
+@@ -0,0 +1,73 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++package(default_visibility = ["//visibility:public"])
++
++licenses(["notice"])  # Apache
++
++cc_library(
++    name = "absl_log",
++    linkopts = [
++        "-labsl_vlog_config_internal",
++        "-labsl_log_internal_conditions",
++        "-labsl_log_internal_check_op",
++        "-labsl_log_internal_message",
++        "-labsl_log_internal_nullguard",
++        "-labsl_log_internal_format",
++        "-labsl_log_internal_globals",
++    ],
++)
++
++cc_library(
++    name = "absl_check",
++    linkopts = [
++        "-labsl_vlog_config_internal",
++        "-labsl_log_internal_check_op",
++        "-labsl_log_internal_message",
++        "-labsl_log_internal_nullguard",
++    ],
++)
++
++alias(
++    name = "log",
++    actual = ":absl_log",
++)
++
++alias(
++    name = "check",
++    actual = ":absl_check",
++)
++
++cc_library(
++    name = "die_if_null",
++    linkopts = ["-labsl_die_if_null"],
++)
++
++cc_library(
++    name = "log_entry",
++    linkopts = ["-labsl_log_internal_message"],
++)
++
++cc_library(
++    name = "log_sink",
++    linkopts = ["-labsl_log_sink"],
++)
++
++cc_library(
++    name = "log_sink_registry",
++    linkopts = ["-labsl_log_sink"],
++)
++
++cc_library(
++    name = "globals",
++    linkopts = ["-labsl_log_globals"],
++)
++
++cc_library(
++    name = "log_flags",
++    linkopts = ["-labsl_log_flags"],
++)
++
++cc_library(
++    name = "initialize",
++    linkopts = ["-labsl_log_initialize"],
++)
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/absl/system.absl.random.BUILD b/third_party/xla/third_party/absl/system.absl.random.BUILD
+index ac17ce6343b..f3a4bcfce41 100644
+--- a/third_party/xla/third_party/absl/system.absl.random.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.random.BUILD
+@@ -29,14 +29,13 @@ cc_library(
+ cc_library(
+     name = "seed_sequences",
+     linkopts = [
+-        "-labsl_random_internal_platform",
+-        "-labsl_random_internal_pool_urbg",
++        "-labsl_random_seed_sequences",
++        "-labsl_random_internal_entropy_pool",
+         "-labsl_random_internal_randen",
+         "-labsl_random_internal_randen_hwaes",
+         "-labsl_random_internal_randen_hwaes_impl",
+         "-labsl_random_internal_randen_slow",
+-        "-labsl_random_internal_seed_material",
+-        "-labsl_random_seed_sequences",
++        "-labsl_random_internal_platform",
+         "-pthread",
+     ],
+     deps = [
+diff --git a/third_party/xla/third_party/absl/system.absl.status.BUILD b/third_party/xla/third_party/absl/system.absl.status.BUILD
+index e50e9790c82..3eeb0d8dbeb 100644
+--- a/third_party/xla/third_party/absl/system.absl.status.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.status.BUILD
+@@ -4,7 +4,14 @@ package(default_visibility = ["//visibility:public"])
+ 
+ cc_library(
+     name = "status",
+-    linkopts = ["-labsl_status"],
++    linkopts = [
++        "-labsl_status",
++        "-labsl_cord",
++        "-labsl_cord_internal",
++        "-labsl_cordz_functions",
++        "-labsl_cordz_info",
++        "-labsl_cordz_handle",
++    ],
+     deps = [
+         "//absl/base:atomic_hook",
+         "//absl/base:raw_logging_internal",
+diff --git a/third_party/xla/third_party/absl/system.absl.strings.BUILD b/third_party/xla/third_party/absl/system.absl.strings.BUILD
+index fa9a7a84f67..4fb9a61299a 100644
+--- a/third_party/xla/third_party/absl/system.absl.strings.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.strings.BUILD
+@@ -17,16 +17,28 @@ cc_library(
+ 
+ cc_library(
+     name = "internal",
+-    linkopts = ["-labsl_strings_internal"],
++    linkopts = ["-labsl_strings", "-labsl_strings_internal"],
+     deps = [
+         "//absl/base:endian",
+         "//absl/base:raw_logging_internal",
+     ],
+ )
+ 
++cc_library(
++    name = "string_view",
++    linkopts = ["-labsl_string_view"],
++    deps = [
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:nullability",
++        "//absl/base:throw_delegate",
++    ],
++)
++
+ cc_library(
+     name = "cord",
+-    linkopts = ["-labsl_cord"],
++    linkopts = ["-labsl_cord", "-labsl_cordz_functions", "-labsl_cordz_info", "-labsl_cordz_handle", "-labsl_cord_internal"],
+     deps = [
+         ":str_format",
+         "//absl/container:compressed_tuple",
+diff --git a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
+index c0fa37aacd7..875b5bca23c 100644
+--- a/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.synchronization.BUILD
+@@ -5,7 +5,7 @@ package(default_visibility = ["//visibility:public"])
+ # Internal data structure for efficiently detecting mutex dependency cycles
+ cc_library(
+     name = "graphcycles_internal",
+-    linkopts = ["-labsl_graphcycles_internal"],
++    linkopts = ["-labsl_synchronization"],
+     visibility = [
+         "//absl:__subpackages__",
+     ],
+@@ -16,6 +16,20 @@ cc_library(
+     ],
+ )
+ 
++cc_library(
++    name = "kernel_timeout_internal",
++    linkopts = ["-labsl_kernel_timeout_internal"],
++    visibility = [
++    ],
++    deps = [
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:raw_logging_internal",
++        "//absl/time",
++    ],
++)
++
+ cc_library(
+     name = "synchronization",
+     linkopts = [
+@@ -24,6 +38,7 @@ cc_library(
+     ],
+     deps = [
+         ":graphcycles_internal",
++        ":kernel_timeout_internal",
+         "//absl/base",
+         "//absl/base:atomic_hook",
+         "//absl/base:dynamic_annotations",
+diff --git a/third_party/xla/third_party/absl/system.absl.types.BUILD b/third_party/xla/third_party/absl/system.absl.types.BUILD
+index db94fc99185..ebfea47ba5e 100644
+--- a/third_party/xla/third_party/absl/system.absl.types.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.types.BUILD
+@@ -11,7 +11,9 @@ cc_library(
+ 
+ cc_library(
+     name = "bad_any_cast",
+-    linkopts = ["-labsl_bad_any_cast_impl"],
++    deps = [
++        "@com_google_absl//absl/base:base",
++    ],
+ )
+ 
+ cc_library(
+@@ -30,16 +32,16 @@ cc_library(
+ 
+ cc_library(
+     name = "bad_optional_access",
+-    linkopts = ["-labsl_bad_optional_access"],
+     deps = [
++        "@com_google_absl//absl/base:base",
+         "//absl/base:raw_logging_internal",
+     ],
+ )
+ 
+ cc_library(
+     name = "bad_variant_access",
+-    linkopts = ["-labsl_bad_variant_access"],
+     deps = [
++        "@com_google_absl//absl/base:base",
+         "//absl/base:raw_logging_internal",
+     ],
+ )
+diff --git a/third_party/xla/third_party/absl/system.absl.utility.BUILD b/third_party/xla/third_party/absl/system.absl.utility.BUILD
+index e15049e261c..e9c25fe3714 100644
+--- a/third_party/xla/third_party/absl/system.absl.utility.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.utility.BUILD
+@@ -1,6 +1,11 @@
+ load("@rules_cc//cc:defs.bzl", "cc_library")
+ 
++package(default_visibility = ["//visibility:public"])
++
+ cc_library(
+     name = "utility",
+-    visibility = ["//visibility:public"],
+ )
++
++cc_library(
++    name = "if_constexpr",
++)
+\ No newline at end of file
+diff --git a/third_party/xla/third_party/absl/workspace.bzl b/third_party/xla/third_party/absl/workspace.bzl
+index 9144c5bd5b6..e24a2b08b9c 100644
+--- a/third_party/xla/third_party/absl/workspace.bzl
++++ b/third_party/xla/third_party/absl/workspace.bzl
+@@ -11,9 +11,40 @@ def repo():
+     ABSL_SHA256 = "c397cd9cca3f71724a8ddf183e7fa71c19196eaafd1dc2a3c86d3a572613a807"
+     # LINT.ThenChange(//tensorflow/lite/tools/cmake/modules/abseil-cpp.cmake)
+ 
++    SYS_DIRS = [
++        "algorithm",
++        "base",
++        "crc",
++        "log",
++        "cleanup",
++        "container",
++        "debugging",
++        "flags",
++        "functional",
++        "hash",
++        "memory",
++        "meta",
++        "numeric",
++        "random",
++        "status",
++        "strings",
++        "synchronization",
++        "time",
++        "types",
++        "utility",
++    ]
++
++    SYS_LINKS = {
++        "//third_party/absl:system.absl.{name}.BUILD".format(name = n): "absl/{name}/BUILD.bazel".format(name = n)
++        for n in SYS_DIRS
++    }
++
+     tf_http_archive(
+         name = "com_google_absl",
+         sha256 = ABSL_SHA256,
++        build_file = "//third_party/absl:com_google_absl.BUILD",
++        system_build_file = "//third_party/absl:system.BUILD",
++        system_link_files = SYS_LINKS,
+         strip_prefix = "abseil-cpp-{commit}".format(commit = ABSL_COMMIT),
+         urls = tf_mirror_urls("https://github.com/abseil/abseil-cpp/archive/{commit}.tar.gz".format(commit = ABSL_COMMIT)),
+         patch_file = [
+diff --git a/third_party/xla/third_party/protobuf/protobuf.patch b/third_party/xla/third_party/protobuf/protobuf.patch
+index 0c8e1cbfc6d..8d7c838edb9 100644
+--- a/third_party/xla/third_party/protobuf/protobuf.patch
++++ b/third_party/xla/third_party/protobuf/protobuf.patch
+@@ -70,6 +70,88 @@ diff --git a/python/dist/system_python.bzl b/python/dist/system_python.bzl
+          _populate_package(repository_ctx, path, python3, python_version)
+      else:
+          # buildifier: disable=print
++diff --git a/src/google/protobuf/arena.h b/src/google/protobuf/arena.h
++index a3cd7b7..9e2393b 100644
++--- a/src/google/protobuf/arena.h
+++++ b/src/google/protobuf/arena.h
++@@ -30,7 +30,6 @@ using type_info = ::type_info;
++ #include "absl/base/attributes.h"
++ #include "absl/base/macros.h"
++ #include "absl/log/absl_check.h"
++-#include "absl/utility/internal/if_constexpr.h"
++ #include "google/protobuf/arena_align.h"
++ #include "google/protobuf/arena_allocation_policy.h"
++ #include "google/protobuf/port.h"
++@@ -189,41 +188,34 @@ class PROTOBUF_EXPORT PROTOBUF_ALIGNAS(8) Arena final {
++   // otherwise, returns a heap-allocated object.
++   template <typename T, typename... Args>
++   PROTOBUF_NDEBUG_INLINE static T* Create(Arena* arena, Args&&... args) {
++-    return absl::utility_internal::IfConstexprElse<
++-        is_arena_constructable<T>::value>(
++-        // Arena-constructable
++-        [arena](auto&&... args) {
++-          using Type = std::remove_const_t<T>;
++-#ifdef __cpp_if_constexpr
++-          // DefaultConstruct/CopyConstruct are optimized for messages, which
++-          // are both arena constructible and destructor skippable and they
++-          // assume much. Don't use these functions unless the invariants
++-          // hold.
++-          if constexpr (is_destructor_skippable<T>::value) {
++-            constexpr auto construct_type = GetConstructType<T, Args&&...>();
++-            // We delegate to DefaultConstruct/CopyConstruct where appropriate
++-            // because protobuf generated classes have external templates for
++-            // these functions for code size reasons. When `if constexpr` is not
++-            // available always use the fallback.
++-            if constexpr (construct_type == ConstructType::kDefault) {
++-              return static_cast<Type*>(DefaultConstruct<Type>(arena));
++-            } else if constexpr (construct_type == ConstructType::kCopy) {
++-              return static_cast<Type*>(CopyConstruct<Type>(arena, &args...));
++-            }
++-          }
++-#endif
++-          return CreateArenaCompatible<Type>(arena,
++-                                             std::forward<Args>(args)...);
++-        },
++-        // Non arena-constructable
++-        [arena](auto&&... args) {
++-          if (PROTOBUF_PREDICT_FALSE(arena == nullptr)) {
++-            return new T(std::forward<Args>(args)...);
++-          }
++-          return new (arena->AllocateInternal<T>())
++-              T(std::forward<Args>(args)...);
++-        },
++-        std::forward<Args>(args)...);
+++    using Type = std::remove_const_t<T>;
+++    if constexpr (is_arena_constructable<T>::value) {
+++      // Arena-constructable
+++      // DefaultConstruct/CopyConstruct are optimized for messages, which
+++      // are both arena constructible and destructor skippable and they
+++      // assume much. Don't use these functions unless the invariants
+++      // hold.
+++      if constexpr (is_destructor_skippable<T>::value) {
+++        constexpr auto construct_type = GetConstructType<T, Args&&...>();
+++        // We delegate to DefaultConstruct/CopyConstruct where appropriate
+++        // because protobuf generated classes have external templates for
+++        // these functions for code size reasons.
+++        if constexpr (construct_type == ConstructType::kDefault) {
+++          return static_cast<Type*>(DefaultConstruct<Type>(arena));
+++        } else if constexpr (construct_type == ConstructType::kCopy) {
+++          return static_cast<Type*>(CopyConstruct<Type>(arena, &args...));
+++        }
+++      }
+++      return CreateArenaCompatible<Type>(arena,
+++                                         std::forward<Args>(args)...);
+++    } else {
+++      // Non arena-constructable
+++      if (PROTOBUF_PREDICT_FALSE(arena == nullptr)) {
+++        return new T(std::forward<Args>(args)...);
+++      }
+++      return new (arena->AllocateInternal<T>())
+++          T(std::forward<Args>(args)...);
+++    }
++   }
++ 
++   // API to delete any objects not on an arena.  This can be used to safely
+ diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
+ --- a/src/google/protobuf/arena.cc	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
+ +++ b/src/google/protobuf/arena.cc	(date 1748042877047)
+-- 
+2.50.1 (Apple Git-155)
+
