@@ -43,6 +43,7 @@ export TF_SYSTEM_LIBS="
   boringssl
   com_github_googlecloudplatform_google_cloud_cpp
   com_google_absl
+  com_google_protobuf
   com_github_grpc_grpc
   curl
   cython
@@ -212,6 +213,7 @@ build --crosstool_top=//bazel_toolchain:toolchain
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
+build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
 build --repo_env=ML_WHEEL_TYPE=release
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
@@ -301,6 +303,11 @@ echo 'build:linux --linkopt=-labsl_leak_check' >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_leak_check' >> .bazelrc
 echo 'build:linux --linkopt=-labsl_int128' >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_int128' >> .bazelrc
+
+if [[ "${target_platform}" == osx-* ]]; then
+    echo "build --copt=-DPROTOBUF_USE_DLLS" >> .bazelrc
+    echo "build --host_copt=-DPROTOBUF_USE_DLLS" >> .bazelrc
+fi
 
 # build using bazel
 bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}

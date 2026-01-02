@@ -1,5 +1,5 @@
 {% set version = "2.20.0" %}
-{% set build = 0 %}
+{% set build = 1 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -51,7 +51,9 @@ source:
       # Make necessary symbols visible.
       - patches/0027-make-proto_cast_util-visible.patch     # [linux]
       - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
-
+      # Protobuf un-vendoring
+      - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
+      - patches/0030-Disable-profiler.patch  # [not win]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
@@ -87,6 +89,7 @@ requirements:
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
+    - libprotobuf {{ libprotobuf }}  # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
     - sed        # [unix]
@@ -144,6 +147,8 @@ requirements:
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
+    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
@@ -224,6 +229,8 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
+        - libprotobuf {{ libprotobuf }}  # [not win]
+        - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
         - openssl {{ openssl }}
         - pybind11 2
         # snappy needs rtti enabled, this version of ours has it
@@ -242,7 +249,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        # - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+        - protobuf >=5.28.0
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
@@ -263,7 +270,7 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0,<2.2.0
         - opt_einsum >=2.3.2
-        # - protobuf >=3.20.3,<6,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5
+        - protobuf >=5.28.0
         - python-flatbuffers 24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
