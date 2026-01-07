@@ -1,4 +1,4 @@
 task_timeout: 54000
 
 channels:
-  - https://staging.continuum.io/pbp/fs/libprotobuf-feedstock/pr34/9e5cd0b
+  - https://staging.continuum.io/pbp/fs/libprotobuf-feedstock/pr35/fe27eee

@@ -304,11 +304,6 @@ echo 'build:linux --host_linkopt=-labsl_leak_check' >> .bazelrc
 echo 'build:linux --linkopt=-labsl_int128' >> .bazelrc
 echo 'build:linux --host_linkopt=-labsl_int128' >> .bazelrc
 
-if [[ "${target_platform}" == osx-* ]]; then
-    echo "build --copt=-DPROTOBUF_USE_DLLS" >> .bazelrc
-    echo "build --host_copt=-DPROTOBUF_USE_DLLS" >> .bazelrc
-fi
-
 # build using bazel
 bazel ${BAZEL_STARTUP_OPTS} build ${BAZEL_BUILD_OPTS} ${BUILD_TARGET}
 
