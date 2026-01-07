@@ -54,6 +54,7 @@ source:
       # Protobuf un-vendoring
       - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0030-Disable-profiler.patch  # [not win]
+      - patches/0031-disable-PROTOBUF_USE_DLLS.patch  # [not win]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
@@ -318,7 +319,9 @@ outputs:
         - test_tensorflow.py
       requires:
         - pip
+        - pyarrow
       imports:
+        - pyarrow
         - tensorflow
       commands:
         # override any potential keras config file on the builder
