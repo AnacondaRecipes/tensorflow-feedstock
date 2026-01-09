@@ -3,6 +3,9 @@ From: Eric Lundby <Eric.Lundby@gmail.com>
 Date: Fri, 9 Jan 2026 14:18:16 -0700
 Subject: [PATCH 1/1] xla_hlo_passes_rename
 
+Renamed from passes.h.inc to hlo_passes.h.inc to avoid collision with
+TFLite's transforms/passes.h.inc in systemlib/CUDA builds
+
 ---
  third_party/xla/xla/mlir_hlo/BUILD                        | 8 +++++---
  .../xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc      | 2 +-
