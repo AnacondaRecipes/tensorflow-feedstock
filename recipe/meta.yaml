@@ -89,6 +89,7 @@ requirements:
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain >=0.2.0b1  # [not win]
     - libgrpc {{ libgrpc }}
+    # Protobuf is still vendored on windows. 
     - libprotobuf {{ libprotobuf }}  # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
@@ -249,7 +250,9 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
-        - protobuf >=5.28.0
+        # Upstream specifies protobuf >=5.28.0, 
+        # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
+        - protobuf {{ libprotobuf }}
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
@@ -270,7 +273,9 @@ outputs:
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0,<2.2.0
         - opt_einsum >=2.3.2
-        - protobuf >=5.28.0
+        # Upstream specifies protobuf >=5.28.0, 
+        # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
+        - protobuf {{ libprotobuf }}
         - python-flatbuffers 24.3.25
         - requests >=2.21.0,<3
         - six >=1.12
@@ -318,6 +323,11 @@ outputs:
         - test_tensorflow.py
       requires:
         - pip
+        # Import-order regression test:
+        # importing `pyarrow` before `tensorflow` previously caused a hard segfault
+        # due to shared dependency initialization issues. This test ensures that
+        # TensorFlow remains safe to import after pyarrow and guards against
+        # future ABI / symbol regressions.
         - pyarrow
       imports:
         - pyarrow
