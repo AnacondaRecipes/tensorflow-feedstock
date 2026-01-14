@@ -6,6 +6,10 @@ set -ex
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 elif [[ "${target_platform}" == "linux-aarch64" ]]; then
+  # To prevent memory exhaustion on CI
+  export CPU_COUNT=8
+elif [[ ${cuda_compiler_version} != "None" ]]; then
+  # To prevent disk exhaustion on CI
   export CPU_COUNT=8
 fi
 

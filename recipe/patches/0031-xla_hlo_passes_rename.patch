@@ -1,0 +1,218 @@
+From e1d1db4abae2730fc21490a2ffe83049612bbc93 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 9 Jan 2026 14:18:16 -0700
+Subject: [PATCH 1/1] xla_hlo_passes_rename
+
+Renamed from passes.h.inc to hlo_passes.h.inc to avoid collision with
+TFLite's transforms/passes.h.inc in systemlib/CUDA builds
+
+---
+ third_party/xla/xla/mlir_hlo/BUILD                        | 8 +++++---
+ .../xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc      | 2 +-
+ third_party/xla/xla/mlir_hlo/transforms/bufferize_pass.cc | 2 +-
+ .../transforms/collapse_parallel_loops_to_1d_pass.cc      | 2 +-
+ .../xla/xla/mlir_hlo/transforms/detensorize_scf_ops.cc    | 2 +-
+ .../xla/xla/mlir_hlo/transforms/generic_host_to_llvm.cc   | 2 +-
+ .../xla/xla/mlir_hlo/transforms/lower_index_cast_pass.cc  | 2 +-
+ .../xla/xla/mlir_hlo/transforms/naive_copy_removal.cc     | 2 +-
+ third_party/xla/xla/mlir_hlo/transforms/passes.h          | 6 +++---
+ .../xla/xla/mlir_hlo/transforms/tile_loops_pass.cc        | 2 +-
+ .../xla/xla/mlir_hlo/transforms/unbufferize_pass.cc       | 2 +-
+ third_party/xla/xla/mlir_hlo/transforms/vectorize_copy.cc | 2 +-
+ 12 files changed, 18 insertions(+), 16 deletions(-)
+
+diff --git a/third_party/xla/xla/mlir_hlo/BUILD b/third_party/xla/xla/mlir_hlo/BUILD
+index 4c21044efb7..c794d303ae0 100644
+--- a/third_party/xla/xla/mlir_hlo/BUILD
++++ b/third_party/xla/xla/mlir_hlo/BUILD
+@@ -627,7 +627,7 @@ cc_library(
+         # These are not exposed as headers in the dependent targets, and
+         # shouldn't be. Ideally, this entire target should be removed.
+         "deallocation/transforms/passes.h.inc",
+-        "transforms/passes.h.inc",
++        "transforms/hlo_passes.h.inc",
+     ],
+     hdrs = [
+         "deallocation/transforms/passes.h",
+@@ -669,7 +669,7 @@ cc_library(
+     ],
+     hdrs = [
+         "transforms/passes.h",
+-        "transforms/passes.h.inc",
++        "transforms/hlo_passes.h.inc",
+         "transforms/rewriters.h",
+     ],
+     strip_include_prefix = ".",
+@@ -807,7 +807,9 @@ gentbl_cc_library(
+     name = "transforms_passes_inc_gen",
+     compatible_with = get_compatible_with_portable(),
+     strip_include_prefix = ".",
+-    tbl_outs = {"transforms/passes.h.inc": [
++    # Renamed from passes.h.inc to hlo_passes.h.inc to avoid collision with
++    # TFLite's transforms/passes.h.inc in systemlib/CUDA builds
++    tbl_outs = {"transforms/hlo_passes.h.inc": [
+         "-gen-pass-decls",
+         "-name=LMHLOTransforms",
+     ]},
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc
+index 6022dc31e64..a6633c59a7a 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/alloc_to_arg_pass.cc
+@@ -28,7 +28,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_ALLOCTOARGPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ using ::mlir::func::FuncOp;
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/bufferize_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/bufferize_pass.cc
+index 95e27efd95c..3f5db9b026e 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/bufferize_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/bufferize_pass.cc
+@@ -78,7 +78,7 @@ namespace mlir {
+ #define GEN_PASS_DEF_COMPUTEOPANDFUNCBUFFERIZEPASS
+ #define GEN_PASS_DEF_FINALBUFFERIZEPASS
+ #define GEN_PASS_DEF_ONESHOTBUFFERIZE
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ namespace {
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/collapse_parallel_loops_to_1d_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/collapse_parallel_loops_to_1d_pass.cc
+index a73a9c3bc77..0ef38dc4e1a 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/collapse_parallel_loops_to_1d_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/collapse_parallel_loops_to_1d_pass.cc
+@@ -31,7 +31,7 @@ using ::mlir::scf::ParallelOp;
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_COLLAPSEPARALLELLOOPSTO1DPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ namespace {
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/detensorize_scf_ops.cc b/third_party/xla/xla/mlir_hlo/transforms/detensorize_scf_ops.cc
+index 12d8b381464..c3e12c0bd80 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/detensorize_scf_ops.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/detensorize_scf_ops.cc
+@@ -29,7 +29,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_DETENSORIZESCFOPSPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ namespace {
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/generic_host_to_llvm.cc b/third_party/xla/xla/mlir_hlo/transforms/generic_host_to_llvm.cc
+index 3609530ec1a..abe30822f26 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/generic_host_to_llvm.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/generic_host_to_llvm.cc
+@@ -54,7 +54,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_GENERICHOSTTOLLVMPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ namespace {
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/lower_index_cast_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/lower_index_cast_pass.cc
+index b773792e67b..a1bf833176c 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/lower_index_cast_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/lower_index_cast_pass.cc
+@@ -31,7 +31,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_LOWERINDEXCASTPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ namespace {
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/naive_copy_removal.cc b/third_party/xla/xla/mlir_hlo/transforms/naive_copy_removal.cc
+index a13f0396a85..cea53b0a60b 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/naive_copy_removal.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/naive_copy_removal.cc
+@@ -27,7 +27,7 @@ namespace mlir {
+ namespace {
+ 
+ #define GEN_PASS_DEF_NAIVECOPYREMOVALPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ /// Remove memref::CopyOp whose target (can be either a memref::SubViewOp or
+ /// memref::AllocOp) has no other users.
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/passes.h b/third_party/xla/xla/mlir_hlo/transforms/passes.h
+index b8da3442ec7..ded59912151 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/passes.h
++++ b/third_party/xla/xla/mlir_hlo/transforms/passes.h
+@@ -46,7 +46,7 @@ using BufferizePatternsCallback = std::function<void(
+ #define GEN_PASS_DECL_TILELOOPSPASS
+ #define GEN_PASS_DECL_GENERICHOSTTOLLVMPASS
+ #define GEN_PASS_DECL_VECTORIZECOPYPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ // Pass to lower index cast on tensors to tensor dialect.
+ // Note: dependency from XLA:CPU:NEXT.
+@@ -88,13 +88,13 @@ namespace hlo {
+ std::unique_ptr<OperationPass<ModuleOp>> createOneShotBufferizePass();
+ 
+ std::unique_ptr<OperationPass<ModuleOp>> createGenericHostToLLVMPass(
+-    const GenericHostToLLVMPassOptions& options = {});
++    const ::mlir::GenericHostToLLVMPassOptions& options = {});
+ 
+ std::unique_ptr<OperationPass<func::FuncOp>> createUnbufferizePass();
+ std::unique_ptr<OperationPass<func::FuncOp>> createAllocToArgPass();
+ 
+ #define GEN_PASS_REGISTRATION
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ }  // namespace hlo
+ }  // namespace mlir
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/tile_loops_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/tile_loops_pass.cc
+index d6efd72d243..f59d813648a 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/tile_loops_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/tile_loops_pass.cc
+@@ -39,7 +39,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_TILELOOPSPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ using ::mlir::scf::ParallelOp;
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/unbufferize_pass.cc b/third_party/xla/xla/mlir_hlo/transforms/unbufferize_pass.cc
+index ae2896218ad..39bceca4554 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/unbufferize_pass.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/unbufferize_pass.cc
+@@ -35,7 +35,7 @@ limitations under the License.
+ namespace mlir {
+ 
+ #define GEN_PASS_DEF_UNBUFFERIZEPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ using ::mlir::func::FuncOp;
+ 
+diff --git a/third_party/xla/xla/mlir_hlo/transforms/vectorize_copy.cc b/third_party/xla/xla/mlir_hlo/transforms/vectorize_copy.cc
+index 5650e83be0c..c39ba97b667 100644
+--- a/third_party/xla/xla/mlir_hlo/transforms/vectorize_copy.cc
++++ b/third_party/xla/xla/mlir_hlo/transforms/vectorize_copy.cc
+@@ -28,7 +28,7 @@ namespace mlir {
+ namespace {
+ 
+ #define GEN_PASS_DEF_VECTORIZECOPYPASS
+-#include "transforms/passes.h.inc"
++#include "transforms/hlo_passes.h.inc"
+ 
+ /// Transforms a big non-contiguous `memref.copy` into a loop over smaller
+ /// copies that are either contiguous or can be vectorized.
+-- 
+2.50.1 (Apple Git-155)
+

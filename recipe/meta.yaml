@@ -54,6 +54,7 @@ source:
       # Protobuf un-vendoring
       - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0030-Disable-profiler.patch  # [not win]
+      - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
