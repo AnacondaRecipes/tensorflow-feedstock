@@ -1,17 +1,71 @@
-From 181bb5966a93aa9a61fd76dc7373519a7c4ff4cd Mon Sep 17 00:00:00 2001
-From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Tue, 28 Oct 2025 09:48:22 -0600
-Subject: [PATCH 2/2] 23
+From c4c9aca08ca8a3fd89600c4b05812cbeee82bc6a Mon Sep 17 00:00:00 2001
+From: Patryk Kups <pkups@anaconda.com>
+Date: Wed, 28 Jan 2026 10:17:34 +0100
+Subject: [PATCH] patch
 
-ERROR: Flag 'leave_barriers_on_recoverable_agent_restart' was defined more than once but with differing types. Defined in files 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc' and 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc'.
 ---
+ tensorflow/core/common_runtime/eager/BUILD    |  2 +-
+ tensorflow/core/distributed_runtime/BUILD     |  2 +-
+ .../integration_test/BUILD                    |  4 +-
  tensorflow/core/distributed_runtime/rpc/BUILD |  2 +-
+ third_party/xla/xla/pjrt/distributed/BUILD    |  2 +-
+ third_party/xla/xla/pjrt/gpu/BUILD            |  2 +-
  third_party/xla/xla/service/BUILD             |  2 +-
  .../distributed_runtime/coordination/BUILD    | 42 ++++++++++++++++++-
- 3 files changed, 43 insertions(+), 3 deletions(-)
+ .../tsl/distributed_runtime/preemption/BUILD  |  2 +-
+ .../rpc/coordination/BUILD                    |  2 +-
+ 10 files changed, 51 insertions(+), 11 deletions(-)
 
+diff --git a/tensorflow/core/common_runtime/eager/BUILD b/tensorflow/core/common_runtime/eager/BUILD
+index 46d6d0ab..693ae36b 100644
+--- a/tensorflow/core/common_runtime/eager/BUILD
++++ b/tensorflow/core/common_runtime/eager/BUILD
+@@ -252,7 +252,7 @@ tf_cuda_library(
+             "@com_google_absl//absl/time",
+             "@local_tsl//tsl/platform:mutex",
+             "@local_xla//xla/pjrt/gpu:se_gpu_pjrt_client",
+-            "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service",
++            "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+             "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+             "@local_xla//xla/tsl/distributed_runtime/preemption:preemption_notifier",
+             "@local_xla//xla/tsl/platform:statusor",
+diff --git a/tensorflow/core/distributed_runtime/BUILD b/tensorflow/core/distributed_runtime/BUILD
+index 6c6910aa..ff79c99a 100644
+--- a/tensorflow/core/distributed_runtime/BUILD
++++ b/tensorflow/core/distributed_runtime/BUILD
+@@ -174,7 +174,7 @@ cc_library(
+         "//tensorflow/core/activity_watcher",
+         "//tensorflow/core/protobuf:worker_proto_cc",
+         "@com_google_absl//absl/log",
+-        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+         "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_rpc_handler",
+         "@local_xla//xla/tsl/protobuf:coordination_service_proto_cc",
+diff --git a/tensorflow/core/distributed_runtime/integration_test/BUILD b/tensorflow/core/distributed_runtime/integration_test/BUILD
+index 50cf7670..3cffa9e5 100644
+--- a/tensorflow/core/distributed_runtime/integration_test/BUILD
++++ b/tensorflow/core/distributed_runtime/integration_test/BUILD
+@@ -108,7 +108,7 @@ tf_cuda_cc_test(
+         "//tensorflow/core/common_runtime/eager:context",
+         "//tensorflow/core/distributed_runtime:server_lib",
+         "//tensorflow/core/platform:env",
+-        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+     ],
+ )
+@@ -142,7 +142,7 @@ tf_cc_test(
+         "//tensorflow/core/distributed_runtime:server_lib",
+         "//tensorflow/core/platform:env",
+         "@com_google_absl//absl/synchronization",
+-        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "@local_xla//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+     ],
+ )
 diff --git a/tensorflow/core/distributed_runtime/rpc/BUILD b/tensorflow/core/distributed_runtime/rpc/BUILD
-index c0351bbe448..cb454aa38b5 100644
+index c0351bbe..cb454aa3 100644
 --- a/tensorflow/core/distributed_runtime/rpc/BUILD
 +++ b/tensorflow/core/distributed_runtime/rpc/BUILD
 @@ -335,7 +335,7 @@ cc_library(
@@ -23,8 +77,34 @@ index c0351bbe448..cb454aa38b5 100644
          "@local_xla//xla/tsl/distributed_runtime/rpc:async_service_interface",
      ] + tf_protos_profiler_service() + tf_grpc_dependencies() + tf_grpc_cc_dependencies(),
      alwayslink = 1,
+diff --git a/third_party/xla/xla/pjrt/distributed/BUILD b/third_party/xla/xla/pjrt/distributed/BUILD
+index f88dcb45..287abcbb 100644
+--- a/third_party/xla/xla/pjrt/distributed/BUILD
++++ b/third_party/xla/xla/pjrt/distributed/BUILD
+@@ -25,7 +25,7 @@ cc_library(
+         ":util",
+         "//xla:types",
+         "//xla:util",
+-        "//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "//xla/tsl/distributed_runtime/rpc:async_service_interface",
+         "//xla/tsl/distributed_runtime/rpc/coordination:grpc_coordination_service_impl",
+         "//xla/tsl/protobuf:coordination_config_proto_cc",
+diff --git a/third_party/xla/xla/pjrt/gpu/BUILD b/third_party/xla/xla/pjrt/gpu/BUILD
+index d590e52c..e5d47e96 100644
+--- a/third_party/xla/xla/pjrt/gpu/BUILD
++++ b/third_party/xla/xla/pjrt/gpu/BUILD
+@@ -120,7 +120,7 @@ cc_library(
+         "//xla/stream_executor/integrations:tf_allocator_adapter",
+         "//xla/tsl/concurrency:async_value",
+         "//xla/tsl/concurrency:ref_count",
+-        "//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+         "//xla/tsl/framework:allocator",
+         "//xla/tsl/framework:bfc_allocator",
 diff --git a/third_party/xla/xla/service/BUILD b/third_party/xla/xla/service/BUILD
-index ce859c54227..d735e675cad 100644
+index ce859c54..d735e675 100644
 --- a/third_party/xla/xla/service/BUILD
 +++ b/third_party/xla/xla/service/BUILD
 @@ -5279,7 +5279,7 @@ cc_library(
@@ -37,7 +117,7 @@ index ce859c54227..d735e675cad 100644
          "@com_google_absl//absl/types:span",
      ],
 diff --git a/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD b/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
-index 962640f01dd..73df692198f 100644
+index 962640f0..73df6921 100644
 --- a/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
 +++ b/third_party/xla/xla/tsl/distributed_runtime/coordination/BUILD
 @@ -50,7 +50,7 @@ cc_library(
@@ -96,6 +176,32 @@ index 962640f01dd..73df692198f 100644
  tf_proto_library(
      name = "test_device_proto",
      testonly = 1,
+diff --git a/third_party/xla/xla/tsl/distributed_runtime/preemption/BUILD b/third_party/xla/xla/tsl/distributed_runtime/preemption/BUILD
+index 6dd6bd76..bd2f5c47 100644
+--- a/third_party/xla/xla/tsl/distributed_runtime/preemption/BUILD
++++ b/third_party/xla/xla/tsl/distributed_runtime/preemption/BUILD
+@@ -78,7 +78,7 @@ tsl_cc_test(
+         ":preemption_notifier",
+         ":preemption_sync_manager",
+         "//xla/tsl/distributed_runtime/coordination:coordination_client",
+-        "//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+         "//xla/tsl/distributed_runtime/rpc:async_service_interface",
+         "//xla/tsl/distributed_runtime/rpc/coordination:grpc_coordination_client",
+diff --git a/third_party/xla/xla/tsl/distributed_runtime/rpc/coordination/BUILD b/third_party/xla/xla/tsl/distributed_runtime/rpc/coordination/BUILD
+index d1d1cbd1..c4155298 100644
+--- a/third_party/xla/xla/tsl/distributed_runtime/rpc/coordination/BUILD
++++ b/third_party/xla/xla/tsl/distributed_runtime/rpc/coordination/BUILD
+@@ -36,7 +36,7 @@ cc_library(
+     srcs = ["grpc_coordination_service_impl.cc"],
+     hdrs = ["grpc_coordination_service_impl.h"],
+     deps = [
+-        "//xla/tsl/distributed_runtime/coordination:coordination_service",
++        "//xla/tsl/distributed_runtime/coordination:coordination_service_hdrs_only",
+         "//xla/tsl/distributed_runtime/coordination:coordination_service_agent",
+         "//xla/tsl/distributed_runtime/coordination:coordination_service_rpc_handler",
+         "//xla/tsl/distributed_runtime/rpc:async_service_interface",
 -- 
-2.50.1 (Apple Git-155)
+2.39.5 (Apple Git-154)
 
