@@ -1,5 +1,5 @@
 {% set version = "2.20.0" %}
-{% set build = 1 %}
+{% set build = 2 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -62,7 +62,7 @@ build:
   skip: true  # [py<310 or py>313]
   skip: true  # [skip_cuda_pbp and (gpu_variant or "").startswith('cuda')]
   # TODO re-enable windows once PBP can handle symlinks again. 
-  skip: true  # [win]
+  # skip: true  # [win]
 
 requirements:
   build:
@@ -368,7 +368,7 @@ outputs:
         - tensorflow
 
 about:
-  home: https://www.tensorflow.org/
+  home: https://www.tensorflow.org
   license: Apache-2.0
   license_file: LICENSE
   license_family: Apache
