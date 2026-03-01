@@ -26,3 +26,5 @@ c_compiler_version:        # [win]
   - 20                     # [win]
 cxx_compiler_version:      # [win]
   - 20                     # [win]
+zlib:
+  - '1.3'

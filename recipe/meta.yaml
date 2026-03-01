@@ -1,5 +1,5 @@
-{% set version = "2.20.0" %}
-{% set build = 2 %}
+{% set version = "2.21.0.rc0" %}
+{% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -16,7 +16,7 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0
+    sha256: 91b2c2d12f0ebd78d84e5e1401269d0e6e36db5b74e19cc929e0f012b380af39
     patches:
       - patches/0001-loosen-requirements.patch
       - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
