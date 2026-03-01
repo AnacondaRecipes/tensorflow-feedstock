@@ -1,1 +1,3 @@
 task_timeout: 54000
+channels:
+  - https://staging.continuum.io/preprod-pbp/fs/bazel-feedstock/pr26/0922908
