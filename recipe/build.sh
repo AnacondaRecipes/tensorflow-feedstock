@@ -83,6 +83,7 @@ if [[ "${target_platform}" == osx-* ]]; then
   export LDFLAGS="${LDFLAGS} -lz -framework CoreFoundation -Xlinker -undefined -Xlinker dynamic_lookup"
   # Remove DEVELOPER_DIR from .bazelrc
   sed -i.bak '/DEVELOPER_DIR=\/Applications\/Xcode.app/d' .bazelrc
+  sed -i '/noenable_bzlmod/a common --enable_workspace' .bazelrc
 
   # Force Bazel to use the conda C++ toolchain instead of Bazel’s Apple toolchain.
   export BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
