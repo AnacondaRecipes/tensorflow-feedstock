@@ -39,8 +39,6 @@ export TF_PYTHON_VERSION=$PY_VER
 # TODO(check):
 # absl_py
 # com_github_googleapis_googleapis
-# Needs c++17, try on linux
-#  com_googlesource_code_re2
 export TF_SYSTEM_LIBS="
   astor_archive
   astunparse_archive
@@ -49,6 +47,7 @@ export TF_SYSTEM_LIBS="
   com_google_absl
   com_google_protobuf
   com_github_grpc_grpc
+  com_googlesource_code_re2
   curl
   cython
   dill_archive
