@@ -1,5 +1,5 @@
 {% set version = "2.20.0" %}
-{% set build = 1 %}
+{% set build = 2 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -55,14 +55,13 @@ source:
       - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0030-Disable-profiler.patch  # [not win]
       - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
+      - patches/0032-add-missing-string-include.patch
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<310 or py>313]
   skip: true  # [skip_cuda_pbp and (gpu_variant or "").startswith('cuda')]
-  # TODO re-enable windows once PBP can handle symlinks again. 
-  skip: true  # [win]
 
 requirements:
   build:
@@ -88,7 +87,7 @@ requirements:
     - {{ compiler('cuda') }}                 # [cuda_compiler_version != "None"]
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
-    - bazel-toolchain >=0.2.0b1  # [not win]
+    - bazel-toolchain 0.3.2  # [not win]
     - libgrpc {{ libgrpc }}
     # Protobuf is still vendored on windows. 
     - libprotobuf {{ libprotobuf }}  # [not win]
