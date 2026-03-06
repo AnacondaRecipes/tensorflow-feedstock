@@ -20,3 +20,16 @@ diff --git a/third_party/xla/xla/service/custom_call_status_internal.h b/third_p
  
  #include "absl/strings/string_view.h"
  #include "xla/service/custom_call_status.h"
+
+diff --git a/third_party/xla/xla/backends/profiler/gpu/nvtx_utils.h b/third_party/xla/xla/backends/profiler/gpu/nvtx_utils.h
+index 9f253659957..059e1a3e517 100644
+--- a/third_party/xla/xla/backends/profiler/gpu/nvtx_utils.h
++++ b/third_party/xla/xla/backends/profiler/gpu/nvtx_utils.h
+@@ -18,6 +18,7 @@ limitations under the License.
+ 
+ #include <stack>
+ 
++#include <string>
+ #include "absl/strings/string_view.h"
+ #include "tsl/platform/macros.h"
+ 
