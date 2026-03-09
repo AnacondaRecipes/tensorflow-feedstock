@@ -1,39 +1,9 @@
-From 815570be15ff13416649a4063ed60ab099cd8c9c Mon Sep 17 00:00:00 2001
-From: Eric Lundby <Eric.Lundby@gmail.com>
-Date: Fri, 5 Dec 2025 15:30:10 -0700
-Subject: [PATCH 1/1] 0021
-
----
- tensorflow/BUILD                              | 26 +++++-
- tensorflow/core/kernels/batching_util/BUILD   |  3 +
- tensorflow/python/BUILD                       |  8 ++
- tensorflow/tools/graph_transforms/BUILD       |  1 +
- third_party/systemlibs/grpc.BUILD             |  4 +
- .../third_party/absl/system.absl.base.BUILD   | 27 ++++++
- .../third_party/absl/system.absl.crc.BUILD    | 33 ++++++++
- .../absl/system.absl.debugging.BUILD          |  6 +-
- .../third_party/absl/system.absl.flags.BUILD  | 33 +++++---
- .../absl/system.absl.functional.BUILD         |  5 ++
- .../third_party/absl/system.absl.hash.BUILD   |  2 +-
- .../third_party/absl/system.absl.log.BUILD    | 73 +++++++++++++++++
- .../third_party/absl/system.absl.random.BUILD |  7 +-
- .../third_party/absl/system.absl.status.BUILD |  9 +-
- .../absl/system.absl.strings.BUILD            | 16 +++-
- .../absl/system.absl.synchronization.BUILD    | 17 +++-
- .../third_party/absl/system.absl.types.BUILD  |  8 +-
- .../absl/system.absl.utility.BUILD            |  7 +-
- .../xla/third_party/absl/workspace.bzl        | 31 +++++++
- .../xla/third_party/protobuf/protobuf.patch   | 82 +++++++++++++++++++
- 20 files changed, 367 insertions(+), 31 deletions(-)
- create mode 100644 third_party/xla/third_party/absl/system.absl.crc.BUILD
- create mode 100644 third_party/xla/third_party/absl/system.absl.log.BUILD
-
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
-index b58696813e7..ce878664539 100644
+index 68b0ef13c31..a48a3275ee1 100644
 --- a/tensorflow/BUILD
 +++ b/tensorflow/BUILD
-@@ -1203,6 +1203,10 @@ tf_cc_shared_library(
-             }),
+@@ -1210,6 +1210,10 @@ tf_cc_shared_library(
+     ] + tf_additional_binary_deps(),
      soversion = VERSION,
      static_deps = PACKAGE_STATIC_DEPS,
 +    deps = [
@@ -43,49 +13,8 @@ index b58696813e7..ce878664539 100644
      visibility = ["//visibility:public"],
  )
  
-@@ -1292,8 +1296,14 @@ tf_cc_shared_library(
-         "//tensorflow:tf_version_script.lds",
-     ],
-     dynamic_deps = select({
--        "//tensorflow:macos": ["//tensorflow:libtensorflow_framework.%s.dylib" % VERSION],
--        "//conditions:default": ["//tensorflow:libtensorflow_framework.so.%s" % VERSION],
-+        "//tensorflow:macos": [
-+            "//tensorflow:libtensorflow_framework.%s.dylib" % VERSION,
-+            "@com_google_absl//absl/flags:flag",
-+        ],
-+        "//conditions:default": [
-+            "//tensorflow:libtensorflow_framework.so.%s" % VERSION,
-+            "@com_google_absl//absl/flags:flag",
-+        ],
-     }),
-     exports_filter = [
-         "//:__subpackages__",
-@@ -1304,11 +1314,23 @@ tf_cc_shared_library(
-     linkopts = select({
-         "//tensorflow:macos": [
-             "-Wl,-exported_symbols_list,$(location //tensorflow:tf_exported_symbols.lds)",
-+            "-labsl_flags_internal",
-+            "-labsl_flags_commandlineflag",
-+            "-labsl_flags_commandlineflag_internal",
-+            "-labsl_flags_config",
-+            "-labsl_flags_marshalling",
-+            "-labsl_flags_reflection",
-         ],
-         "//tensorflow:windows": [],
-         "//conditions:default": [
-             "-Wl,-z,defs",
-             "-Wl,--version-script,$(location //tensorflow:tf_version_script.lds)",
-+            "-labsl_flags_internal",
-+            "-labsl_flags_commandlineflag",
-+            "-labsl_flags_commandlineflag_internal",
-+            "-labsl_flags_config",
-+            "-labsl_flags_marshalling",
-+            "-labsl_flags_reflection",
-         ],
-     }),
-     per_os_targets = True,
 diff --git a/tensorflow/core/kernels/batching_util/BUILD b/tensorflow/core/kernels/batching_util/BUILD
-index 9a66862779e..a893a935951 100644
+index 74ee89ea1e4..109c085c1c9 100644
 --- a/tensorflow/core/kernels/batching_util/BUILD
 +++ b/tensorflow/core/kernels/batching_util/BUILD
 @@ -19,6 +19,7 @@ cc_library(
@@ -93,30 +22,30 @@ index 9a66862779e..a893a935951 100644
          "//tensorflow/core/lib/core:notification",
          "@com_google_absl//absl/functional:any_invocable",
 +        "@com_google_absl//absl/base:tracing_internal",
+         "@com_google_absl//absl/synchronization",
      ],
  )
- 
-@@ -138,6 +139,7 @@ cc_library(
+@@ -141,6 +142,7 @@ cc_library(
          "@com_google_absl//absl/status:statusor",
          "@com_google_absl//absl/strings:str_format",
          "@com_google_absl//absl/strings:string_view",
 +        "@com_google_absl//absl/base:tracing_internal",
-         "@local_tsl//tsl/profiler/lib:traceme",
-         "@local_xla//xla/tsl/platform:criticality",
-     ],
-@@ -465,6 +467,7 @@ cc_library(
+         "@com_google_absl//absl/synchronization",
+         "@tsl//tsl/profiler/lib:traceme",
+         "@xla//xla/tsl/platform:criticality",
+@@ -478,6 +480,7 @@ cc_library(
          "@com_google_absl//absl/synchronization",
          "@com_google_absl//absl/time",
          "@com_google_absl//absl/types:optional",
 +        "@com_google_absl//absl/base:tracing_internal",
-         "@local_xla//xla/tsl/platform:criticality",
+         "@xla//xla/tsl/platform:criticality",
      ],
  )
 diff --git a/tensorflow/python/BUILD b/tensorflow/python/BUILD
-index 8fea090dc44..0a2a3761408 100644
+index dc34dad31dc..fe183e0cefc 100644
 --- a/tensorflow/python/BUILD
 +++ b/tensorflow/python/BUILD
-@@ -850,6 +850,14 @@ pywrap_tensorflow_macro(
+@@ -855,6 +855,14 @@ pywrap_tensorflow_macro(
          "@com_google_absl//absl/container:inlined_vector",
          "@com_google_absl//absl/types:optional",
          "@com_google_absl//absl/types:span",
@@ -128,14 +57,14 @@ index 8fea090dc44..0a2a3761408 100644
 +        "@com_google_absl//absl/flags:marshalling",
 +        "@com_google_absl//absl/flags:program_name",
 +        "@com_google_absl//absl/flags:private_handle_accessor",
-         "@local_xla//third_party/python_runtime:headers",
-         "@local_xla//xla/backends/profiler/cpu:python_tracer",
-         "@local_xla//xla/stream_executor:stream_executor_impl",
+         "@xla//third_party/python_runtime:headers",
+         "@xla//xla/backends/profiler/cpu:python_tracer",
+         "@xla//xla/stream_executor:stream_executor_impl",
 diff --git a/tensorflow/tools/graph_transforms/BUILD b/tensorflow/tools/graph_transforms/BUILD
-index 57627d37b0d..8e1d2402cb4 100644
+index 2f43920068a..800964e38ec 100644
 --- a/tensorflow/tools/graph_transforms/BUILD
 +++ b/tensorflow/tools/graph_transforms/BUILD
-@@ -69,6 +69,7 @@ cc_library(
+@@ -70,6 +70,7 @@ cc_library(
      deps = [
          "//tensorflow/core:lib",
          "//tensorflow/core:protos_all_cc",
@@ -228,46 +157,6 @@ index d6bf8748dee..f88bef771d0 100644
 +        ":core_headers",
 +    ],
 +)
-diff --git a/third_party/xla/third_party/absl/system.absl.crc.BUILD b/third_party/xla/third_party/absl/system.absl.crc.BUILD
-new file mode 100644
-index 00000000000..aa7b1e8b58d
---- /dev/null
-+++ b/third_party/xla/third_party/absl/system.absl.crc.BUILD
-@@ -0,0 +1,33 @@
-+load("@rules_cc//cc:defs.bzl", "cc_library")
-+
-+package(default_visibility = ["//visibility:public"])
-+
-+licenses(["notice"])  # Apache
-+
-+cc_library(
-+    name = "crc",
-+    linkopts = ["-labsl_crc32c"],
-+    deps = [
-+        "//absl/base:raw_logging_internal",
-+    ],
-+)
-+
-+cc_library(
-+    name = "crc32c",
-+    linkopts = ["-labsl_crc32c"],
-+)
-+
-+cc_library(
-+    name = "crc_cord_state",
-+    linkopts = ["-labsl_crc_cord_state"],
-+)
-+
-+cc_library(
-+    name = "crc_internal",
-+    linkopts = ["-labsl_crc32c", "-labsl_crc_internal", "-labsl_crc_cpu_detect"],
-+)
-+
-+cc_library(
-+    name = "non_temporal_memcpy",
-+    linkopts = ["-labsl_base"],
-+)
-\ No newline at end of file
 diff --git a/third_party/xla/third_party/absl/system.absl.debugging.BUILD b/third_party/xla/third_party/absl/system.absl.debugging.BUILD
 index 931ffdc9e92..3fc97a4569c 100644
 --- a/third_party/xla/third_party/absl/system.absl.debugging.BUILD
@@ -409,86 +298,6 @@ index 3367340cb25..316693e1793 100644
      visibility = ["//visibility:private"],
      deps = [
          "//absl/base:endian",
-diff --git a/third_party/xla/third_party/absl/system.absl.log.BUILD b/third_party/xla/third_party/absl/system.absl.log.BUILD
-new file mode 100644
-index 00000000000..ae2a0045cc6
---- /dev/null
-+++ b/third_party/xla/third_party/absl/system.absl.log.BUILD
-@@ -0,0 +1,73 @@
-+load("@rules_cc//cc:defs.bzl", "cc_library")
-+
-+package(default_visibility = ["//visibility:public"])
-+
-+licenses(["notice"])  # Apache
-+
-+cc_library(
-+    name = "absl_log",
-+    linkopts = [
-+        "-labsl_vlog_config_internal",
-+        "-labsl_log_internal_conditions",
-+        "-labsl_log_internal_check_op",
-+        "-labsl_log_internal_message",
-+        "-labsl_log_internal_nullguard",
-+        "-labsl_log_internal_format",
-+        "-labsl_log_internal_globals",
-+    ],
-+)
-+
-+cc_library(
-+    name = "absl_check",
-+    linkopts = [
-+        "-labsl_vlog_config_internal",
-+        "-labsl_log_internal_check_op",
-+        "-labsl_log_internal_message",
-+        "-labsl_log_internal_nullguard",
-+    ],
-+)
-+
-+alias(
-+    name = "log",
-+    actual = ":absl_log",
-+)
-+
-+alias(
-+    name = "check",
-+    actual = ":absl_check",
-+)
-+
-+cc_library(
-+    name = "die_if_null",
-+    linkopts = ["-labsl_die_if_null"],
-+)
-+
-+cc_library(
-+    name = "log_entry",
-+    linkopts = ["-labsl_log_internal_message"],
-+)
-+
-+cc_library(
-+    name = "log_sink",
-+    linkopts = ["-labsl_log_sink"],
-+)
-+
-+cc_library(
-+    name = "log_sink_registry",
-+    linkopts = ["-labsl_log_sink"],
-+)
-+
-+cc_library(
-+    name = "globals",
-+    linkopts = ["-labsl_log_globals"],
-+)
-+
-+cc_library(
-+    name = "log_flags",
-+    linkopts = ["-labsl_log_flags"],
-+)
-+
-+cc_library(
-+    name = "initialize",
-+    linkopts = ["-labsl_log_initialize"],
-+)
-\ No newline at end of file
 diff --git a/third_party/xla/third_party/absl/system.absl.random.BUILD b/third_party/xla/third_party/absl/system.absl.random.BUILD
 index ac17ce6343b..f3a4bcfce41 100644
 --- a/third_party/xla/third_party/absl/system.absl.random.BUILD
@@ -532,7 +341,7 @@ index e50e9790c82..3eeb0d8dbeb 100644
          "//absl/base:atomic_hook",
          "//absl/base:raw_logging_internal",
 diff --git a/third_party/xla/third_party/absl/system.absl.strings.BUILD b/third_party/xla/third_party/absl/system.absl.strings.BUILD
-index fa9a7a84f67..4fb9a61299a 100644
+index fa9a7a84f67..f7fa5737677 100644
 --- a/third_party/xla/third_party/absl/system.absl.strings.BUILD
 +++ b/third_party/xla/third_party/absl/system.absl.strings.BUILD
 @@ -17,16 +17,27 @@ cc_library(
@@ -660,11 +469,11 @@ index e15049e261c..e9c25fe3714 100644
 +)
 \ No newline at end of file
 diff --git a/third_party/xla/third_party/absl/workspace.bzl b/third_party/xla/third_party/absl/workspace.bzl
-index 9144c5bd5b6..e24a2b08b9c 100644
+index 46c1573beed..6a6add09948 100644
 --- a/third_party/xla/third_party/absl/workspace.bzl
 +++ b/third_party/xla/third_party/absl/workspace.bzl
 @@ -11,9 +11,40 @@ def repo():
-     ABSL_SHA256 = "c397cd9cca3f71724a8ddf183e7fa71c19196eaafd1dc2a3c86d3a572613a807"
+     ABSL_SHA256 = "d1abe9da2003e6cbbd7619b0ced3e52047422f4f4ac6c66a9bef5d2e99fea837"
      # LINT.ThenChange(//tensorflow/lite/tools/cmake/modules/abseil-cpp.cmake)
  
 +    SYS_DIRS = [
@@ -705,13 +514,13 @@ index 9144c5bd5b6..e24a2b08b9c 100644
          urls = tf_mirror_urls("https://github.com/abseil/abseil-cpp/archive/{commit}.tar.gz".format(commit = ABSL_COMMIT)),
          patch_file = [
 diff --git a/third_party/xla/third_party/protobuf/protobuf.patch b/third_party/xla/third_party/protobuf/protobuf.patch
-index 0c8e1cbfc6d..8d7c838edb9 100644
+index e54be1995c4..a1bd9570e00 100644
 --- a/third_party/xla/third_party/protobuf/protobuf.patch
 +++ b/third_party/xla/third_party/protobuf/protobuf.patch
-@@ -70,6 +70,88 @@ diff --git a/python/dist/system_python.bzl b/python/dist/system_python.bzl
-          _populate_package(repository_ctx, path, python3, python_version)
-      else:
-          # buildifier: disable=print
+@@ -131,6 +131,88 @@ diff --git a/src/google/protobuf/BUILD.bazel b/src/google/protobuf/BUILD.bazel
+      linkopts = LINK_OPTS,
+      strip_include_prefix = "/src",
+      visibility = [
 +diff --git a/src/google/protobuf/arena.h b/src/google/protobuf/arena.h
 +index a3cd7b7..9e2393b 100644
 +--- a/src/google/protobuf/arena.h
@@ -795,8 +604,5 @@ index 0c8e1cbfc6d..8d7c838edb9 100644
 + 
 +   // API to delete any objects not on an arena.  This can be used to safely
  diff --git a/src/google/protobuf/arena.cc b/src/google/protobuf/arena.cc
- --- a/src/google/protobuf/arena.cc	(revision 5fda5abda3dee5f7a102c85860594bff8d8610bd)
- +++ b/src/google/protobuf/arena.cc	(date 1748042877047)
--- 
-2.50.1 (Apple Git-155)
-
+ --- a/src/google/protobuf/arena.cc
+ +++ b/src/google/protobuf/arena.cc

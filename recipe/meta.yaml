@@ -1,5 +1,5 @@
-{% set version = "2.20.0" %}
-{% set build = 2 %}
+{% set version = "2.21.0" %}
+{% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -16,7 +16,7 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0
+    sha256: ef3568bb4865d6c1b2564fb5689c19b6b9a5311572cd1f2ff9198636a8520921
     patches:
       - patches/0001-loosen-requirements.patch
       - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
@@ -37,7 +37,6 @@ source:
       - patches/0017-system-python.patch  # [osx]
       - patches/0018-fix-xla-namespace.patch
       - patches/0019-link-giflib.patch
-      - patches/0020-is_signed-cannot-be-specialized.patch
       # Abseil un-vendoring
       - patches/0021-consolidated-abseil-unvendoring.patch  # [not win]
       - patches/0022-fix-multiple-flag-defs.patch  # [not win]
@@ -279,15 +278,13 @@ outputs:
         # Upstream specifies protobuf >=5.28.0, 
         # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
         - protobuf {{ libprotobuf }}
-        - python-flatbuffers 24.3.25
+        - python-flatbuffers >=25.9.23
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.20.0,<2.21.0
-        - keras >=3.10.0
+        - keras >=3.12.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
