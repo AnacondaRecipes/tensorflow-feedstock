@@ -1,8 +1,8 @@
 diff --git a/third_party/systemlibs/pybind11.BUILD b/third_party/systemlibs/pybind11.BUILD
-index f633074f3ff..b2324baa733 100644
+index 23f25d556d9..68800711106 100644
 --- a/third_party/systemlibs/pybind11.BUILD
 +++ b/third_party/systemlibs/pybind11.BUILD
-@@ -3,6 +3,6 @@ package(default_visibility = ["//visibility:public"])
+@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
  cc_library(
      name = "pybind11",
      deps = [
@@ -10,3 +10,13 @@ index f633074f3ff..b2324baa733 100644
 +        "@xla//third_party/python_runtime:headers",
      ],
  )
+ 
+@@ -12,3 +12,8 @@ config_setting(
+     name = "osx",
+     constraint_values = ["@platforms//os:osx"],
+ )
++
++config_setting(
++    name = "msvc_compiler",
++    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
++)

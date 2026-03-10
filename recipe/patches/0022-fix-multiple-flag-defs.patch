@@ -63,7 +63,7 @@ index 42c9d1920bb..511fd91e272 100644
 +        "@com_google_absl//absl/synchronization",
 +        "@com_google_absl//absl/time",
 +        "@com_google_absl//absl/types:span",
-+        "@local_tsl//tsl/platform:random",
++        "@tsl//tsl/platform:random",
 +    ],
 +    visibility = ["//visibility:public"],
 +)

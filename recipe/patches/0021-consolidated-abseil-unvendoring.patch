@@ -1,3 +1,218 @@
+diff --git a/third_party/xla/third_party/absl/system.absl.crc.BUILD b/third_party/xla/third_party/absl/system.absl.crc.BUILD
+new file mode 100644
+index 00000000000..f7c8b7d1760
+--- /dev/null
++++ b/third_party/xla/third_party/absl/system.absl.crc.BUILD
+@@ -0,0 +1,43 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++package(default_visibility = ["//visibility:public"])
++
++cc_library(
++    name = "crc32c",
++    linkopts = ["-labsl_crc32c"],
++    deps = [
++        ":crc_internal",
++        "//absl/base:config",
++        "//absl/base:endian",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "crc_internal",
++    linkopts = ["-labsl_crc_internal"],
++    deps = [
++        "//absl/base:config",
++        "//absl/base:endian",
++        "//absl/base:prefetch",
++        "//absl/base:raw_logging_internal",
++    ],
++)
++
++cc_library(
++    name = "crc_cord_state",
++    linkopts = ["-labsl_crc_cord_state"],
++    deps = [
++        ":crc32c",
++        "//absl/base:config",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "non_temporal_memcpy",
++    deps = [
++        "//absl/base:config",
++        "//absl/base:core_headers",
++    ],
++)
+diff --git a/third_party/xla/third_party/absl/system.absl.log.BUILD b/third_party/xla/third_party/absl/system.absl.log.BUILD
+new file mode 100644
+index 00000000000..08a2f6301fd
+--- /dev/null
++++ b/third_party/xla/third_party/absl/system.absl.log.BUILD
+@@ -0,0 +1,160 @@
++load("@rules_cc//cc:defs.bzl", "cc_library")
++
++package(default_visibility = ["//visibility:public"])
++
++cc_library(
++    name = "log",
++    linkopts = ["-labsl_log_internal_message", "-labsl_log_internal_check_op"],
++    deps = [
++        ":log_internal",
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:log_severity",
++    ],
++)
++
++cc_library(
++    name = "absl_log",
++    deps = [":log"],
++)
++
++cc_library(
++    name = "check",
++    deps = [":log"],
++)
++
++cc_library(
++    name = "absl_check",
++    deps = [":check"],
++)
++
++cc_library(
++    name = "die_if_null",
++    linkopts = ["-labsl_die_if_null"],
++    deps = [
++        ":log",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "log_internal",
++    linkopts = [
++        "-labsl_log_internal_message",
++        "-labsl_log_internal_nullguard",
++        "-labsl_log_internal_log_sink_set",
++        "-labsl_log_internal_globals",
++        "-labsl_log_internal_format",
++        "-labsl_log_internal_proto",
++        "-labsl_log_internal_conditions",
++        "-labsl_log_internal_check_op",
++    ],
++    deps = [
++        "//absl/base",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:log_severity",
++        "//absl/strings",
++        "//absl/strings:string_view",
++        "//absl/time",
++    ],
++)
++
++cc_library(
++    name = "log_entry",
++    linkopts = ["-labsl_log_entry"],
++    deps = [
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:log_severity",
++        "//absl/strings:string_view",
++        "//absl/time",
++        "//absl/types:span",
++    ],
++)
++
++cc_library(
++    name = "log_sink",
++    linkopts = ["-labsl_log_sink"],
++    deps = [
++        ":log_entry",
++        "//absl/base:config",
++    ],
++)
++
++cc_library(
++    name = "log_sink_registry",
++    deps = [
++        ":log_sink",
++        "//absl/base:config",
++    ],
++)
++
++cc_library(
++    name = "globals",
++    linkopts = ["-labsl_log_globals"],
++    deps = [
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:log_severity",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "log_flags",
++    deps = [
++        ":globals",
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/base:log_severity",
++        "//absl/flags:flag",
++        "//absl/strings",
++    ],
++)
++
++cc_library(
++    name = "initialize",
++    linkopts = ["-labsl_log_initialize"],
++    deps = [
++        ":globals",
++        "//absl/base:config",
++    ],
++)
++
++cc_library(
++    name = "vlog_is_on",
++    linkopts = ["-labsl_vlog_config_internal"],
++    deps = [
++        "//absl/base:config",
++        "//absl/base:core_headers",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "flags",
++    deps = [":log_flags"],
++)
++
++cc_library(
++    name = "log_streamer",
++    deps = [
++        ":log",
++        "//absl/base:config",
++        "//absl/strings:string_view",
++    ],
++)
++
++cc_library(
++    name = "scoped_mock_log",
++    deps = [
++        ":log_entry",
++        ":log_sink",
++        ":log_sink_registry",
++        "//absl/base:config",
++    ],
++)
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
 index 68b0ef13c31..a48a3275ee1 100644
 --- a/tensorflow/BUILD
@@ -155,6 +370,22 @@ index d6bf8748dee..f88bef771d0 100644
 +    deps = [
 +        ":config",
 +        ":core_headers",
++    ],
++)
+diff --git a/third_party/xla/third_party/absl/system.absl.container.BUILD b/third_party/xla/third_party/absl/system.absl.container.BUILD
+index 95c16260430..ba5962bee64 100644
+--- a/third_party/xla/third_party/absl/system.absl.container.BUILD
++++ b/third_party/xla/third_party/absl/system.absl.container.BUILD
+@@ -215,3 +215,11 @@ cc_library(
+         "//absl/utility",
+     ],
+ )
++
++cc_library(
++    name = "hash_container_defaults",
++    deps = [
++        ":hash_function_defaults",
++        "//absl/base:config",
 +    ],
 +)
 diff --git a/third_party/xla/third_party/absl/system.absl.debugging.BUILD b/third_party/xla/third_party/absl/system.absl.debugging.BUILD
