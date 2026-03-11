@@ -56,7 +56,7 @@ source:
       - patches/0032-add-missing-string-include.patch
       - patches/0033-remove-spurious-framework-dep-from-tflite-analyzer.patch
       - patches/0034-add-missing-cstdint-include.patch
-      - patches/0035-fix-xla-llvm-ir-copts.patch  # [linux and aarch64]
+      - patches/0035-fix-xla-llvm-ir-copts.patch  # [linux]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
