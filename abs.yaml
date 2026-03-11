@@ -1,1 +1,6 @@
 task_timeout: 54000
+
+channels:
+  - https://staging.continuum.io/pbp/fs/flatbuffers-feedstock/pr6/03a1e17
+  - https://staging.continuum.io/pbp/fs/python-flatbuffers-feedstock/pr2/900c9a6
+  - https://staging.continuum.io/pbp/fs/keras-feedstock/pr7/84aa6dc
