@@ -234,12 +234,11 @@ fi
 cat >> .bazelrc <<EOF
 
 build --crosstool_top=//bazel_toolchain:toolchain
+build --noincompatible_enable_cc_toolchain_resolution
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
-build --copt=-isystem${PREFIX}/include
-build --host_copt=-isystem${PREFIX}/include
 build --copt=-D_GNU_SOURCE
 build --host_copt=-D_GNU_SOURCE
 build --conlyopt=-include
