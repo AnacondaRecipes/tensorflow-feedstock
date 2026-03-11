@@ -261,6 +261,13 @@ build --experimental_ui_max_stdouterr_bytes=104857600
 
 EOF
 
+if [[ "${target_platform}" == "linux-aarch64" ]]; then
+  # XNNPACK SME/SME2 kernels currently require ISA support not available in
+  # our aarch64 GCC toolchain configuration on CI.
+  echo "build --define=xnn_enable_arm_sme=false" >> .bazelrc
+  echo "build --define=xnn_enable_arm_sme2=false" >> .bazelrc
+fi
+
 if [[ ${cuda_compiler_version} != "None" ]]; then
     echo "build --config=cuda_wheel" >> .bazelrc
 fi
