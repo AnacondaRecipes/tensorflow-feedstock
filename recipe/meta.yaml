@@ -55,6 +55,7 @@ source:
       - patches/0030-Disable-profiler.patch  # [not win]
       - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
       - patches/0032-add-missing-string-include.patch
+      - patches/0033-remove-spurious-framework-dep-from-tflite-analyzer.patch
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
@@ -247,7 +248,7 @@ outputs:
         - python-flatbuffers >=25.9.23
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
-        - h5py >=3.11
+        - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
@@ -270,7 +271,7 @@ outputs:
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
         - grpcio {{ libgrpc }}.*
-        - h5py >=3.11
+        - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0,<2.2.0
         - opt_einsum >=2.3.2

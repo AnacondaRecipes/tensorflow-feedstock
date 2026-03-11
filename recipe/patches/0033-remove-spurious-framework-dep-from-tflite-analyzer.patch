@@ -1,0 +1,12 @@
+diff --git a/tensorflow/lite/python/analyzer_wrapper/BUILD b/tensorflow/lite/python/analyzer_wrapper/BUILD
+index f40c8b28c7b..6560db7cd90 100644
+--- a/tensorflow/lite/python/analyzer_wrapper/BUILD
++++ b/tensorflow/lite/python/analyzer_wrapper/BUILD
+@@ -34,7 +34,6 @@ cc_library(
+     visibility = ["//visibility:public"],
+     deps = [
+         "//tensorflow/compiler/mlir/lite/schema:schema_utils",
+-        "//tensorflow/core:framework",
+         "//tensorflow/core/public:release_version",
+         "//tensorflow/lite:version",
+         "//tensorflow/lite/core:model_builder",
