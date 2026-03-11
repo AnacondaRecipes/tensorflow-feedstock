@@ -19,7 +19,7 @@ source:
     sha256: ef3568bb4865d6c1b2564fb5689c19b6b9a5311572cd1f2ff9198636a8520921
     patches:
       - patches/0001-loosen-requirements.patch
-      - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
+      - patches/0002-Add-constraint-to-pybind11-systemlib.patch
       - patches/0003-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
       - patches/0004-Use-correct-hermetic-python.patch  # [not win]
       - patches/0006-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
