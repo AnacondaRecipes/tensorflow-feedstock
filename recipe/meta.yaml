@@ -22,7 +22,6 @@ source:
       - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
       - patches/0003-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
       - patches/0004-Use-correct-hermetic-python.patch  # [not win]
-      - patches/0005-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
       - patches/0006-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
       - patches/0007-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
       - patches/0008-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
@@ -56,6 +55,7 @@ source:
       - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
       - patches/0032-add-missing-string-include.patch
       - patches/0033-remove-spurious-framework-dep-from-tflite-analyzer.patch
+      - patches/0034-add-missing-cstdint-include.patch
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']

@@ -1,8 +1,7 @@
 diff --git a/third_party/systemlibs/pybind11.BUILD b/third_party/systemlibs/pybind11.BUILD
-index 23f25d556d9..68800711106 100644
 --- a/third_party/systemlibs/pybind11.BUILD
 +++ b/third_party/systemlibs/pybind11.BUILD
-@@ -3,7 +3,7 @@ package(default_visibility = ["//visibility:public"])
+@@ -3,7 +3,7 @@ cc_library(
  cc_library(
      name = "pybind11",
      deps = [

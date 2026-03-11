@@ -161,6 +161,27 @@ else
     export TF_NEED_CUDA=0
 fi
 
+# XLA's embed_gpu_specs_gen genrule needs xxd, which isn't available as a
+# conda package. Provide a minimal Python shim that emulates `xxd -i`.
+cat > xxd <<'XXD_SCRIPT'
+#!/usr/bin/env python3
+import sys
+args = sys.argv[1:]
+if '-i' in args:
+    args.remove('-i')
+fname = args[0]
+with open(fname, 'rb') as f:
+    data = f.read()
+varname = fname.replace('/', '_').replace('.', '_').replace('-', '_')
+print(f"unsigned char {varname}[] = {{")
+for i in range(0, len(data), 12):
+    chunk = data[i:i+12]
+    print("  " + ", ".join(f"0x{b:02x}" for b in chunk) + ",")
+print("};")
+print(f"unsigned int {varname}_len = {len(data)};")
+XXD_SCRIPT
+chmod +x xxd
+
 source gen-bazel-toolchain
 
 # Get rid of unwanted defaults
@@ -217,6 +238,18 @@ build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+build --copt=-isystem${PREFIX}/include
+build --host_copt=-isystem${PREFIX}/include
+build --copt=-D_GNU_SOURCE
+build --host_copt=-D_GNU_SOURCE
+build --conlyopt=-include
+build --conlyopt=stdint.h
+build --cxxopt=-include
+build --cxxopt=cstdint
+build --host_conlyopt=-include
+build --host_conlyopt=stdint.h
+build --host_cxxopt=-include
+build --host_cxxopt=cstdint
 build --repo_env=ML_WHEEL_TYPE=release
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
