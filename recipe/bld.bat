@@ -11,7 +11,7 @@ IF %ERRORLEVEL% NEQ 0 (
 rm -f symlink_test2.txt
 rm -f symlink_test.txt
 
-set "PATH=%CD%:%PATH%"
+set "PATH=%CD%;%PATH%"
 set BAZEL_VS="%VSINSTALLDIR%"
 set BAZEL_VC="%VSINSTALLDIR%/VC"
 set CLANG_COMPILER_PATH=%BUILD_PREFIX:\=/%/Library/bin/clang.exe
@@ -74,6 +74,13 @@ set TF_DOWNLOAD_CLANG=0
 set TF_SET_ANDROID_WORKSPACE=0
 set TF_NEED_CLANG=1
 set TF_OVERRIDE_EIGEN_STRONG_INLINE=0
+
+:: XLA uses `xxd -i` in genrules; provide a local shim on Windows.
+copy /Y "%RECIPE_DIR%\xxd.py" "%CD%\xxd.py"
+(
+  echo @echo off
+  echo "%PYTHON%" "%CD%\xxd.py" %%*
+) > "%CD%\xxd.bat"
 
 bazel clean --expunge
 bazel shutdown
