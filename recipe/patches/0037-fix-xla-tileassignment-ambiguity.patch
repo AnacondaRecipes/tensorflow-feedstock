@@ -1,0 +1,21 @@
+diff --git a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
+--- a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
++++ b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
+@@ -353,13 +353,14 @@ class DeviceGroupTileAssignment : public TileAssignment {
+  public:
+   explicit DeviceGroupTileAssignment(int64_t num_groups,
+                                      int64_t num_devices_per_group)
+-      : TileAssignment({num_groups, num_devices_per_group}) {}
++      : TileAssignment(std::vector<int64_t>{num_groups,
++                                            num_devices_per_group}) {}
+   explicit DeviceGroupTileAssignment(int64_t num_groups,
+                                      int64_t num_devices_per_group,
+                                      absl::Span<const int64_t> reshape_dims,
+                                      absl::Span<const int> transpose_perm)
+-      : TileAssignment({num_groups, num_devices_per_group}, reshape_dims,
+-                       transpose_perm) {}
++      : TileAssignment(std::vector<int64_t>{num_groups, num_devices_per_group},
++                       reshape_dims, transpose_perm) {}
+   explicit DeviceGroupTileAssignment(const TileAssignment& tile_assignment)
+       : TileAssignment(tile_assignment) {
+     CHECK(tile_assignment.num_dimensions() == 2)

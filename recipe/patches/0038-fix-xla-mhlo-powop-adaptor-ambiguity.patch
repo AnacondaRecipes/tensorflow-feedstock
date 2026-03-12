@@ -1,0 +1,15 @@
+diff --git a/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc b/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
+--- a/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
++++ b/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
+@@ -47,9 +47,10 @@ mlir::LogicalResult ExpandIntegerPower(mlir::math::IPowIOp op,
+                                        mlir::PatternRewriter& rewriter) {
+   llvm::SmallVector<mlir::Type> result_types(op->getResultTypes());
+   llvm::SmallVector<mlir::Type> arg_types(op->getOperandTypes());
++  mlir::mhlo::PowOp::Adaptor adaptor(op);
+   mlir::Value result =
+       mlir::mhlo::impl::mapMhloOpToStdScalarOp<mlir::mhlo::PowOp>(
+-          op.getLoc(), result_types, arg_types, {op->getOperands()},
++          op.getLoc(), result_types, arg_types, adaptor,
+           op->getAttrs(), &rewriter);
+ 
+   rewriter.replaceOp(op, result);

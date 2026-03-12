@@ -266,6 +266,9 @@ if [[ "${target_platform}" == "linux-aarch64" ]]; then
   # our aarch64 GCC toolchain configuration on CI.
   echo "build --define=xnn_enable_arm_sme=false" >> .bazelrc
   echo "build --define=xnn_enable_arm_sme2=false" >> .bazelrc
+  # Newer XNNPACK routes these kernels through YNNPACK feature flags.
+  echo "build --define=ynn_enable_arm64_sme=false" >> .bazelrc
+  echo "build --define=ynn_enable_arm64_sme2=false" >> .bazelrc
 fi
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
