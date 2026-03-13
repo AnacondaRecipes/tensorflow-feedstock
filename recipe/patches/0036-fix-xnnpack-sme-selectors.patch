@@ -1,3 +1,21 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b3 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:03:00 -0700
+Subject: [PATCH] Fix XNNPACK build_defs.bzl typo and add missing newline
+
+Two fixes to the XNNPACK layering_check_fix patch that TF carries:
+
+1. The patch file was missing a trailing newline, causing git apply
+   issues.
+
+2. In build_defs.bzl the explicit_false branch of define_build_option's
+   select() incorrectly pointed to explicit_true, making it impossible
+   to disable a build option. This is an upstream XNNPACK bug.
+
+---
+ .../xla/third_party/xnnpack/layering_check_fix.patch | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
 diff --git a/third_party/xla/third_party/xnnpack/layering_check_fix.patch b/third_party/xla/third_party/xnnpack/layering_check_fix.patch
 --- a/third_party/xla/third_party/xnnpack/layering_check_fix.patch
 +++ b/third_party/xla/third_party/xnnpack/layering_check_fix.patch

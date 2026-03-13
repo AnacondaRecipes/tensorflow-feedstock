@@ -1,3 +1,14 @@
+From 0552bce35c8d495fee08ed6ae1a7381e2d5c6180 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 19 May 2024 20:52:35 +1100
+Subject: [PATCH 26/26] work around for warning that clang falsely treats as
+ error
+
+see https://github.com/llvm/llvm-project/issues/92630
+---
+ .bazelrc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/.bazelrc b/.bazelrc
 index 92e739983b3..476b212d2a7 100644
 --- a/.bazelrc

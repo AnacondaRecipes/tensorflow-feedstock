@@ -1,3 +1,21 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b2 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:02:00 -0700
+Subject: [PATCH] Remove clang-only flags from cc_to_llvm_ir.bzl
+
+The cc_to_llvm_ir rule hardcodes several clang-specific compiler flags:
+  -mprefer-vector-width=512
+  -fno-experimental-sanitize-metadata=all
+  -fno-sanitize=all
+
+These are not recognized by GCC, causing build failures when the conda
+toolchain uses GCC. The flags are not essential for correctness so we
+remove them to support both compilers.
+
+---
+ .../xla/codegen/intrinsic/cpp/cc_to_llvm_ir.bzl    | 3 ---
+ 1 file changed, 3 deletions(-)
+
 diff --git a/third_party/xla/xla/codegen/intrinsic/cpp/cc_to_llvm_ir.bzl b/third_party/xla/xla/codegen/intrinsic/cpp/cc_to_llvm_ir.bzl
 --- a/third_party/xla/xla/codegen/intrinsic/cpp/cc_to_llvm_ir.bzl
 +++ b/third_party/xla/xla/codegen/intrinsic/cpp/cc_to_llvm_ir.bzl

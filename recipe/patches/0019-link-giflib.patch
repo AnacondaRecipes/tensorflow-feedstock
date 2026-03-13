@@ -1,3 +1,16 @@
+From 105b6c62bda4f4bc793a41cd16fa34c4a7d8534c Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 16:55:34 -0600
+Subject: [PATCH] link-giflib
+
+from tensorflow.python._pywrap_tensorflow_internal import *
+ImportError: dlopen(/env/lib/python3.12/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so, 0x000A): 
+    symbol not found in flat namespace '_DGifCloseFile'
+
+---
+ third_party/systemlibs/gif.BUILD | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
 diff --git a/tensorflow/BUILD b/tensorflow/BUILD
 index 4bd80133d91..68b0ef13c31 100644
 --- a/tensorflow/BUILD

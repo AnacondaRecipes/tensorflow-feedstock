@@ -1,3 +1,17 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b4 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:04:00 -0700
+Subject: [PATCH] Fix ambiguous TileAssignment initializer_list construction
+
+GCC treats brace-enclosed initializer lists as ambiguous when
+TileAssignment has both an initializer_list<int64_t> constructor and
+a Span-based constructor. Explicitly constructing a std::vector removes
+the ambiguity.
+
+---
+ .../xla/xla/hlo/utils/hlo_sharding_util.h         | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
 diff --git a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
 --- a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
 +++ b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h

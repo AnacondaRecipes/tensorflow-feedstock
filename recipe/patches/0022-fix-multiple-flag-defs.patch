@@ -1,3 +1,15 @@
+From 181bb5966a93aa9a61fd76dc7373519a7c4ff4cd Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 28 Oct 2025 09:48:22 -0600
+Subject: [PATCH 2/2] 23
+
+ERROR: Flag 'leave_barriers_on_recoverable_agent_restart' was defined more than once but with differing types. Defined in files 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc' and 'external/local_xla/xla/tsl/distributed_runtime/coordination/coordination_service.cc'.
+---
+ tensorflow/core/distributed_runtime/rpc/BUILD |  2 +-
+ third_party/xla/xla/service/BUILD             |  2 +-
+ .../distributed_runtime/coordination/BUILD    | 42 ++++++++++++++++++-
+ 3 files changed, 43 insertions(+), 3 deletions(-)
+
 diff --git a/tensorflow/core/distributed_runtime/rpc/BUILD b/tensorflow/core/distributed_runtime/rpc/BUILD
 index ff7d95c66b1..91db8093e4b 100644
 --- a/tensorflow/core/distributed_runtime/rpc/BUILD

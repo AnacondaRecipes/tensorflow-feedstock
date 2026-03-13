@@ -1,3 +1,21 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:00:00 -0700
+Subject: [PATCH] Remove spurious //tensorflow/core:framework dep from TFLite
+ analyzer
+
+The model_analyzer cc_library pulls in //tensorflow/core:framework which
+transitively drags all of protos_all_cc into the TFLite shared library.
+This causes duplicate protobuf descriptor registration at runtime
+(tensor_shape.proto, etc.) when the profiler is loaded.
+
+The dependency is unnecessary; model_analyzer only needs the headers
+already provided by the other listed deps.
+
+---
+ tensorflow/lite/python/analyzer_wrapper/BUILD | 1 -
+ 1 file changed, 1 deletion(-)
+
 diff --git a/tensorflow/lite/python/analyzer_wrapper/BUILD b/tensorflow/lite/python/analyzer_wrapper/BUILD
 index f40c8b28c7b..6560db7cd90 100644
 --- a/tensorflow/lite/python/analyzer_wrapper/BUILD

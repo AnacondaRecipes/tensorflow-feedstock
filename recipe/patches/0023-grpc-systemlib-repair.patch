@@ -1,3 +1,34 @@
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Wed, 29 Oct 2025 12:48:39 -0600
+Subject: [PATCH] grpc systemlib repair
+
+Restores support for using system-provided gRPC libraries instead of TensorFlow's 
+vendored version.
+
+
+WORKSPACE: Adds system_python repository definition after protobuf is loaded, 
+which protobuf's build files require.
+
+tensorflow/workspace2.bzl & third_party/xla/workspace2.bzl: Adds system_link_files 
+mappings to the gRPC dependency configuration. These were removed in a upstream refactor that broke
+systemlib support.
+
+grpc.bazel.cc_grpc_library.bzl: Adds plugin_flags parameter support to the cc_grpc_library macro.
+For the vendored version this is applied as a patch.
+
+grpc.bazel.python_rules.bzl (new file): Creates a minimal py_grpc_library implementation for system gRPC. 
+Instead of generating code, it creates stub targets with dummy Python files, since the actual gRPC 
+Python bindings come from the system's grpcio package.
+
+---
+ WORKSPACE                                     |  8 +++
+ tensorflow/workspace2.bzl                     | 10 ++++
+ .../systemlibs/grpc.bazel.cc_grpc_library.bzl |  5 ++
+ .../systemlibs/grpc.bazel.python_rules.bzl    | 55 +++++++++++++++++++
+ third_party/xla/workspace2.bzl                | 10 ++++
+ 5 files changed, 88 insertions(+)
+ create mode 100644 third_party/systemlibs/grpc.bazel.python_rules.bzl
+
 diff --git a/third_party/systemlibs/grpc.bazel.python_rules.bzl b/third_party/systemlibs/grpc.bazel.python_rules.bzl
 new file mode 100644
 index 00000000000..d430b67c5a8

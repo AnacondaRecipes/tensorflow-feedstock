@@ -1,3 +1,18 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b5 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:05:00 -0700
+Subject: [PATCH] Fix ambiguous PowOp adaptor construction in
+ expand_integer_power
+
+GCC cannot resolve the mapMhloOpToStdScalarOp call when the adaptor
+argument is passed as a brace-enclosed aggregate {op->getOperands()}.
+Explicitly constructing a mlir::mhlo::PowOp::Adaptor eliminates the
+ambiguity.
+
+---
+ .../emitters/transforms/expand_integer_power.cc    | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
 diff --git a/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc b/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
 --- a/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
 +++ b/third_party/xla/xla/codegen/emitters/transforms/expand_integer_power.cc
