@@ -102,7 +102,9 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     export TF_NCCL_VERSION=$(pkg-config nccl --modversion | grep -Po '\d+\.\d+')
 
     export LDFLAGS="${LDFLAGS//-Wl,-z,now/-Wl,-z,lazy}"
-    export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
+    if [[ "${target_platform}" == "linux-64" ]]; then
+        export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
+    fi
 
     if [[ ${cuda_compiler_version} == 11.8 ]]; then
         export TF_CUDA_COMPUTE_CAPABILITIES=sm_35,sm_50,sm_60,sm_62,sm_70,sm_72,sm_75,sm_80,sm_86,sm_87,sm_89,sm_90,compute_90
@@ -111,39 +113,49 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
         export CUDNN_INSTALL_PATH=$PREFIX
         export NCCL_INSTALL_PATH=$PREFIX
-        export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
-        export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
+
+        # CUDA toolkit layout differs by architecture:
+        # - x86_64 uses targets/x86_64-linux
+        # - aarch64 uses targets/sbsa-linux
+        if [[ "${target_platform}" == "linux-aarch64" ]]; then
+            CUDA_TARGET_DIR="targets/sbsa-linux"
+        else
+            CUDA_TARGET_DIR="targets/x86_64-linux"
+        fi
+
+        export CUDA_HOME="${BUILD_PREFIX}/${CUDA_TARGET_DIR}"
+        export TF_CUDA_PATHS="${BUILD_PREFIX}/${CUDA_TARGET_DIR},${PREFIX}/${CUDA_TARGET_DIR}"
         
         export HERMETIC_CUDA_VERSION="${cuda_compiler_version}"
         export HERMETIC_CUDNN_VERSION="${cudnn}"
         export HERMETIC_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES}
-        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/targets/x86_64-linux"
-        export LOCAL_CUDNN_PATH="${PREFIX}/targets/x86_64-linux"
-        export LOCAL_NCCL_PATH="${PREFIX}/targets/x86_64-linux"
+        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/${CUDA_TARGET_DIR}"
+        export LOCAL_CUDNN_PATH="${PREFIX}/${CUDA_TARGET_DIR}"
+        export LOCAL_NCCL_PATH="${PREFIX}/${CUDA_TARGET_DIR}"
 
         # XLA can only cope with a single cuda header include directory, merge both
-        rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
+        rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/include/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/
         
         # Also merge CUDA libraries
-        rsync -a ${PREFIX}/targets/x86_64-linux/lib/ ${BUILD_PREFIX}/targets/x86_64-linux/lib/
+        rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/lib/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/lib/
 
         # Although XLA supports a non-hermetic build, it still tries to find headers in the hermetic locations.
         # We do this in the BUILD_PREFIX to not have any impact on the resulting package.
         # Otherwise, these copied files would be included in the package.
-        rm -rf ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI
-        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/
-        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI/
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn
-        cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn/
+        rm -rf ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI
+        cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/
+        cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn
+        cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
 
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/bin
-        ln -s $(which ptxas) ${BUILD_PREFIX}/targets/x86_64-linux/bin/ptxas
-        ln -s $(which nvlink) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvlink
-        ln -s $(which fatbinary) ${BUILD_PREFIX}/targets/x86_64-linux/bin/fatbinary
-        ln -s $(which bin2c) ${BUILD_PREFIX}/targets/x86_64-linux/bin/bin2c
-        ln -s $(which nvprune) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvprune
-        ln -s $PREFIX/bin/crt ${BUILD_PREFIX}/targets/x86_64-linux/bin/crt
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin
+        ln -s $(which ptxas) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/ptxas
+        ln -s $(which nvlink) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/nvlink
+        ln -s $(which fatbinary) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/fatbinary
+        ln -s $(which bin2c) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/bin2c
+        ln -s $(which nvprune) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/nvprune
+        ln -s $PREFIX/bin/crt ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/crt
 
         export PATH=$PATH:${BUILD_PREFIX}/nvvm/bin
           
