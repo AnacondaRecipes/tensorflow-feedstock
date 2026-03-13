@@ -61,6 +61,7 @@ source:
       - patches/0037-fix-xla-tileassignment-ambiguity.patch  # [linux]
       - patches/0038-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
       - patches/0039-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
+      - patches/0040-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
