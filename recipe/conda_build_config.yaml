@@ -1,6 +1,7 @@
 gpu_variant:
   - None
   - cuda                       # [linux]
+  - cuda                       # [linux]
 
 cuda_compiler_version:
   - None                       
