@@ -5,6 +5,7 @@ gpu_variant:
 cuda_compiler_version:
   - None                       
   - 12.9                       # [linux]
+  - 13.0                       # [linux]
 
 zip_keys:                      # [linux]
   -                            # [linux]
@@ -22,7 +23,11 @@ c_compiler:                # [win]
 cxx_compiler:              # [win]
   - clang                  # [win]
 
-c_compiler_version:        # [win]
+c_compiler_version:
+  # NVCC + GCC 14 on linux-aarch64 trips in arm_neon.h builtins.
+  # Use GCC 11 (available in pkgs/main) for stable CUDA host compilation.
+  - 11                     # [linux and aarch64]
   - 20                     # [win]
-cxx_compiler_version:      # [win]
+cxx_compiler_version:
+  - 11                     # [linux and aarch64]
   - 20                     # [win]
