@@ -15,16 +15,14 @@ diff --git a/third_party/xla/xla/backends/cpu/runtime/convolution_lib.h b/third_
 index 8fc4c0a91db..dbf6903d2d4 100644
 --- a/third_party/xla/xla/backends/cpu/runtime/convolution_lib.h
 +++ b/third_party/xla/xla/backends/cpu/runtime/convolution_lib.h
-@@ -413,7 +413,7 @@ void EigenGenericConv2D(
-         Eigen::Index start = task_index * task_size;
-         Eigen::Index end = std::min(start + task_size, feature_group_count);
-         for (Eigen::Index i = start; i < end; ++i) {
+@@ -416,5 +416,5 @@ void EigenGenericConv2D(
+           for (Eigen::Index i = start; i < end; ++i) {
 -            auto on_done = [count_down]() mutable { count_down.CountDown(); };
 +            auto on_done = [count_down]() mutable { count_down.CountDown(1); };
              auto [output, convolved] = convolve_group(i);
              output.device(*device, std::move(on_done)) = convolved;
-         }
-@@ -572,11 +572,11 @@ void EigenConv3D(const Eigen::ThreadPoolDevice* device, ScalarType* out,
+           }
+@@ -575,10 +575,10 @@ void EigenConv3D(const Eigen::ThreadPoolDevice* device, ScalarType* out,
      auto output_reshaped = output.reshape(output_reshaped_dims).chip(i, 4);
  
      if (device != nullptr) {
