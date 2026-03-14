@@ -66,7 +66,7 @@ source:
 build:
   number: {{ build }}
   # Temporary narrowing for focused debugging: build only linux-aarch64 CUDA.
-  skip: true  # [not py312]
+  skip: true  # [not py==312]
   skip: true  # [not (linux and aarch64 and cuda_compiler_version != "None")]
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
