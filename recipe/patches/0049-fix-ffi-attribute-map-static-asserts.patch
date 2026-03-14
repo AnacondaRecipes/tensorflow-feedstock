@@ -1,0 +1,63 @@
+From 89abcdef0123456789abcdef0123456789abcdef Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Fri, 13 Mar 2026 20:25:00 -0700
+Subject: [PATCH] Make FFI attribute_map static_asserts template-dependent
+
+Some compilers evaluate `static_assert(false, ...)` in discarded `if constexpr`
+branches inside generic lambdas. Replace with template-dependent false helpers
+so assertions only trigger for unsupported instantiated types.
+
+---
+ third_party/xla/xla/ffi/attribute_map.cc | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/third_party/xla/xla/ffi/attribute_map.cc b/third_party/xla/xla/ffi/attribute_map.cc
+index 0fd8ef2e74e..44aaea941f0 100644
+--- a/third_party/xla/xla/ffi/attribute_map.cc
++++ b/third_party/xla/xla/ffi/attribute_map.cc
+@@ -271,6 +271,9 @@ absl::StatusOr<Attribute> Attribute::FromProto(const AttributeProto& proto) {
+   }
+ }
+ 
++template <typename T>
++inline constexpr bool kUnsupportedAttributeType = false;
++
+ xla::ffi::AttributeProto Attribute::ToProto() const {
+   AttributeProto proto;
+   std::visit(
+@@ -285,7 +288,7 @@ xla::ffi::AttributeProto Attribute::ToProto() const {
+         } else if constexpr (std::is_same_v<U, AttributesDictionary>) {
+           *proto.mutable_dict() = value.ToProto();
+         } else {
+-          static_assert(false, "Unsupported attribute type");
++          static_assert(kUnsupportedAttributeType<U>, "Unsupported attribute type");
+         }
+       },
+       AsVariant());
+@@ -320,7 +323,7 @@ ScalarProto Scalar::ToProto() const {
+         } else if constexpr (std::is_same_v<U, double>) {
+           proto.set_f64(value);
+         } else {
+-          static_assert(false, "Unsupported scalar type");
++          static_assert(kUnsupportedAttributeType<U>, "Unsupported scalar type");
+         }
+       },
+       AsVariant());
+@@ -408,7 +411,7 @@ ArrayProto Array::ToProto() const {
+           proto.mutable_f64()->mutable_values()->Assign(value.begin(),
+                                                         value.end());
+         } else {
+-          static_assert(false, "Unsupported array type");
++          static_assert(kUnsupportedAttributeType<U>, "Unsupported array type");
+         }
+       },
+       AsVariant());
+@@ -480,7 +483,7 @@ FlatAttributeProto FlatAttribute::ToProto() const {
+         } else if constexpr (std::is_same_v<U, std::string>) {
+           proto.set_str(value);
+         } else {
+-          static_assert(false, "Unsupported flat attribute type");
++          static_assert(kUnsupportedAttributeType<U>, "Unsupported flat attribute type");
+         }
+       },
+       AsVariant());
