@@ -268,9 +268,6 @@ if [[ "${target_platform}" == "linux-aarch64" ]]; then
   # Disable BF16 YNNPACK kernels; current aarch64 toolchain errors in assembly
   # on arm_neonbf16 with `fmov v*.8h`.
   echo "build --define=ynn_enable_arm_neonbf16=false" >> .bazelrc
-  # Brotli in TF's external deps enables -Wconversion and -Werror.
-  # GCC on aarch64 reports a narrowing warning in platform.h; do not fail build.
-  echo "build --copt=-Wno-conversion" >> .bazelrc
 fi
 
 if [[ ${cuda_compiler_version} != "None" ]]; then

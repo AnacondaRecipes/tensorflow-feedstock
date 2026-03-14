@@ -62,6 +62,7 @@ source:
       - patches/0038-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
       - patches/0039-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
       - patches/0040-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
+      - patches/0044-relax-brotli-conversion-werror.patch  # [linux and aarch64]
 build:
   number: {{ build }}
   # Temporary narrowing for focused debugging: build only linux-aarch64 CUDA.
