@@ -64,6 +64,7 @@ source:
       - patches/0040-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
       - patches/0044-relax-brotli-conversion-werror.patch  # [linux and aarch64]
       - patches/0045-fix-xla-countdown-signature.patch  # [linux and aarch64]
+      - patches/0046-fix-plugin-registry-static-assert.patch  # [linux and aarch64]
 build:
   number: {{ build }}
   # Temporary narrowing for focused debugging: build only linux-aarch64 CUDA.
