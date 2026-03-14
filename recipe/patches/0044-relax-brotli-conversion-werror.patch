@@ -33,8 +33,6 @@ index 00000000000..9f2378f4ad1
 --- /dev/null
 +++ b/third_party/org_brotli/brotli_werror_conversion.patch
 @@ -0,0 +1,11 @@
-+diff --git a/BUILD.bazel b/BUILD.bazel
-+index 35eb302..ed5e79b 100644
 +--- a/BUILD.bazel
 +++ b/BUILD.bazel
 +@@ -36,6 +36,7 @@ STRICT_C_OPTIONS = select({
