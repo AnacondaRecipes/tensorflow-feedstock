@@ -68,6 +68,7 @@ source:
       - patches/0047-fix-cupti-tracer-nodestructor-init.patch  # [linux and aarch64]
       - patches/0049-fix-ffi-attribute-map-static-asserts.patch  # [linux and aarch64]
       - patches/0050-fix-ynn-support-nodestructor-init.patch  # [linux and aarch64]
+      - patches/0051-fix-fuse-qdq-nodestructor-init.patch  # [linux and aarch64]
 build:
   number: {{ build }}
   # Temporary narrowing for focused debugging: build only linux-aarch64 CUDA.
