@@ -76,6 +76,8 @@ set TF_NEED_CLANG=1
 set TF_OVERRIDE_EIGEN_STRONG_INLINE=0
 
 :: XLA uses `xxd -i` in genrules; provide a local shim on Windows.
+:: Bazel genrules use MSYS2 bash on Windows; create a bash wrapper
+:: that invokes xxd.py using the configured Python interpreter.
 copy /Y "%RECIPE_DIR%\xxd.py" "%CD%\xxd.py"
 (
   echo #!/usr/bin/env bash
