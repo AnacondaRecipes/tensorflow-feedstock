@@ -299,7 +299,7 @@ outputs:
         - grpcio {{ libgrpc }}.*
         - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
-        - numpy >=1.26.0,<2.2.0
+        - numpy >=1.26.0
         - opt_einsum >=2.3.2
         # Upstream specifies protobuf >=5.28.0, 
         # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
