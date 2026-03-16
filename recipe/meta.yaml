@@ -308,6 +308,7 @@ outputs:
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
         - cuda-nvcc-tools                                         # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvml-dev                                           # [cuda_compiler_version != "None"]
     # TODO: decide on the name of the package
     # run_constrained:
     #   What is the difference between these two packages?
