@@ -81,14 +81,6 @@ copy /Y "%RECIPE_DIR%\xxd.py" "%CD%\xxd.py"
   echo #!/usr/bin/env bash
   echo exec "$PYTHON_BIN_PATH" "$PWD/xxd.py" "$@"
 ) > "%CD%\xxd"
-(
-  echo @echo off
-  echo "%PYTHON%" "%CD%\xxd.py" %%*
-) > "%CD%\xxd.bat"
-(
-  echo @echo off
-  echo "%PYTHON%" "%CD%\xxd.py" %%*
-) > "%CD%\xxd.cmd"
 
 bazel clean --expunge
 bazel shutdown
