@@ -1,11 +1,11 @@
 --- a/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc
 +++ b/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc
-@@ -54,7 +54,8 @@ std::optional<std::pair<std::string, uint32_t>> ParseMarkerDataActivity(
-        free(payload);
-      }
--     return std::make_pair(std::move(result_str), marker_data->id);
-+     uint32_t marker_id = marker_data->id;
-+     return std::make_pair(std::move(result_str), marker_id);
-    }
-    return std::nullopt;
-  }
+@@ -54,7 +54,8 @@
+       free(payload);
+     }
+-    return std::make_pair(std::move(result_str), marker_data->id);
++    uint32_t marker_id = marker_data->id;
++    return std::make_pair(std::move(result_str), marker_id);
+   }
+   return std::nullopt;
+ }
