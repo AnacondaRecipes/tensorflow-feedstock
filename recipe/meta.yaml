@@ -76,6 +76,8 @@ source:
       - patches/0047-fix-fuse-qdq-nodestructor-init.patch  # [linux and aarch64]
       # aarch64 linker fix
       - patches/0048-fix-linking-with-NVML.patch  # [linux and aarch64]
+      # CUDA 13 packed-struct fix
+      - patches/0049-fix-cupti-marker-packed-field-ref.patch  # [cuda_compiler_version != "None"]
 build:
   number: {{ build }}
   # Temporary narrowing for focused debugging: build only linux-aarch64 CUDA.
