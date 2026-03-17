@@ -52,7 +52,7 @@ source:
       # Protobuf un-vendoring
       - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0030-Disable-profiler.patch  # [not win]
-      - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
+      - patches/0031-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
       - patches/0032-add-missing-string-include.patch
       - patches/0033-remove-spurious-framework-dep-from-tflite-analyzer.patch
       - patches/0034-add-missing-cstdint-include.patch
@@ -128,20 +128,20 @@ requirements:
     - cudnn  {{ cudnn }}  # [cuda_compiler_version != "None"]
     - nccl  {{ nccl }}    # [cuda_compiler_version != "None"]
     - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-    - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvrtc-dev    # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvml-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvtx-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcublas-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcusolver-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
-    - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-cupti-dev    # [cuda_compiler_version != "None"]
+    - cuda-cudart-dev   # [cuda_compiler_version != "None"]
+    - cuda-nvrtc-dev    # [cuda_compiler_version != "None"]
+    - cuda-nvml-dev     # [cuda_compiler_version != "None"]
+    - cuda-nvtx-dev     # [cuda_compiler_version != "None"]
+    - libcublas-dev     # [cuda_compiler_version != "None"]
+    - libcusolver-dev   # [cuda_compiler_version != "None"]
+    - libcurand-dev     # [cuda_compiler_version != "None"]
+    - libcufft-dev      # [cuda_compiler_version != "None"]
+    - libcusparse-dev   # [cuda_compiler_version != "None"]
+    - libnvjitlink-dev  # [cuda_compiler_version != "None"]
+    - cuda-nvcc-tools   # [cuda_compiler_version != "None"]
+    - cuda-crt-tools    # [cuda_compiler_version != "None"]
+    - cuda-nvprune      # [cuda_compiler_version != "None"]
     # conda build requirements
     - python
     - pip
@@ -227,20 +227,20 @@ outputs:
         - cudnn                   # [cuda_compiler_version != "None"]
         - nccl 2.21.5.1           # [cuda_compiler_version != "None"]
         - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-        - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvrtc-dev    # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvml-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvtx-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcublas-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcusolver-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
-        - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-cupti-dev    # [cuda_compiler_version != "None"]
+        - cuda-cudart-dev   # [cuda_compiler_version != "None"]
+        - cuda-nvrtc-dev    # [cuda_compiler_version != "None"]
+        - cuda-nvml-dev     # [cuda_compiler_version != "None"]
+        - cuda-nvtx-dev     # [cuda_compiler_version != "None"]
+        - libcublas-dev     # [cuda_compiler_version != "None"]
+        - libcusolver-dev   # [cuda_compiler_version != "None"]
+        - libcurand-dev     # [cuda_compiler_version != "None"]
+        - libcufft-dev      # [cuda_compiler_version != "None"]
+        - libcusparse-dev   # [cuda_compiler_version != "None"]
+        - libnvjitlink-dev  # [cuda_compiler_version != "None"]
+        - cuda-nvcc-tools   # [cuda_compiler_version != "None"]
+        - cuda-crt-tools    # [cuda_compiler_version != "None"]
+        - cuda-nvprune      # [cuda_compiler_version != "None"]
         # conda build requirements
         - python
         - pip
@@ -314,7 +314,7 @@ outputs:
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
-        - cuda-nvcc-tools                                         # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvcc-tools                                         # [cuda_compiler_version != "None"]
     # TODO: decide on the name of the package
     # run_constrained:
     #   What is the difference between these two packages?

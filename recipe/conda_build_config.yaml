@@ -1,10 +1,12 @@
 gpu_variant:
   - None
   - cuda                       # [linux]
+  - cuda                       # [linux]
 
 cuda_compiler_version:
   - None                       
   - 12.9                       # [linux]
+  - 13.1                       # [linux]
 
 zip_keys:                      # [linux]
   -                            # [linux]

@@ -106,11 +106,12 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
     fi
 
-    if [[ ${cuda_compiler_version} == 11.8 ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_35,sm_50,sm_60,sm_62,sm_70,sm_72,sm_75,sm_80,sm_86,sm_87,sm_89,sm_90,compute_90
-        export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
-    elif [[ "${cuda_compiler_version}" == 12* ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
+    if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
+        if [[ "${cuda_compiler_version}" == 13* ]]; then
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_70,sm_80,sm_86,sm_89,sm_90,sm_100,compute_100
+        else
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
+        fi
         export CUDNN_INSTALL_PATH=$PREFIX
         export NCCL_INSTALL_PATH=$PREFIX
 
@@ -219,7 +220,7 @@ bazel shutdown
 ./configure
 
 # Remove legacy flags set by configure that conflicts with CUDA 12's multi-directory approach.
-if [[ "${cuda_compiler_version}" == 12* ]]; then
+if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
     sed -i '/CUDA_TOOLKIT_PATH/d' .tf_configure.bazelrc
 fi
 
