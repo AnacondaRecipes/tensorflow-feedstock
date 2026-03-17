@@ -7,10 +7,10 @@ if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 elif [[ "${target_platform}" == "linux-aarch64" ]]; then
   # To prevent memory exhaustion on CI
-  export CPU_COUNT=8
+  export CPU_COUNT=12
 elif [[ ${cuda_compiler_version} != "None" ]]; then
   # To prevent disk exhaustion on CI
-  export CPU_COUNT=8
+  export CPU_COUNT=12
 fi
 
 export PATH="$PWD:$PATH"
