@@ -106,11 +106,12 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
     fi
 
-    if [[ ${cuda_compiler_version} == 11.8 ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_35,sm_50,sm_60,sm_62,sm_70,sm_72,sm_75,sm_80,sm_86,sm_87,sm_89,sm_90,compute_90
-        export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
-    elif [[ "${cuda_compiler_version}" == 12* ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
+    if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
+        if [[ "${cuda_compiler_version}" == 13* ]]; then
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_80,sm_86,sm_89,sm_90,sm_100,compute_100
+        else
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
+        fi
         export CUDNN_INSTALL_PATH=$PREFIX
         export NCCL_INSTALL_PATH=$PREFIX
 
@@ -135,7 +136,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 
         # XLA can only cope with a single cuda header include directory, merge both
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/include/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/
-        
+
         # Also merge CUDA libraries
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/lib/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/lib/
 
@@ -148,6 +149,24 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/
         mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn
         cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
+
+        # CUDA 13 / CCCL 3.0 moved CUB/Thrust/libcudacxx headers under include/cccl/.
+        # Copy them back to legacy paths so bare #include "cub/..." still resolves.
+        # Use hard copies; symlinks don't survive Bazel's sandbox.
+        for _incdir in \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/include; do
+            for _lib in cub thrust nv; do
+                if [[ -d ${_incdir}/cccl/${_lib} && ! -d ${_incdir}/${_lib} ]]; then
+                    cp -r ${_incdir}/cccl/${_lib} ${_incdir}/${_lib}
+                fi
+            done
+            # cuda/ already exists (runtime headers); merge CCCL's cuda/ into it
+            if [[ -d ${_incdir}/cccl/cuda ]]; then
+                cp -rn ${_incdir}/cccl/cuda/ ${_incdir}/cuda/ 2>/dev/null || true
+            fi
+        done
 
         mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin
         ln -s $(which ptxas) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/ptxas
@@ -219,7 +238,7 @@ bazel shutdown
 ./configure
 
 # Remove legacy flags set by configure that conflicts with CUDA 12's multi-directory approach.
-if [[ "${cuda_compiler_version}" == 12* ]]; then
+if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
     sed -i '/CUDA_TOOLKIT_PATH/d' .tf_configure.bazelrc
 fi
 
