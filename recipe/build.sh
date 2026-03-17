@@ -136,6 +136,14 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 
         # XLA can only cope with a single cuda header include directory, merge both
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/include/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/
+
+        # CUDA 13 / CCCL 3.0 moved CUB/Thrust headers under include/cccl/.
+        # Symlink them back so that bare #include "cub/..." still resolves.
+        if [[ -d ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cccl/cub && \
+              ! -e ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cub ]]; then
+            ln -s cccl/cub     ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cub
+            ln -s cccl/thrust  ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/thrust
+        fi
         
         # Also merge CUDA libraries
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/lib/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/lib/
