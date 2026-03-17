@@ -26,7 +26,7 @@ c_compiler_version:
   # NVCC + GCC 14 on linux-aarch64 trips in arm_neon.h builtins.
   # Use GCC 11 (available in pkgs/main) for stable CUDA host compilation.
   - 11                     # [linux and aarch64]
-  - 20                     # [win]
+  - 21                     # [win]
 cxx_compiler_version:
   - 11                     # [linux and aarch64]
-  - 20                     # [win]
+  - 21                     # [win]

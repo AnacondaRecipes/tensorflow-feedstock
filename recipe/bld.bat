@@ -37,16 +37,9 @@ rmdir /s /q "%BAZEL_OUT_DIR%" 2>nul
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
 
-:: -D__PRFCHWINTRIN_H can be removed once LLVM 21 is available.
-:: Clang's prfchwintrin.h declares _m_prefetchw with C++ linkage,
-:: but the Windows SDK (winnt.h) declares it with C linkage.
-:: This causes a redeclaration error when both headers are pulled in.
-:: Defining __PRFCHWINTRIN_H disables Clang's version, so MSVC's
-:: intrinsic declaration is used consistently.
 set BUILD_OPTS=^
  --define=no_tensorflow_py_deps=true^
- --config=win_clang^
- --copt=-D__PRFCHWINTRIN_H
+ --config=win_clang
 
 set TF_ENABLE_XLA=1
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow
