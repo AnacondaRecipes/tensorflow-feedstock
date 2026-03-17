@@ -137,14 +137,6 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         # XLA can only cope with a single cuda header include directory, merge both
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/include/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/
 
-        # CUDA 13 / CCCL 3.0 moved CUB/Thrust headers under include/cccl/.
-        # Symlink them back so that bare #include "cub/..." still resolves.
-        if [[ -d ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cccl/cub && \
-              ! -e ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cub ]]; then
-            ln -s cccl/cub     ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/cub
-            ln -s cccl/thrust  ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/thrust
-        fi
-        
         # Also merge CUDA libraries
         rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/lib/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/lib/
 
@@ -157,6 +149,18 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/
         mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn
         cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
+
+        # CUDA 13 / CCCL 3.0 moved CUB/Thrust headers under include/cccl/.
+        # Symlink them back in every include tree so bare #include "cub/..." resolves.
+        for _incdir in \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/include; do
+            if [[ -d ${_incdir}/cccl/cub && ! -e ${_incdir}/cub ]]; then
+                ln -s cccl/cub    ${_incdir}/cub
+                ln -s cccl/thrust ${_incdir}/thrust
+            fi
+        done
 
         mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin
         ln -s $(which ptxas) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/ptxas
