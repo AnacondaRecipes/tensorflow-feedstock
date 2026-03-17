@@ -108,7 +108,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 
     if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
         if [[ "${cuda_compiler_version}" == 13* ]]; then
-            export TF_CUDA_COMPUTE_CAPABILITIES=sm_70,sm_80,sm_86,sm_89,sm_90,sm_100,compute_100
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_80,sm_86,sm_89,sm_90,sm_100,compute_100
         else
             export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
         fi
