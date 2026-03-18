@@ -150,15 +150,21 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn
         cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
 
-        # CUDA 13 / CCCL 3.0 moved CUB/Thrust headers under include/cccl/.
-        # Symlink them back in every include tree so bare #include "cub/..." resolves.
+        # CUDA 13 / CCCL 3.0 moved CUB/Thrust/libcudacxx headers under include/cccl/.
+        # Copy them back to legacy paths so bare #include "cub/..." still resolves.
+        # Use hard copies; symlinks don't survive Bazel's sandbox.
         for _incdir in \
             ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include \
             ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/include \
             ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/include; do
-            if [[ -d ${_incdir}/cccl/cub && ! -e ${_incdir}/cub ]]; then
-                ln -s cccl/cub    ${_incdir}/cub
-                ln -s cccl/thrust ${_incdir}/thrust
+            for _lib in cub thrust nv; do
+                if [[ -d ${_incdir}/cccl/${_lib} && ! -d ${_incdir}/${_lib} ]]; then
+                    cp -r ${_incdir}/cccl/${_lib} ${_incdir}/${_lib}
+                fi
+            done
+            # cuda/ already exists (runtime headers); merge CCCL's cuda/ into it
+            if [[ -d ${_incdir}/cccl/cuda ]]; then
+                cp -rn ${_incdir}/cccl/cuda/ ${_incdir}/cuda/ 2>/dev/null || true
             fi
         done
 
