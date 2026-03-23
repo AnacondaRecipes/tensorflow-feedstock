@@ -42,7 +42,7 @@ source:
       # gRPC un-vendoring
       - patches/0023-grpc-systemlib-repair.patch  # [not win]
       # Linux specific patches
-      - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
+      # - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
       - patches/0025-add-missing-namespace.patch            # [linux]
       - patches/0026-link-snappy.patch                      # [linux]
       # For pybind11_* targets, the default is "-fvisibility=hidden". 
@@ -68,12 +68,12 @@ source:
       - patches/0041-relax-brotli-conversion-werror.patch  # [linux and aarch64]
       - patches/0042-fix-xla-countdown-signature.patch  # [linux and aarch64]
       # aarch64 GCC 11 compatibility: static_assert(false) in if-constexpr
-      - patches/0043-fix-plugin-registry-static-assert.patch  # [linux and aarch64]
-      - patches/0044-fix-ffi-attribute-map-static-asserts.patch  # [linux and aarch64]
+      # - patches/0043-fix-plugin-registry-static-assert.patch  # [linux and aarch64]
+      # - patches/0044-fix-ffi-attribute-map-static-asserts.patch  # [linux and aarch64]
       # aarch64 GCC 11 compatibility: NoDestructor braced-init ambiguity
-      - patches/0045-fix-cupti-tracer-nodestructor-init.patch  # [linux and aarch64]
-      - patches/0046-fix-ynn-support-nodestructor-init.patch  # [linux and aarch64]
-      - patches/0047-fix-fuse-qdq-nodestructor-init.patch  # [linux and aarch64]
+      # - patches/0045-fix-cupti-tracer-nodestructor-init.patch  # [linux and aarch64]
+      # - patches/0046-fix-ynn-support-nodestructor-init.patch  # [linux and aarch64]
+      # - patches/0047-fix-fuse-qdq-nodestructor-init.patch  # [linux and aarch64]
       # aarch64 linker fix
       - patches/0048-fix-linking-with-NVML.patch  # [linux and aarch64]
       # CUDA 13 packed-struct fix
