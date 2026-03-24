@@ -22,63 +22,55 @@ source:
       - patches/0002-Add-constraint-to-pybind11-systemlib.patch
       - patches/0003-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
       - patches/0004-Use-correct-hermetic-python.patch  # [not win]
-      - patches/0006-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
-      - patches/0007-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
-      - patches/0008-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
-      - patches/0009-Avoid-linking-with-internal-nvrtc.patch  
-      - patches/0010-remove-dependencies-to-libcuda.patch   
-      - patches/0011-loosen-hermetic-python.patch  # [not win]
-      - patches/0012-win-fix-inline-perl.patch  # [win]
-      - patches/0013-fix-osx-wheel-name.patch  # [osx and arm64]
-      - patches/0014-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
-      - patches/0015-fix-win-binary-quirk.patch  # [win]
-      - patches/0016-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
-      - patches/0017-system-python.patch  # [osx]
-      - patches/0018-fix-xla-namespace.patch
-      - patches/0019-link-giflib.patch
+      - patches/0005-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
+      - patches/0006-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
+      - patches/0007-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      - patches/0008-Avoid-linking-with-internal-nvrtc.patch
+      - patches/0009-remove-dependencies-to-libcuda.patch
+      - patches/0010-loosen-hermetic-python.patch  # [not win]
+      - patches/0011-win-fix-inline-perl.patch  # [win]
+      - patches/0012-fix-osx-wheel-name.patch  # [osx and arm64]
+      - patches/0013-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
+      - patches/0014-fix-win-binary-quirk.patch  # [win]
+      - patches/0015-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
+      - patches/0016-system-python.patch  # [osx]
+      - patches/0017-fix-xla-namespace.patch
+      - patches/0018-link-giflib.patch
       # Abseil un-vendoring
-      - patches/0021-consolidated-abseil-unvendoring.patch  # [not win]
-      - patches/0022-fix-multiple-flag-defs.patch  # [not win]
+      - patches/0019-consolidated-abseil-unvendoring.patch  # [not win]
+      - patches/0020-fix-multiple-flag-defs.patch  # [not win]
       # gRPC un-vendoring
-      - patches/0023-grpc-systemlib-repair.patch  # [not win]
+      - patches/0021-grpc-systemlib-repair.patch  # [not win]
       # Linux specific patches
-      # - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
-      - patches/0025-add-missing-namespace.patch            # [linux]
-      - patches/0026-link-snappy.patch                      # [linux]
+      - patches/0022-add-missing-namespace.patch            # [linux]
+      - patches/0023-link-snappy.patch                      # [linux]
       # For pybind11_* targets, the default is "-fvisibility=hidden". 
       # Make necessary symbols visible.
-      - patches/0027-make-proto_cast_util-visible.patch     # [linux]
-      - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
+      - patches/0024-make-proto_cast_util-visible.patch     # [linux]
+      - patches/0025-make-ImportStatusModule-visible.patch  # [linux]
       # Protobuf un-vendoring
-      - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
-      - patches/0030-Disable-profiler.patch  # [not win]
-      - patches/0031-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
-      - patches/0032-add-missing-string-include.patch
-      - patches/0033-remove-spurious-framework-dep-from-tflite-analyzer.patch
-      - patches/0034-add-missing-cstdint-include.patch
+      - patches/0026-consolidated-protobuf-unvendoring.patch     # [not win]
+      - patches/0027-Disable-profiler.patch  # [not win]
+      - patches/0028-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
+      - patches/0029-add-missing-string-include.patch
+      - patches/0030-remove-spurious-framework-dep-from-tflite-analyzer.patch
+      - patches/0031-add-missing-cstdint-include.patch
       # Linux C++ / build fixes
-      - patches/0035-fix-xla-llvm-ir-copts.patch  # [linux]
-      - patches/0036-fix-xla-tileassignment-ambiguity.patch  # [linux]
-      - patches/0037-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
+      - patches/0032-fix-xla-llvm-ir-copts.patch  # [linux]
+      - patches/0033-fix-xla-tileassignment-ambiguity.patch  # [linux]
+      - patches/0034-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
       # CUDA fixes
-      - patches/0038-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
-      - patches/0039-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
+      - patches/0035-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
+      - patches/0036-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
       # aarch64 architecture & build fixes
-      - patches/0040-fix-xnnpack-sme-selectors.patch  # [linux and aarch64]
-      - patches/0041-relax-brotli-conversion-werror.patch  # [linux and aarch64]
-      - patches/0042-fix-xla-countdown-signature.patch  # [linux and aarch64]
-      # aarch64 GCC 11 compatibility: static_assert(false) in if-constexpr
-      # - patches/0043-fix-plugin-registry-static-assert.patch  # [linux and aarch64]
-      # - patches/0044-fix-ffi-attribute-map-static-asserts.patch  # [linux and aarch64]
-      # aarch64 GCC 11 compatibility: NoDestructor braced-init ambiguity
-      # - patches/0045-fix-cupti-tracer-nodestructor-init.patch  # [linux and aarch64]
-      # - patches/0046-fix-ynn-support-nodestructor-init.patch  # [linux and aarch64]
-      # - patches/0047-fix-fuse-qdq-nodestructor-init.patch  # [linux and aarch64]
+      - patches/0037-fix-xnnpack-sme-selectors.patch  # [linux and aarch64]
+      - patches/0038-relax-brotli-conversion-werror.patch  # [linux and aarch64]
+      - patches/0039-fix-xla-countdown-signature.patch  # [linux and aarch64]
       # aarch64 linker fix
-      - patches/0048-fix-linking-with-NVML.patch  # [linux and aarch64]
+      - patches/0040-fix-linking-with-NVML.patch  # [linux and aarch64]
       # CUDA 13 packed-struct fix
-      - patches/0049-fix-cupti-marker-packed-field-ref.patch  # [cuda_compiler_version != "None"]
-      - patches/0050-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
+      - patches/0041-fix-cupti-marker-packed-field-ref.patch  # [cuda_compiler_version != "None"]
+      - patches/0042-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
 build:
   number: {{ build }}
   # TEMPORARY: only build linux-aarch64 matrix entries
