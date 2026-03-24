@@ -284,14 +284,8 @@ EOF
 if [[ "${target_platform}" == "linux-aarch64" ]]; then
   # XNNPACK SME/SME2 kernels currently require ISA support not available in
   # our aarch64 GCC toolchain configuration on CI.
-  echo "build --define=xnn_enable_arm_sme=false" >> .bazelrc
-  echo "build --define=xnn_enable_arm_sme2=false" >> .bazelrc
-  # Newer XNNPACK routes these kernels through YNNPACK feature flags.
   echo "build --define=ynn_enable_arm64_sme=false" >> .bazelrc
   echo "build --define=ynn_enable_arm64_sme2=false" >> .bazelrc
-  # Disable BF16 YNNPACK kernels; current aarch64 toolchain errors in assembly
-  # on arm_neonbf16 with `fmov v*.8h`.
-  echo "build --define=ynn_enable_arm_neonbf16=false" >> .bazelrc
 fi
 
 if [[ ${cuda_compiler_version} != "None" ]]; then
@@ -300,26 +294,15 @@ fi
 
 if [[ "${target_platform}" == "linux-aarch64" ]] && [[ ${cuda_compiler_version} != "None" ]]; then
   # NVCC's EDG frontend cannot parse GCC 14's arm_neon.h (__builtin_aarch64_*
-  # builtins are GCC-specific). Two-pronged fix:
+  # builtins are GCC-specific).
   #
-  # 1) Undefine __ARM_NEON for CUDA translation units so code that conditionally
+  #    Undefine __ARM_NEON for CUDA translation units so code that conditionally
   #    uses NEON (Eigen, highwayhash, XNNPACK) takes portable fallback paths and
   #    never #includes arm_neon.h in the first place. -U is valid for both GCC
   #    and NVCC so no "unrecognized option" risk.
   echo 'build --per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
   echo 'build --host_per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
-  #
-  # 2) Patch GCC's arm_neon.h as a safety net: if anything unconditionally
-  #    includes it under NVCC, skip the body rather than fail on GCC builtins.
-  for _neon_header in $(find ${BUILD_PREFIX}/lib/gcc -name 'arm_neon.h' 2>/dev/null); do
-    { echo '#ifdef __CUDACC__'
-      echo '/* NVCC EDG cannot parse GCC arm_neon.h — skip under CUDA */'
-      echo '#else'
-      cat "${_neon_header}"
-      echo '#endif /* !__CUDACC__ */'
-    } > "${_neon_header}.patched"
-    mv "${_neon_header}.patched" "${_neon_header}"
-  done
+
 fi
 
 # Update TF lite schema with latest flatbuffers version
