@@ -259,8 +259,14 @@ build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+
+# hwloc (and other deps) need _GNU_SOURCE for glibc extensions like
+# dynamic CPU set macros (CPU_ALLOC, sched_setaffinity, etc.) that
+# Google's hermetic toolchain defines but the conda toolchain does not.
 build --copt=-D_GNU_SOURCE
 build --host_copt=-D_GNU_SOURCE
+
+# GCC requires explicit inclusion of stdint.h and cstdint.h for ie int16_t and uint16_t.
 build --conlyopt=-include
 build --conlyopt=stdint.h
 build --cxxopt=-include
@@ -269,6 +275,7 @@ build --host_conlyopt=-include
 build --host_conlyopt=stdint.h
 build --host_cxxopt=-include
 build --host_cxxopt=cstdint
+
 build --repo_env=ML_WHEEL_TYPE=release
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
@@ -293,13 +300,14 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 fi
 
 if [[ "${target_platform}" == "linux-aarch64" ]] && [[ ${cuda_compiler_version} != "None" ]]; then
-  # NVCC's EDG frontend cannot parse GCC 14's arm_neon.h (__builtin_aarch64_*
-  # builtins are GCC-specific).
+  # NVCC's EDG frontend cannot parse GCC 14's arm_neon.h (it uses GCC-specific
+  # __builtin_aarch64_* builtins). Undefine __ARM_NEON only for CUDA files
+  # (*.cu.cc, *_cuda.cc) so headers like Eigen/XNNPACK take portable fallbacks
+  # and never #include arm_neon.h when compiled by NVCC.
   #
-  #    Undefine __ARM_NEON for CUDA translation units so code that conditionally
-  #    uses NEON (Eigen, highwayhash, XNNPACK) takes portable fallback paths and
-  #    never #includes arm_neon.h in the first place. -U is valid for both GCC
-  #    and NVCC so no "unrecognized option" risk.
+  # This is safe because these files run on the GPU and never use ARM NEON.
+  # Do NOT disable NEON globally — it is the base SIMD ISA on aarch64 and
+  # is critical for CPU kernel performance.
   echo 'build --per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
   echo 'build --host_per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
 
