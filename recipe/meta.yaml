@@ -52,13 +52,13 @@ source:
       - patches/0026-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0027-Disable-profiler.patch  # [not win]
       - patches/0028-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
-      - patches/0029-add-missing-string-include.patch
+      # - patches/0029-add-missing-string-include.patch
       - patches/0030-remove-spurious-framework-dep-from-tflite-analyzer.patch
-      - patches/0031-add-missing-cstdint-include.patch
+      # - patches/0031-add-missing-cstdint-include.patch
       # Linux C++ / build fixes
       - patches/0032-fix-xla-llvm-ir-copts.patch  # [linux]
-      - patches/0033-fix-xla-tileassignment-ambiguity.patch  # [linux]
-      - patches/0034-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
+      # - patches/0033-fix-xla-tileassignment-ambiguity.patch  # [linux]
+      # - patches/0034-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
       # CUDA fixes
       - patches/0035-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
       - patches/0036-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
