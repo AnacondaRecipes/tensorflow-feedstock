@@ -52,7 +52,7 @@ source:
       - patches/0026-consolidated-protobuf-unvendoring.patch     # [not win]
       - patches/0027-Disable-profiler.patch  # [not win]
       - patches/0028-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
-      # - patches/0029-add-missing-string-include.patch
+      - patches/0029-add-missing-string-include.patch
       - patches/0030-remove-spurious-framework-dep-from-tflite-analyzer.patch
       # - patches/0031-add-missing-cstdint-include.patch
       # Linux C++ / build fixes
