@@ -156,7 +156,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
 
         # CUDA 13 / CCCL 3.0 moved CUB/Thrust/libcudacxx headers under include/cccl/.
-        # Copy them back to legacy paths so bare #include "cub/..." still resolves.
+        # Tensorflow only tests with CUDA 12.5 so we must copy them back to legacy paths so bare #include "cub/..." still resolves.
         # Use hard copies; symlinks don't survive Bazel's sandbox.
         for _incdir in \
             ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include \
