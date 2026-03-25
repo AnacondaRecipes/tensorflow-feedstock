@@ -25,9 +25,6 @@ cxx_compiler:              # [win]
   - clang                  # [win]
 
 c_compiler_version:
-  # NVCC + GCC 14 on linux-aarch64 trips in arm_neon.h builtins.
-  - 14                     # [linux and aarch64]
   - 21                     # [win]
 cxx_compiler_version:
-  - 14                     # [linux and aarch64]
   - 21                     # [win]

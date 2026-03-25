@@ -73,8 +73,6 @@ source:
       - patches/0042-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
 build:
   number: {{ build }}
-  # TEMPORARY: only build linux-aarch64 matrix entries
-  skip: true  # [not (linux and aarch64)]
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<310 or py>313]
@@ -280,9 +278,7 @@ outputs:
         - termcolor >=1.1.0
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.20.0,<2.21.0
-        - keras >=3.10.0
+        - keras >=3.12.0
       run:
         - python
         - packaging
