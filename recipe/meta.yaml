@@ -33,7 +33,7 @@ source:
       - patches/0013-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
       - patches/0014-fix-win-binary-quirk.patch  # [win]
       - patches/0015-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
-      - patches/0016-system-python.patch  # [osx]
+      - patches/0016-disable-apple-toolchain.patch  # [osx]
       - patches/0017-fix-xla-namespace.patch
       - patches/0018-link-giflib.patch
       # Abseil un-vendoring
