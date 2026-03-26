@@ -7,10 +7,10 @@ if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
 elif [[ "${target_platform}" == "linux-aarch64" ]]; then
   # To prevent memory exhaustion on CI
-  export CPU_COUNT=8
+  export CPU_COUNT=12
 elif [[ ${cuda_compiler_version} != "None" ]]; then
   # To prevent disk exhaustion on CI
-  export CPU_COUNT=8
+  export CPU_COUNT=12
 fi
 
 export PATH="$PWD:$PATH"
@@ -102,48 +102,84 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     export TF_NCCL_VERSION=$(pkg-config nccl --modversion | grep -Po '\d+\.\d+')
 
     export LDFLAGS="${LDFLAGS//-Wl,-z,now/-Wl,-z,lazy}"
-    export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
+    if [[ "${target_platform}" == "linux-64" ]]; then
+        export CC_OPT_FLAGS="-march=nocona -mtune=haswell"
+    elif [[ "${target_platform}" == "linux-aarch64" ]]; then
+        # armv8.2-a+fp16: required so GCC arm_neon.h defines float16x4x2_t etc. (used by
+        # Eigen/XNNPACK). NVCC host compiles pull in that header; armv8-a alone leaves
+        # FP16 vector intrinsics undefined and breaks with "float16x4x2_t is undefined".
+        export CC_OPT_FLAGS="-march=armv8-a+fp16 -mtune=generic"
+    fi
 
-    if [[ ${cuda_compiler_version} == 11.8 ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_35,sm_50,sm_60,sm_62,sm_70,sm_72,sm_75,sm_80,sm_86,sm_87,sm_89,sm_90,compute_90
-        export TF_CUDA_PATHS="${PREFIX},${CUDA_HOME}"
-    elif [[ "${cuda_compiler_version}" == 12* ]]; then
-        export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,compute_90
+    if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
+        if [[ "${cuda_compiler_version}" == 13* ]]; then
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_75,sm_80,sm_86,sm_89,sm_90,sm_100,sm_103,sm_120,sm_121,compute_121
+        else
+            export TF_CUDA_COMPUTE_CAPABILITIES=sm_60,sm_70,sm_75,sm_80,sm_86,sm_89,sm_90,sm_100,sm_103,sm_120,sm_121,compute_121
+        fi
         export CUDNN_INSTALL_PATH=$PREFIX
         export NCCL_INSTALL_PATH=$PREFIX
-        export CUDA_HOME="${BUILD_PREFIX}/targets/x86_64-linux"
-        export TF_CUDA_PATHS="${BUILD_PREFIX}/targets/x86_64-linux,${PREFIX}/targets/x86_64-linux"
+
+        # CUDA toolkit layout differs by architecture:
+        # - x86_64 uses targets/x86_64-linux
+        # - aarch64 uses targets/sbsa-linux
+        if [[ "${target_platform}" == "linux-aarch64" ]]; then
+            CUDA_TARGET_DIR="targets/sbsa-linux"
+        else
+            CUDA_TARGET_DIR="targets/x86_64-linux"
+        fi
+
+        export CUDA_HOME="${BUILD_PREFIX}/${CUDA_TARGET_DIR}"
+        export TF_CUDA_PATHS="${BUILD_PREFIX}/${CUDA_TARGET_DIR},${PREFIX}/${CUDA_TARGET_DIR}"
         
         export HERMETIC_CUDA_VERSION="${cuda_compiler_version}"
         export HERMETIC_CUDNN_VERSION="${cudnn}"
         export HERMETIC_CUDA_COMPUTE_CAPABILITIES=${TF_CUDA_COMPUTE_CAPABILITIES}
-        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/targets/x86_64-linux"
-        export LOCAL_CUDNN_PATH="${PREFIX}/targets/x86_64-linux"
-        export LOCAL_NCCL_PATH="${PREFIX}/targets/x86_64-linux"
+        export LOCAL_CUDA_PATH="${BUILD_PREFIX}/${CUDA_TARGET_DIR}"
+        export LOCAL_CUDNN_PATH="${PREFIX}/${CUDA_TARGET_DIR}"
+        export LOCAL_NCCL_PATH="${PREFIX}/${CUDA_TARGET_DIR}"
 
         # XLA can only cope with a single cuda header include directory, merge both
-        rsync -a ${PREFIX}/targets/x86_64-linux/include/ ${BUILD_PREFIX}/targets/x86_64-linux/include/
-        
+        rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/include/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/
+
         # Also merge CUDA libraries
-        rsync -a ${PREFIX}/targets/x86_64-linux/lib/ ${BUILD_PREFIX}/targets/x86_64-linux/lib/
+        rsync -a ${PREFIX}/${CUDA_TARGET_DIR}/lib/ ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/lib/
 
         # Although XLA supports a non-hermetic build, it still tries to find headers in the hermetic locations.
         # We do this in the BUILD_PREFIX to not have any impact on the resulting package.
         # Otherwise, these copied files would be included in the package.
-        rm -rf ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI
-        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/
-        cp -r ${PREFIX}/targets/x86_64-linux/include ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cuda/extras/CUPTI/
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn
-        cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/targets/x86_64-linux/include/third_party/gpus/cudnn/
+        rm -rf ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI
+        cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/
+        cp -r ${PREFIX}/${CUDA_TARGET_DIR}/include ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn
+        cp ${PREFIX}/include/cudnn*.h ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cudnn/
 
-        mkdir -p ${BUILD_PREFIX}/targets/x86_64-linux/bin
-        ln -s $(which ptxas) ${BUILD_PREFIX}/targets/x86_64-linux/bin/ptxas
-        ln -s $(which nvlink) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvlink
-        ln -s $(which fatbinary) ${BUILD_PREFIX}/targets/x86_64-linux/bin/fatbinary
-        ln -s $(which bin2c) ${BUILD_PREFIX}/targets/x86_64-linux/bin/bin2c
-        ln -s $(which nvprune) ${BUILD_PREFIX}/targets/x86_64-linux/bin/nvprune
-        ln -s $PREFIX/bin/crt ${BUILD_PREFIX}/targets/x86_64-linux/bin/crt
+        # CUDA 13 / CCCL 3.0 moved CUB/Thrust/libcudacxx headers under include/cccl/.
+        # Tensorflow only tests with CUDA 12.5 so we must copy them back to legacy paths so bare #include "cub/..." still resolves.
+        # Use hard copies; symlinks don't survive Bazel's sandbox.
+        for _incdir in \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/include \
+            ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/include/third_party/gpus/cuda/extras/CUPTI/include; do
+            for _lib in cub thrust nv; do
+                if [[ -d ${_incdir}/cccl/${_lib} && ! -d ${_incdir}/${_lib} ]]; then
+                    cp -r ${_incdir}/cccl/${_lib} ${_incdir}/${_lib}
+                fi
+            done
+            # cuda/ already exists (runtime headers); merge CCCL's cuda/ into it
+            if [[ -d ${_incdir}/cccl/cuda ]]; then
+                cp -rn ${_incdir}/cccl/cuda/ ${_incdir}/cuda/ 2>/dev/null || true
+            fi
+        done
+
+        mkdir -p ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin
+        ln -s $(which ptxas) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/ptxas
+        ln -s $(which nvlink) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/nvlink
+        ln -s $(which fatbinary) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/fatbinary
+        ln -s $(which bin2c) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/bin2c
+        ln -s $(which nvprune) ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/nvprune
+        ln -s $PREFIX/bin/crt ${BUILD_PREFIX}/${CUDA_TARGET_DIR}/bin/crt
 
         export PATH=$PATH:${BUILD_PREFIX}/nvvm/bin
           
@@ -160,6 +196,11 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
 else
     export TF_NEED_CUDA=0
 fi
+
+# XLA's embed_gpu_specs_gen genrule needs xxd, which isn't available as a
+# conda package. Provide a minimal Python shim that emulates `xxd -i`.
+cp "${RECIPE_DIR}/xxd.py" xxd
+chmod +x xxd
 
 source gen-bazel-toolchain
 
@@ -202,7 +243,7 @@ bazel shutdown
 ./configure
 
 # Remove legacy flags set by configure that conflicts with CUDA 12's multi-directory approach.
-if [[ "${cuda_compiler_version}" == 12* ]]; then
+if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
     sed -i '/CUDA_TOOLKIT_PATH/d' .tf_configure.bazelrc
 fi
 
@@ -213,10 +254,28 @@ fi
 cat >> .bazelrc <<EOF
 
 build --crosstool_top=//bazel_toolchain:toolchain
+build --noincompatible_enable_cc_toolchain_resolution
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+
+# hwloc (and other deps) need _GNU_SOURCE for glibc extensions like
+# dynamic CPU set macros (CPU_ALLOC, sched_setaffinity, etc.) that
+# Google's hermetic toolchain defines but the conda toolchain does not.
+build --copt=-D_GNU_SOURCE
+build --host_copt=-D_GNU_SOURCE
+
+# GCC requires explicit inclusion of stdint.h and cstdint.h for ie int16_t and uint16_t.
+build --conlyopt=-include
+build --conlyopt=stdint.h
+build --cxxopt=-include
+build --cxxopt=cstdint
+build --host_conlyopt=-include
+build --host_conlyopt=stdint.h
+build --host_cxxopt=-include
+build --host_cxxopt=cstdint
+
 build --repo_env=ML_WHEEL_TYPE=release
 # TODO: re-enable once we upgrade from gcc 11.8 and get support for flag -mavx512fp16.
 # See: https://github.com/google/XNNPACK/blob/master/BUILD.bazel
@@ -229,8 +288,29 @@ build --experimental_ui_max_stdouterr_bytes=104857600
 
 EOF
 
+if [[ "${target_platform}" == "linux-aarch64" ]]; then
+  # XNNPACK SME/SME2 kernels currently require ISA support not available in
+  # our aarch64 GCC toolchain configuration on CI.
+  echo "build --define=ynn_enable_arm64_sme=false" >> .bazelrc
+  echo "build --define=ynn_enable_arm64_sme2=false" >> .bazelrc
+fi
+
 if [[ ${cuda_compiler_version} != "None" ]]; then
     echo "build --config=cuda_wheel" >> .bazelrc
+fi
+
+if [[ "${target_platform}" == "linux-aarch64" ]] && [[ ${cuda_compiler_version} != "None" ]]; then
+  # NVCC's EDG frontend cannot parse GCC 14's arm_neon.h (it uses GCC-specific
+  # __builtin_aarch64_* builtins). Undefine __ARM_NEON only for CUDA files
+  # (*.cu.cc, *_cuda.cc) so headers like Eigen/XNNPACK take portable fallbacks
+  # and never #include arm_neon.h when compiled by NVCC.
+  #
+  # This is safe because these files run on the GPU and never use ARM NEON.
+  # Do NOT disable NEON globally — it is the base SIMD ISA on aarch64 and
+  # is critical for CPU kernel performance.
+  echo 'build --per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
+  echo 'build --host_per_file_copt=.*stream_executor/cuda/.*_cuda\.cc,.*\.cu\.cc@-U__ARM_NEON,-U__ARM_NEON__' >> .bazelrc
+
 fi
 
 # Update TF lite schema with latest flatbuffers version

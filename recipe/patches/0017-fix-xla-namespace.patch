@@ -1,0 +1,30 @@
+From d32445a7346f76a333ef0cf65a3c05c6ab4bbc3f Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 15 Sep 2025 14:22:49 -0600
+Subject: [PATCH 6/6] fix-xla-namespace
+
+---
+ third_party/systemlibs/pybind11.BUILD | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/third_party/systemlibs/pybind11.BUILD b/third_party/systemlibs/pybind11.BUILD
+--- a/third_party/systemlibs/pybind11.BUILD
++++ b/third_party/systemlibs/pybind11.BUILD
+@@ -3,7 +3,7 @@ cc_library(
+ cc_library(
+     name = "pybind11",
+     deps = [
+-        "@xla@xla//third_party/python_runtime:headers",
++        "@xla//third_party/python_runtime:headers",
+     ],
+ )
+ 
+@@ -12,3 +12,8 @@ config_setting(
+     name = "osx",
+     constraint_values = ["@platforms//os:osx"],
+ )
++
++config_setting(
++    name = "msvc_compiler",
++    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
++)

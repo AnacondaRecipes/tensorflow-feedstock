@@ -1,5 +1,5 @@
-{% set version = "2.20.0" %}
-{% set build = 2 %}
+{% set version = "2.21.0" %}
+{% set build = 0 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -16,48 +16,64 @@ package:
 
 source:
   - url: https://github.com/tensorflow/tensorflow/archive/refs/tags/v{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a640d1f97be316a09301dfc9347e3d929ad4d9a2336e3ca23c32c93b0ff7e5d0
+    sha256: ef3568bb4865d6c1b2564fb5689c19b6b9a5311572cd1f2ff9198636a8520921
     patches:
       - patches/0001-loosen-requirements.patch
-      - patches/0002-Add-constraint-to-pybind11-systemlib.patch  # [not win]
+      - patches/0002-Add-constraint-to-pybind11-systemlib.patch
       - patches/0003-Different-file-ending-for-flatbuffers-LICENSE.patch  # [not win]
       - patches/0004-Use-correct-hermetic-python.patch  # [not win]
-      - patches/0005-Adjust-relative-path-for-libdevice.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0006-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
-      - patches/0007-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
-      - patches/0008-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
-      - patches/0009-Avoid-linking-with-internal-nvrtc.patch  
-      - patches/0010-remove-dependencies-to-libcuda.patch   
-      - patches/0011-loosen-hermetic-python.patch  # [not win]
-      - patches/0012-win-fix-inline-perl.patch  # [win]
-      - patches/0013-fix-osx-wheel-name.patch  # [osx and arm64]
-      - patches/0014-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
-      - patches/0015-fix-win-binary-quirk.patch  # [win]
-      - patches/0016-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
-      - patches/0017-system-python.patch  # [osx]
-      - patches/0018-fix-xla-namespace.patch
-      - patches/0019-link-giflib.patch
-      - patches/0020-is_signed-cannot-be-specialized.patch
+      - patches/0005-work-around-for-warning-that-clang-falsely-treats-as.patch  # [not win]
+      - patches/0006-Hardcode-BUILD_PREFIX-in-build_pip_package.patch  # [not win]
+      - patches/0007-Only-link-to-sparse_core_layout_proto_cc-headers.patch  # [not win]
+      - patches/0008-Avoid-linking-with-internal-nvrtc.patch
+      - patches/0009-remove-dependencies-to-libcuda.patch
+      - patches/0010-loosen-hermetic-python.patch  # [not win]
+      - patches/0011-win-fix-inline-perl.patch  # [win]
+      - patches/0012-fix-osx-wheel-name.patch  # [osx and arm64]
+      - patches/0013-remove-ambiguous-defaultquantparamspass-constructor.patch  # [linux]
+      - patches/0014-fix-win-binary-quirk.patch  # [win]
+      - patches/0015-explicitly-link-in-_pywrap_profiler_plugin.patch  # [linux and aarch64]
+      - patches/0016-disable-apple-toolchain.patch  # [osx]
+      - patches/0017-fix-xla-namespace.patch
+      - patches/0018-link-giflib.patch
       # Abseil un-vendoring
-      - patches/0021-consolidated-abseil-unvendoring.patch  # [not win]
-      - patches/0022-fix-multiple-flag-defs.patch  # [not win]
+      - patches/0019-consolidated-abseil-unvendoring.patch  # [not win]
+      - patches/0020-fix-multiple-flag-defs.patch  # [not win]
       # gRPC un-vendoring
-      - patches/0023-grpc-systemlib-repair.patch  # [not win]
+      - patches/0021-grpc-systemlib-repair.patch  # [not win]
       # Linux specific patches
-      - patches/0024-fix-ambiguous-NoDestructor.patch       # [linux]
-      - patches/0025-add-missing-namespace.patch            # [linux]
-      - patches/0026-link-snappy.patch                      # [linux]
+      - patches/0022-add-missing-namespace.patch            # [linux]
+      - patches/0023-link-snappy.patch                      # [linux]
       # For pybind11_* targets, the default is "-fvisibility=hidden". 
       # Make necessary symbols visible.
-      - patches/0027-make-proto_cast_util-visible.patch     # [linux]
-      - patches/0028-make-ImportStatusModule-visible.patch  # [linux]
+      - patches/0024-make-proto_cast_util-visible.patch     # [linux]
+      - patches/0025-make-ImportStatusModule-visible.patch  # [linux]
       # Protobuf un-vendoring
-      - patches/0029-consolidated-protobuf-unvendoring.patch     # [not win]
-      - patches/0030-Disable-profiler.patch  # [not win]
-      - patches/0031-xla_hlo_passes_rename.patch  # [(cuda_compiler_version or "").startswith("12")]
-      - patches/0032-add-missing-string-include.patch
+      - patches/0026-consolidated-protobuf-unvendoring.patch     # [not win]
+      - patches/0027-Disable-profiler.patch  # [not win]
+      - patches/0028-xla_hlo_passes_rename.patch  # [cuda_compiler_version != "None"]
+      - patches/0029-add-missing-string-include.patch
+      - patches/0030-remove-spurious-framework-dep-from-tflite-analyzer.patch
+      # Linux C++ / build fixes
+      - patches/0032-fix-xla-llvm-ir-copts.patch  # [linux]
+      - patches/0033-fix-xla-tileassignment-ambiguity.patch  # [linux]
+      - patches/0034-fix-xla-mhlo-powop-adaptor-ambiguity.patch  # [linux]
+      # CUDA fixes
+      - patches/0035-use-cpp-alignof-in-buffer-debug-log.patch  # [cuda_compiler_version != "None"]
+      - patches/0036-fix-nccl-header-include-path.patch  # [cuda_compiler_version != "None"]
+      # aarch64 architecture & build fixes
+      - patches/0037-fix-xnnpack-sme-selectors.patch  # [linux and aarch64]
+      - patches/0038-relax-brotli-conversion-werror.patch  # [linux and aarch64]
+      - patches/0039-fix-xla-countdown-signature.patch  # [linux and aarch64]
+      # aarch64 linker fix
+      - patches/0040-fix-linking-with-NVML.patch  # [linux and aarch64]
+      # CUDA 13 packed-struct fix
+      - patches/0041-fix-cupti-marker-packed-field-ref.patch  # [cuda_compiler_version != "None"]
+      - patches/0042-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
 build:
   number: {{ build }}
+  # TEMPORARY: only build linux-aarch64 matrix entries
+  skip: true  # [not (linux and aarch64)]
   skip: true  # [python_impl == 'pypy']
   # https://www.tensorflow.org/install/source#tested_build_configurations
   skip: true  # [py<310 or py>313]
@@ -105,19 +121,20 @@ requirements:
     - cudnn  {{ cudnn }}  # [cuda_compiler_version != "None"]
     - nccl  {{ nccl }}    # [cuda_compiler_version != "None"]
     - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-    - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvml-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvtx-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcublas-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcusolver-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
-    - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
-    - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
-    - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-cupti-dev    # [cuda_compiler_version != "None"]
+    - cuda-cudart-dev   # [cuda_compiler_version != "None"]
+    - cuda-nvrtc-dev    # [cuda_compiler_version != "None"]
+    - cuda-nvml-dev     # [cuda_compiler_version != "None"]
+    - cuda-nvtx-dev     # [cuda_compiler_version != "None"]
+    - libcublas-dev     # [cuda_compiler_version != "None"]
+    - libcusolver-dev   # [cuda_compiler_version != "None"]
+    - libcurand-dev     # [cuda_compiler_version != "None"]
+    - libcufft-dev      # [cuda_compiler_version != "None"]
+    - libcusparse-dev   # [cuda_compiler_version != "None"]
+    - libnvjitlink-dev  # [cuda_compiler_version != "None"]
+    - cuda-nvcc-tools   # [cuda_compiler_version != "None"]
+    - cuda-crt-tools    # [cuda_compiler_version != "None"]
+    - cuda-nvprune      # [cuda_compiler_version != "None"]
     # conda build requirements
     - python
     - pip
@@ -145,7 +162,7 @@ requirements:
     - dill
     - giflib {{ giflib }}
     - libgrpc {{ libgrpc }}
-    - flatbuffers 24.3.25
+    - flatbuffers 25.9.23
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
@@ -188,6 +205,7 @@ outputs:
         # similar to with pytorch, that it loads libraries manually in the python code (TBC)
         - "**/libtensorflow_framework.so.2"
         - "**/libtensorflow_framework.2.dylib"
+        - "**/libnvidia-ml.so*"  # provided by the NVIDIA driver, not the conda package
     requirements:
       # build requirements needs to pick up the compiler run_exports
       build:
@@ -200,21 +218,22 @@ outputs:
       host:
         # GPU reuqirements
         - cudnn                   # [cuda_compiler_version != "None"]
-        - nccl 2.21.5.1           # [cuda_compiler_version != "None"]
+        - nccl                    # [cuda_compiler_version != "None"]
         - cuda-version {{ cuda_compiler_version }}  # [cuda_compiler_version != "None"]
-        - cuda-cupti-dev    # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-cudart-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvml-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvtx-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcublas-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcusolver-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - libcurand-dev     # [(cuda_compiler_version or "").startswith("12")]
-        - libcufft-dev      # [(cuda_compiler_version or "").startswith("12")]
-        - libcusparse-dev   # [(cuda_compiler_version or "").startswith("12")]
-        - libnvjitlink-dev  # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvcc-tools   # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-crt-tools    # [(cuda_compiler_version or "").startswith("12")]
-        - cuda-nvprune      # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-cupti-dev    # [cuda_compiler_version != "None"]
+        - cuda-cudart-dev   # [cuda_compiler_version != "None"]
+        - cuda-nvrtc-dev    # [cuda_compiler_version != "None"]
+        - cuda-nvml-dev     # [cuda_compiler_version != "None"]
+        - cuda-nvtx-dev     # [cuda_compiler_version != "None"]
+        - libcublas-dev     # [cuda_compiler_version != "None"]
+        - libcusolver-dev   # [cuda_compiler_version != "None"]
+        - libcurand-dev     # [cuda_compiler_version != "None"]
+        - libcufft-dev      # [cuda_compiler_version != "None"]
+        - libcusparse-dev   # [cuda_compiler_version != "None"]
+        - libnvjitlink-dev  # [cuda_compiler_version != "None"]
+        - cuda-nvcc-tools   # [cuda_compiler_version != "None"]
+        - cuda-crt-tools    # [cuda_compiler_version != "None"]
+        - cuda-nvprune      # [cuda_compiler_version != "None"]
         # conda build requirements
         - python
         - pip
@@ -227,7 +246,7 @@ outputs:
         - dill
         - giflib {{ giflib }}
         - libgrpc {{ libgrpc }}
-        - flatbuffers 24.3.25
+        - flatbuffers 25.9.23
         - icu {{ icu }}
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
@@ -245,11 +264,10 @@ outputs:
         # github.com/tensorflow/tensorflow/blob/v{{ version }}/tensorflow/tools/pip_package/setup.py
         - absl-py >=1.0.0
         - astunparse >=1.6.0
-        # Upstream sepcifies >=24.3.25, but the source is riddled with asserts for ==24.3.25
-        - python-flatbuffers 24.3.25
+        - python-flatbuffers >=25.9.23
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
-        - h5py >=3.11
+        - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy {{ numpy }}
         - opt_einsum >=2.3.2
@@ -261,9 +279,7 @@ outputs:
         - termcolor >=1.1.0
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.20.0,<2.21.0
-        - keras >=3.10.0
+        - keras >=3.12.0
       run:
         - python
         - packaging
@@ -272,26 +288,24 @@ outputs:
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
         - grpcio {{ libgrpc }}.*
-        - h5py >=3.11
+        - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
-        - numpy >=1.26.0,<2.2.0
+        - numpy >=1.26.0
         - opt_einsum >=2.3.2
         # Upstream specifies protobuf >=5.28.0, 
         # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
         - protobuf {{ libprotobuf }}
-        - python-flatbuffers 24.3.25
+        - python-flatbuffers >=25.9.23
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
         - typing_extensions >=3.6.6
         - wrapt >=1.11.0
-        # TF-API needs to move in sync
-        - tensorboard >=2.20.0,<2.21.0
-        - keras >=3.10.0
+        - keras >=3.12.0
         # avoid that people without GPUs needlessly download ~0.5-1GB
         - __cuda                                                  # [cuda_compiler_version != "None"]
         # https://github.com/conda-forge/tensorflow-feedstock/issues/296#issuecomment-1835781851
-        - cuda-nvcc-tools                                         # [(cuda_compiler_version or "").startswith("12")]
+        - cuda-nvcc-tools                                         # [cuda_compiler_version != "None"]
     # TODO: decide on the name of the package
     # run_constrained:
     #   What is the difference between these two packages?

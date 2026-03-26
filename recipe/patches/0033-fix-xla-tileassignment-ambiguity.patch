@@ -1,0 +1,35 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b4 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:04:00 -0700
+Subject: [PATCH] Fix ambiguous TileAssignment initializer_list construction
+
+GCC treats brace-enclosed initializer lists as ambiguous when
+TileAssignment has both an initializer_list<int64_t> constructor and
+a Span-based constructor. Explicitly constructing a std::vector removes
+the ambiguity.
+
+---
+ .../xla/xla/hlo/utils/hlo_sharding_util.h         | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
+--- a/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
++++ b/third_party/xla/xla/hlo/utils/hlo_sharding_util.h
+@@ -353,13 +353,14 @@ class DeviceGroupTileAssignment : public TileAssignment {
+  public:
+   explicit DeviceGroupTileAssignment(int64_t num_groups,
+                                      int64_t num_devices_per_group)
+-      : TileAssignment({num_groups, num_devices_per_group}) {}
++      : TileAssignment(std::vector<int64_t>{num_groups,
++                                            num_devices_per_group}) {}
+   explicit DeviceGroupTileAssignment(int64_t num_groups,
+                                      int64_t num_devices_per_group,
+                                      absl::Span<const int64_t> reshape_dims,
+                                      absl::Span<const int> transpose_perm)
+-      : TileAssignment({num_groups, num_devices_per_group}, reshape_dims,
+-                       transpose_perm) {}
++      : TileAssignment(std::vector<int64_t>{num_groups, num_devices_per_group},
++                       reshape_dims, transpose_perm) {}
+   explicit DeviceGroupTileAssignment(const TileAssignment& tile_assignment)
+       : TileAssignment(tile_assignment) {
+     CHECK(tile_assignment.num_dimensions() == 2)

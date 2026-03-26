@@ -1,0 +1,187 @@
+From a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b7 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Mon, 3 Mar 2026 10:07:00 -0700
+Subject: [PATCH] Fix NCCL header include paths for system-installed NCCL
+
+TensorFlow hardcodes #include "third_party/nccl/nccl.h" which only
+works when NCCL is vendored into the source tree. When using the
+system NCCL package (installed via conda), the headers are on the
+standard include path so we use the bare header names instead.
+
+---
+ tensorflow/core/kernels/nccl_ops.cc                       | 2 +-
+ tensorflow/core/nccl/nccl_manager.h                       | 2 +-
+ third_party/xla/xla/backends/gpu/collectives/nccl_collectives.cc | 2 +-
+ third_party/xla/xla/backends/gpu/collectives/nccl_communicator.cc | 4 ++--
+ third_party/xla/xla/backends/gpu/collectives/nccl_communicator.h  | 4 ++--
+ third_party/xla/xla/backends/gpu/collectives/nccl_errors.cc      | 2 +-
+ third_party/xla/xla/backends/gpu/collectives/nccl_errors.h       | 2 +-
+ third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.cc | 2 +-
+ third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.h  | 2 +-
+ third_party/xla/xla/stream_executor/cuda/nccl_memory_allocator.cc    | 2 +-
+ third_party/xla/xla/tests/collective_ops_ffi_kernels.cu.cc           | 4 ++--
+ third_party/xla/xla/tsl/cuda/nccl_stub.cc                            | 2 +-
+ third_party/xla/xla/tsl/platform/default/dso_loader.cc               | 2 +-
+ 13 files changed, 16 insertions(+), 16 deletions(-)
+
+--- a/tensorflow/core/kernels/nccl_ops.cc
++++ b/tensorflow/core/kernels/nccl_ops.cc
+@@ -18,7 +18,7 @@
+ #include <vector>
+ 
+ #if GOOGLE_CUDA
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #elif TENSORFLOW_USE_ROCM
+ #include "rocm/rocm_config.h"
+ #if (TF_ROCM_VERSION >= 50200)
+--- a/tensorflow/core/nccl/nccl_manager.h
++++ b/tensorflow/core/nccl/nccl_manager.h
+@@ -28,7 +28,7 @@
+ 
+ #include "absl/container/flat_hash_map.h"
+ #if GOOGLE_CUDA
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #elif TENSORFLOW_USE_ROCM
+ #include "rocm/rocm_config.h"
+ #if (TF_ROCM_VERSION >= 50200)
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_collectives.cc
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_collectives.cc
+@@ -39,7 +39,7 @@
+ #include "absl/time/clock.h"
+ #include "absl/time/time.h"
+ #include "absl/types/span.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/backends/gpu/collectives/cancellation_token.h"
+ #include "xla/backends/gpu/collectives/gpu_clique_key.h"
+ #include "xla/backends/gpu/collectives/gpu_collectives.h"
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_communicator.cc
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_communicator.cc
+@@ -60,11 +60,11 @@
+ #include "tsl/platform/casts.h"
+ 
+ // Include NCCL after XLA headers.
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ 
+ #if NCCL_VERSION_CODE >= 22800
+ // Device initiated collective operations were added in NCCL 2.28.0.
+-#include "third_party/nccl/nccl_device.h"
++#include "nccl_device.h"
+ #endif  // NCCL_VERSION_CODE >= 22800
+ 
+ namespace xla::gpu {
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_communicator.h
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_communicator.h
+@@ -46,11 +46,11 @@
+ #include "xla/xla_data.pb.h"
+ 
+ // Include NCCL after XLA headers.
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ 
+ #if NCCL_VERSION_CODE >= 22800
+ // Device initiated collective operations were added in NCCL 2.28.0.
+-#include "third_party/nccl/nccl_device.h"
++#include "nccl_device.h"
+ #endif  // NCCL_VERSION_CODE >= 22800
+ 
+ namespace xla::gpu {
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_errors.cc
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_errors.cc
+@@ -19,7 +19,7 @@
+ #include "absl/status/status.h"
+ #include "absl/time/clock.h"
+ #include "absl/time/time.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/backends/gpu/collectives/cancellation_token.h"
+ #include "xla/util.h"
+ 
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_errors.h
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_errors.h
+@@ -17,7 +17,7 @@
+ #define XLA_BACKENDS_GPU_COLLECTIVES_NCCL_ERRORS_H_
+ 
+ #include "absl/status/status.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/backends/gpu/collectives/cancellation_token.h"
+ #include "xla/tsl/platform/logging.h"
+ #include "xla/util.h"  // IWYU pragma: keep
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.cc
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.cc
+@@ -22,7 +22,7 @@
+ #include "absl/memory/memory.h"
+ #include "absl/status/statusor.h"
+ #include "absl/strings/str_format.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/backends/gpu/collectives/nccl_errors.h"
+ #include "xla/stream_executor/device_address.h"
+ 
+--- a/third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.h
++++ b/third_party/xla/xla/backends/gpu/collectives/nccl_symmetric_memory.h
+@@ -17,7 +17,7 @@
+ #define XLA_BACKENDS_GPU_COLLECTIVES_NCCL_SYMMETRIC_MEMORY_H_
+ 
+ #include "absl/status/statusor.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/core/collectives/symmetric_memory.h"
+ #include "xla/stream_executor/device_address.h"
+ 
+--- a/third_party/xla/xla/stream_executor/cuda/nccl_memory_allocator.cc
++++ b/third_party/xla/xla/stream_executor/cuda/nccl_memory_allocator.cc
+@@ -23,7 +23,7 @@
+ #include "absl/status/status.h"
+ #include "absl/status/statusor.h"
+ #include "absl/strings/str_format.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/stream_executor/activate_context.h"
+ #include "xla/stream_executor/cuda/cuda_memory_allocator.h"
+ #include "xla/stream_executor/device_address.h"
+--- a/third_party/xla/xla/tests/collective_ops_ffi_kernels.cu.cc
++++ b/third_party/xla/xla/tests/collective_ops_ffi_kernels.cu.cc
+@@ -16,14 +16,14 @@
+ #include "xla/tests/collective_ops_ffi_kernels.h"
+ 
+ #include "absl/base/casts.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/stream_executor/cuda/cuda_platform_id.h"
+ #include "xla/stream_executor/gpu/gpu_kernel_registry.h"
+ #include "xla/stream_executor/kernel_spec.h"
+ 
+ #if NCCL_VERSION_CODE >= 22800
+ // Device initiated collective operations were added in NCCL 2.28.0.
+-#include "third_party/nccl/nccl_device.h"
++#include "nccl_device.h"
+ #endif  // NCCL_VERSION_CODE >= 22800
+ 
+ namespace xla::gpu {
+--- a/third_party/xla/xla/tsl/cuda/nccl_stub.cc
++++ b/third_party/xla/xla/tsl/cuda/nccl_stub.cc
+@@ -15,7 +15,7 @@
+ #include "absl/container/flat_hash_set.h"
+ #include "absl/strings/string_view.h"
+ #include "third_party/gpus/cuda/include/cuda.h"
+-#include "third_party/nccl/nccl.h"
++#include "nccl.h"
+ #include "xla/tsl/platform/logging.h"
+ #include "tsl/platform/dso_loader.h"
+ #include "tsl/platform/load_library.h"
+--- a/third_party/xla/xla/tsl/platform/default/dso_loader.cc
++++ b/third_party/xla/xla/tsl/platform/default/dso_loader.cc
+@@ -23,7 +23,7 @@
+ #include "absl/strings/str_cat.h"
+ #include "absl/strings/string_view.h"
+ #include "third_party/gpus/cuda/cuda_config.h"
+-#include "third_party/nccl/nccl_config.h"
++#include "nccl_config.h"
+ #include "third_party/nvshmem/nvshmem_config.h"
+ #include "xla/tsl/platform/logging.h"
+ #include "tsl/platform/load_library.h"

@@ -1,0 +1,24 @@
+From cb8db618ad14304fbf882c4e5782bfd26a65abd5 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Sun, 15 Mar 2026 13:46:05 -0600
+Subject: [PATCH 14/14] fix linking with NVML
+
+---
+ third_party/xla/xla/stream_executor/cuda/BUILD | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/third_party/xla/xla/stream_executor/cuda/BUILD b/third_party/xla/xla/stream_executor/cuda/BUILD
+index 77990e714fe..1a3a2335e79 100644
+--- a/third_party/xla/xla/stream_executor/cuda/BUILD
++++ b/third_party/xla/xla/stream_executor/cuda/BUILD
+@@ -1284,6 +1284,7 @@ cc_library(
+         "cuda-only",
+         "gpu",
+     ],
++    linkopts = ["-lnvidia-ml"],
+     deps = [
+         ":cuda_command_buffer",
+         ":cuda_compute_capability",
+-- 
+2.50.1 (Apple Git-155)
+
