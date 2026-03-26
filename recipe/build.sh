@@ -108,7 +108,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
         # armv8.2-a+fp16: required so GCC arm_neon.h defines float16x4x2_t etc. (used by
         # Eigen/XNNPACK). NVCC host compiles pull in that header; armv8-a alone leaves
         # FP16 vector intrinsics undefined and breaks with "float16x4x2_t is undefined".
-        export CC_OPT_FLAGS="-march=armv8.2-a+fp16 -mtune=generic"
+        export CC_OPT_FLAGS="-march=armv8-a+fp16 -mtune=generic"
     fi
 
     if [[ "${cuda_compiler_version}" == 12* || "${cuda_compiler_version}" == 13* ]]; then
