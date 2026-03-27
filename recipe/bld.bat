@@ -11,7 +11,7 @@ IF %ERRORLEVEL% NEQ 0 (
 rm -f symlink_test2.txt
 rm -f symlink_test.txt
 
-set "PATH=%CD%:%PATH%"
+set "PATH=%CD%;%PATH%"
 set BAZEL_VS="%VSINSTALLDIR%"
 set BAZEL_VC="%VSINSTALLDIR%/VC"
 set CLANG_COMPILER_PATH=%BUILD_PREFIX:\=/%/Library/bin/clang.exe
@@ -37,16 +37,9 @@ rmdir /s /q "%BAZEL_OUT_DIR%" 2>nul
 :: Set compiler and linker flags as bazel does not account for CFLAGS,
 :: CXXFLAGS and LDFLAGS.
 
-:: -D__PRFCHWINTRIN_H can be removed once LLVM 21 is available.
-:: Clang's prfchwintrin.h declares _m_prefetchw with C++ linkage,
-:: but the Windows SDK (winnt.h) declares it with C linkage.
-:: This causes a redeclaration error when both headers are pulled in.
-:: Defining __PRFCHWINTRIN_H disables Clang's version, so MSVC's
-:: intrinsic declaration is used consistently.
 set BUILD_OPTS=^
  --define=no_tensorflow_py_deps=true^
- --config=win_clang^
- --copt=-D__PRFCHWINTRIN_H
+ --config=win_clang
 
 set TF_ENABLE_XLA=1
 set BUILD_TARGET=//tensorflow/tools/pip_package:wheel --repo_env=WHEEL_NAME=tensorflow
@@ -74,6 +67,15 @@ set TF_DOWNLOAD_CLANG=0
 set TF_SET_ANDROID_WORKSPACE=0
 set TF_NEED_CLANG=1
 set TF_OVERRIDE_EIGEN_STRONG_INLINE=0
+
+:: XLA uses `xxd -i` in genrules; provide a local shim on Windows.
+:: Bazel genrules use MSYS2 bash on Windows; create a bash wrapper
+:: that invokes xxd.py using the configured Python interpreter.
+copy /Y "%RECIPE_DIR%\xxd.py" "%CD%\xxd.py"
+(
+  echo #!/usr/bin/env bash
+  echo exec "$PYTHON_BIN_PATH" "$PWD/xxd.py" "$@"
+) > "%CD%\xxd"
 
 bazel clean --expunge
 bazel shutdown

@@ -1,0 +1,30 @@
+From 7117a31a1b8dda2e0313b276a5697a5ce09fcff2 Mon Sep 17 00:00:00 2001
+From: Charles Bousseau <cbousseau@anaconda.com>
+Date: Tue, 3 Sep 2024 09:01:50 -0400
+Subject: [PATCH] loosen hermetic python
+
+Tensorflow registers python dependencies using rules_python in order
+to be hermetic to system installed python packages.
+Even if packages are installed, packages are downloaded from pypi at 
+build time.
+On linux-aarch64, a number of requested packages are not available.
+This removes some declared dependencies allowing the build to proceed.
+
+---
+ tensorflow/BUILD                                               | 1 --
+
+ 1 file changed, 1 deletion(-)
+
+
+diff --git a/tensorflow/BUILD b/tensorflow/BUILD
+index 43d390c2cd6..4bd80133d91 100644
+--- a/tensorflow/BUILD
++++ b/tensorflow/BUILD
+@@ -1724,7 +1724,6 @@ py_strict_library(
+         "//tensorflow/lite/python/authoring",
+         "//tensorflow/python:no_contrib",
+         "//tensorflow/python/profiler:profiler_client",
+-        "@pypi_keras//:pkg",
+         "@pypi//protobuf",
+     ],
+ )
