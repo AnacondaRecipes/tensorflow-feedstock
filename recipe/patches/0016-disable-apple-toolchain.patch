@@ -1,0 +1,22 @@
+diff --git a/.bazelrc b/.bazelrc
+index 476b212d2a7..dbf509dab1c 100644
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -225,13 +225,13 @@ common:macos --host_linkopt=-Wl,-undefined,dynamic_lookup
+ 
+ # Use the old Apple toolchain for MacOS builds.
+ common:macos --config=clang_local
+-common:macos --config=apple-toolchain
++# common:macos --config=apple-toolchain
+ 
+ # Use cc toolchains from apple_support for Apple builds (ios, macos, etc).
+ # https://github.com/bazelbuild/apple_support/tree/master?tab=readme-ov-file#bazel-6-setup
+-common:apple-toolchain --apple_crosstool_top=@local_config_apple_cc//:toolchain
+-common:apple-toolchain --crosstool_top=@local_config_apple_cc//:toolchain
+-common:apple-toolchain --host_crosstool_top=@local_config_apple_cc//:toolchain
++# common:apple-toolchain --apple_crosstool_top=@local_config_apple_cc//:toolchain
++# common:apple-toolchain --crosstool_top=@local_config_apple_cc//:toolchain
++# common:apple-toolchain --host_crosstool_top=@local_config_apple_cc//:toolchain
+ 
+ # Settings for MacOS on ARM CPUs.
+ common:macos_arm64 --cpu=darwin_arm64

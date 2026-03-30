@@ -1,0 +1,28 @@
+From a481b10260dfdf833a1b16007eead49c1d7febf3 Mon Sep 17 00:00:00 2001
+From: Eric Lundby <Eric.Lundby@gmail.com>
+Date: Tue, 17 Mar 2026 10:00:00 -0700
+Subject: [PATCH] Fix packed-field reference in cupti_marker_data_parser_ext
+
+CUDA 13's CUPTI headers pack CUpti_ActivityMarkerData2, so its `id`
+field cannot be bound to an unsigned int& reference.  Copy to a local
+variable before passing to std::make_pair.
+
+---
+ .../xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc b/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc
+index d2cb2d3e6ef..34d6a110e49 100644
+--- a/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc
++++ b/third_party/xla/xla/backends/profiler/gpu/cupti_marker_data_parser_ext.cc
+@@ -55,6 +55,7 @@ std::optional<std::pair<std::string, uint32_t>> ParseMarkerDataActivity(
+       free(payload);
+     }
+-    return std::make_pair(std::move(result_str), marker_data->id);
++    uint32_t marker_id = marker_data->id;
++    return std::make_pair(std::move(result_str), marker_id);
+   }
+   return std::nullopt;
+ }
+-- 
+2.39.0
