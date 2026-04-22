@@ -7,3 +7,4 @@ upstream_sources:
       - tensorflow-base
       - tensorflow-cpu
       - tensorflow-gpu
+      - tensorflow-estimator
