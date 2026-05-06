@@ -16,6 +16,11 @@ zip_keys:                      # [linux]
 skip_cuda_pbp:
   - false
 
+cudnn:
+  - 9.17.0.29
+nccl:
+  - 2.28.9.1
+
 OSX_SDK_VER:               # [osx]
   - 12.3                   # [osx]
 
