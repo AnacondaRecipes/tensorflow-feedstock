@@ -28,3 +28,7 @@ c_compiler_version:
   - 21                     # [win]
 cxx_compiler_version:
   - 21                     # [win]
+
+# rebuild for icu 78.3
+icu:
+  - 78.3
