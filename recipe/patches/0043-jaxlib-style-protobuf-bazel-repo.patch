@@ -10,7 +10,7 @@ protobuf headers and runtime libraries.
 
 ---
  tensorflow/workspace2.bzl                     |  12 +-
- third_party/protobuf_impl.bzl                 |  39 ++++
+ third_party/protobuf_impl.bzl                 |  46 ++++
  third_party/protobuf_systemlib.BUILD          | 181 ++++++++++++++++++
  third_party/py/python_init_rules.bzl          |  29 +--
  .../xla/third_party/py/python_init_rules.bzl  |  29 +--
@@ -31,7 +31,7 @@ index a92db10..74e38f7 100644
  load("//third_party/com_google_highway:workspace.bzl", com_google_highway = "repo")
  load("//third_party/flatbuffers:workspace.bzl", flatbuffers = "repo")
  load("//third_party/hexagon:workspace.bzl", hexagon_nn = "repo")
-@@ -405,16 +406,9 @@ def _tf_repositories():
+@@ -405,16 +406,11 @@ def _tf_repositories():
      )
  
      maybe(
@@ -47,6 +47,8 @@ index a92db10..74e38f7 100644
 -            "@protobuf_pip_deps": "@pypi",
 -        },
 +        systemlib = "//third_party:protobuf_systemlib.BUILD",
++        python_dist_build = "//third_party/systemlibs:protobuf.python.dist.BUILD",
++        python_dist_system_python = "//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
  
      tf_http_archive(
@@ -55,7 +57,7 @@ new file mode 100644
 index 0000000..8029e56
 --- /dev/null
 +++ b/third_party/protobuf_impl.bzl
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,46 @@
 +
 +def _protobuf_impl(ctx):
 +    path = ctx.os.environ["PROTOBUF_BAZEL_DIR"]
@@ -80,6 +82,11 @@ index 0000000..8029e56
 +        "package(default_visibility = [\"//visibility:public\"])\n\ncc_library(name = \"io\", linkopts = [\"-lprotobuf\"])\n\ncc_library(name = \"tokenizer\", linkopts = [\"-lprotobuf\"])\n",
 +    )
 +
++    # python/dist stubs referenced during repository mapping (protobuf_deps.bzl).
++    ctx.execute(["mkdir", "-p", "python/dist"])
++    ctx.execute(["cp", ctx.path(ctx.attr.python_dist_build), "python/dist/BUILD.bazel"])
++    ctx.execute(["cp", ctx.path(ctx.attr.python_dist_system_python), "python/dist/system_python.bzl"])
++
 +    # Stub prebuilt toolchain registrations from copied bazel rules.
 +    ctx.execute(["mkdir", "-p", "toolchain"])
 +    ctx.file("toolchain/BUILD", "")
@@ -93,6 +100,8 @@ index 0000000..8029e56
 +    environ = ["PROTOBUF_BAZEL_DIR"],
 +    attrs = {
 +        "systemlib": attr.label(mandatory = True),
++        "python_dist_build": attr.label(mandatory = True, allow_single_file = True),
++        "python_dist_system_python": attr.label(mandatory = True, allow_single_file = True),
 +    },
 +)
 diff --git a/third_party/protobuf_systemlib.BUILD b/third_party/protobuf_systemlib.BUILD
@@ -294,7 +303,7 @@ index 9e72820..e86f796 100644
  
  def python_init_rules(extra_patches = []):
      """Defines (doesn't setup) the rules_python repository.
-@@ -20,33 +21,9 @@ def python_init_rules(extra_patches = []):
+@@ -20,33 +21,11 @@ def python_init_rules(extra_patches = []):
          ],
      )
  
@@ -327,6 +336,8 @@ index 9e72820..e86f796 100644
 -            "@protobuf_pip_deps": "@pypi",
 -        },
 +        systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
++        python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
  
      tf_http_archive(
@@ -342,7 +353,7 @@ index 9e72820..78ef0e2 100644
  
  def python_init_rules(extra_patches = []):
      """Defines (doesn't setup) the rules_python repository.
-@@ -20,33 +21,9 @@ def python_init_rules(extra_patches = []):
+@@ -20,33 +21,11 @@ def python_init_rules(extra_patches = []):
          ],
      )
  
@@ -375,6 +386,8 @@ index 9e72820..78ef0e2 100644
 -            "@protobuf_pip_deps": "@pypi",
 -        },
 +        systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
++        python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
  
      tf_http_archive(
@@ -390,7 +403,7 @@ index 88a5eeb..f35a48e 100644
  load("//third_party/absl:workspace.bzl", absl = "repo")
  load("//third_party/benchmark:workspace.bzl", benchmark = "repo")
  load("//third_party/brotli:workspace.bzl", brotli = "repo")
-@@ -299,16 +300,9 @@ def _tf_repositories():
+@@ -299,16 +300,11 @@ def _tf_repositories():
  
      # `com_google_protobuf` is initialized in `python_init_rules()`.
      maybe(
@@ -406,6 +419,8 @@ index 88a5eeb..f35a48e 100644
 -            "@protobuf_pip_deps": "@pypi",
 -        },
 +        systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
++        python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
  
      tf_http_archive(
