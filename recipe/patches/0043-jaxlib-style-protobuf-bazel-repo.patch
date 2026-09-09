@@ -1,14 +1,26 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Anaconda Recipes <build@anaconda.com>
 Date: Wed, 9 Sep 2026 13:00:00 -0600
-Subject: [PATCH 0043] Use protobuf-bazel-rules via jaxlib-style protobuf_bazel_repo
+Subject: [PATCH 0043] Wire system protobuf via protobuf_bazel_repo
 
-Replace Eric's 6.x-era stub cc_proto_library aspects with real protobuf 7
-bazel rules copied from protobuf-bazel-rules (PROTOBUF_BAZEL_DIR). Host
-protoc at PREFIX/bin/protoc generates code matching libprotobuf 7 headers.
+Introduce a protobuf_bazel_repo repository rule that copies bazel rules from
+protobuf-bazel-rules (PROTOBUF_BAZEL_DIR) and links against host libprotobuf.
+Protoc at PREFIX/bin/protoc generates C++ code consistent with the installed
+protobuf headers and runtime libraries.
 
 ---
+ third_party/protobuf_impl.bzl             |  39 +++++
+ third_party/protobuf_systemlib.BUILD      | 181 ++++++++++++++++++++++
+ third_party/py/python_init_rules.bzl      |  28 +---
+ tensorflow/workspace2.bzl                 |  12 +-
+ third_party/xla/third_party/py/python_init_rules.bzl | 28 +---
+ third_party/xla/workspace2.bzl            |  12 +-
+ 6 files changed, 230 insertions(+), 70 deletions(-)
+ create mode 100644 third_party/protobuf_impl.bzl
+ create mode 100644 third_party/protobuf_systemlib.BUILD
 
+diff --git a/third_party/py/python_init_rules.bzl b/third_party/py/python_init_rules.bzl
+index 9e7282079fa..00000000000 100644
 --- a/third_party/py/python_init_rules.bzl
 +++ b/third_party/py/python_init_rules.bzl
 @@ -1,6 +1,7 @@
@@ -56,6 +68,8 @@ protoc at PREFIX/bin/protoc generates code matching libprotobuf 7 headers.
  
      tf_http_archive(
 
+diff --git a/third_party/xla/third_party/py/python_init_rules.bzl b/third_party/xla/third_party/py/python_init_rules.bzl
+index 9e7282079fa..00000000000 100644
 --- a/third_party/xla/third_party/py/python_init_rules.bzl
 +++ b/third_party/xla/third_party/py/python_init_rules.bzl
 @@ -1,6 +1,7 @@
@@ -103,6 +117,8 @@ protoc at PREFIX/bin/protoc generates code matching libprotobuf 7 headers.
  
      tf_http_archive(
 
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+index 00000000000..00000000000 100644
 --- a/tensorflow/workspace2.bzl
 +++ b/tensorflow/workspace2.bzl
 @@ -48,6 +48,7 @@
@@ -135,6 +151,8 @@ protoc at PREFIX/bin/protoc generates code matching libprotobuf 7 headers.
          name = "com_google_googletest",
          # Use the commit on 2025/6/09:
 
+diff --git a/third_party/xla/workspace2.bzl b/third_party/xla/workspace2.bzl
+index 00000000000..00000000000 100644
 --- a/third_party/xla/workspace2.bzl
 +++ b/third_party/xla/workspace2.bzl
 @@ -8,6 +8,7 @@
