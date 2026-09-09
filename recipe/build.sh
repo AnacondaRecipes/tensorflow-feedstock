@@ -258,7 +258,10 @@ build --noincompatible_enable_cc_toolchain_resolution
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
+build --define=BUILD_PREFIX=${BUILD_PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+build --repo_env=PROTOBUF_BAZEL_DIR=${PREFIX}/share/bazel/protobuf/bazel
+build --repo_env=BAZEL_CXXOPTS=-isystem:${PREFIX}/include:-isystem:${BUILD_PREFIX}/include:-std=c++17
 
 # hwloc (and other deps) need _GNU_SOURCE for glibc extensions like
 # dynamic CPU set macros (CPU_ALLOC, sched_setaffinity, etc.) that

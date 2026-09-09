@@ -102,7 +102,9 @@ requirements:
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain 0.3.2  # [not win]
-    # libgrpc/libprotobuf only in host — bazel 7 caps libgrpc <1.79, incompatible with CBC 1.83
+    # libgrpc only in host — bazel 7 caps libgrpc <1.79, incompatible with CBC 1.83
+    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf-static {{ libprotobuf }}  # [not win]
     - re2                                    # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
@@ -164,6 +166,7 @@ requirements:
     - libpng {{ libpng }}
     - libprotobuf {{ libprotobuf }}  # [not win]
     - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+    - protobuf-bazel-rules  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
