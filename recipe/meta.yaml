@@ -1,5 +1,5 @@
 {% set version = "2.21.0" %}
-{% set build = 1 %}
+{% set build = 2 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -102,9 +102,9 @@ requirements:
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain 0.3.2  # [not win]
-    - libgrpc {{ libgrpc }}
+    - libgrpc 1.83.0
     # Protobuf is still vendored on windows. 
-    - libprotobuf {{ libprotobuf }}  # [not win]
+    - libprotobuf 7.35.1  # [not win]
     - re2                                    # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
@@ -154,18 +154,18 @@ requirements:
     # but so far there have been no problems with leaving these
     # unpinned; though some restrictions come in for packages
     # that are also listed as a requirement for the pip_package.
-    - libabseil {{ libabseil }}
+    - libabseil 20260526.0
     - astor
     - cython
     - dill
     - giflib {{ giflib }}
-    - libgrpc {{ libgrpc }}
+    - libgrpc 1.83.0
     - flatbuffers 25.9.23
     - icu {{ icu }}
     - jpeg {{ jpeg }}
     - libpng {{ libpng }}
-    - libprotobuf {{ libprotobuf }}  # [not win]
-    - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+    - libprotobuf 7.35.1  # [not win]
+    - libprotobuf-python-headers 7.35.1  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
@@ -238,12 +238,12 @@ outputs:
         - packaging
         - wheel
         # TF_SYSTEM_LIBS
-        - libabseil {{ libabseil }}
+        - libabseil 20260526.0
         - astor
         - cython
         - dill
         - giflib {{ giflib }}
-        - libgrpc {{ libgrpc }}
+        - libgrpc 1.83.0
         - flatbuffers 25.9.23
         - icu {{ icu }}
         - jpeg {{ jpeg }}
@@ -271,7 +271,7 @@ outputs:
         - opt_einsum >=2.3.2
         # Upstream specifies protobuf >=5.28.0, 
         # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
-        - protobuf {{ libprotobuf }}
+        - protobuf 7.35.1
         - requests >=2.21.0,<3
         - six >=1.12
         - termcolor >=1.1.0
@@ -285,14 +285,14 @@ outputs:
         - astunparse >=1.6.0
         - gast >=0.2.1,!=0.5.0,!=0.5.1,!=0.5.2
         - google-pasta >=0.1.1
-        - grpcio {{ libgrpc }}.*
+        - grpcio 1.83.*
         - h5py >=3.11,<3.15.0
         - ml_dtypes >={{ ml_dtypes_version }},<1.0.0
         - numpy >=1.26.0
         - opt_einsum >=2.3.2
         # Upstream specifies protobuf >=5.28.0, 
         # but the libprotobuf run_exports enforce {{ libprotobuf }}. Stick with that for clarity.
-        - protobuf {{ libprotobuf }}
+        - protobuf 7.35.1
         - python-flatbuffers >=25.9.23
         - requests >=2.21.0,<3
         - six >=1.12
