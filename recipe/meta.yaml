@@ -102,9 +102,7 @@ requirements:
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain 0.3.2  # [not win]
-    - libgrpc {{ libgrpc }}
-    # Protobuf is still vendored on windows. 
-    - libprotobuf {{ libprotobuf }}  # [not win]
+    # libgrpc/libprotobuf only in host — bazel 7 caps libgrpc <1.79, incompatible with CBC 1.83
     - re2                                    # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
