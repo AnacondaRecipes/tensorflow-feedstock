@@ -249,8 +249,8 @@ outputs:
         - jpeg {{ jpeg }}
         - libcurl {{ libcurl }}
         - libpng {{ libpng }}
-        - libprotobuf {{ libprotobuf }}  # [not win]
-        - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+        - libprotobuf 7.35.1  # [not win]
+        - libprotobuf-python-headers 7.35.1  # [not win]
         - openssl {{ openssl }}
         - pybind11 2
         - re2 {{ re2 }} # [not win]
