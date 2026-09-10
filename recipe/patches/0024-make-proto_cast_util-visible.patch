@@ -14,11 +14,14 @@ diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
 index 335c2a6271e..9347595efbb 100644
 --- a/tensorflow/workspace2.bzl
 +++ b/tensorflow/workspace2.bzl
-@@ -798,6 +798,7 @@ def _tf_repositories():
+@@ -798,6 +798,10 @@ def _tf_repositories():
          urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
          sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
          strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
-+        patch_file = ["//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch"],
++        patch_file = [
++            "//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch",
++            "//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch",
++        ],
      )
  
      tf_http_archive(
@@ -95,11 +98,14 @@ diff --git a/third_party/xla/workspace2.bzl b/third_party/xla/workspace2.bzl
 index 1f3a4524dd2..f357eb5d93e 100644
 --- a/third_party/xla/workspace2.bzl
 +++ b/third_party/xla/workspace2.bzl
-@@ -522,6 +522,7 @@ def _tf_repositories():
+@@ -522,6 +522,10 @@ def _tf_repositories():
          urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
          sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
          strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
-+        patch_file = ["//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch"],
++        patch_file = [
++            "//third_party/pybind11_protobuf:0001-make-proto_cast_util-visible.patch",
++            "//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch",
++        ],
      )
  
      java_import_external(

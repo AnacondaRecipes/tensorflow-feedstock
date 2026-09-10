@@ -72,6 +72,8 @@ source:
       - patches/0042-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
       - patches/0043-jaxlib-style-protobuf-bazel-repo.patch  # [not win]
       - patches/0044-register-protobuf-bazel-init.patch  # [not win]
+      - patches/0045-protobuf7-bazel-systemlib-fixes.patch  # [not win]
+      - patches/0054-pybind11-protobuf7-workspace-osx.patch  # [osx]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']

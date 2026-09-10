@@ -1,0 +1,361 @@
+From a1b3c807ce33a377403decead610b6674d44aceb Mon Sep 17 00:00:00 2001
+From: Anaconda Recipes <build@anaconda.com>
+Date: Wed, 10 Sep 2026 14:00:00 -0600
+Subject: [PATCH 0045] Protobuf 7 bazel/systemlib build fixes
+
+Consolidates rules_java/bazel dep bumps, python toolchain stubs,
+WKT cc proto stubs, cc_proto_aspect toolchain fixes, and gRPC ProtoInfo.
+diff --git a/tensorflow/workspace2.bzl b/tensorflow/workspace2.bzl
+index e0cf647..c8e1979 100644
+--- a/tensorflow/workspace2.bzl
++++ b/tensorflow/workspace2.bzl
+@@ -409,6 +409,9 @@ def _tf_repositories():
+         protobuf_bazel_repo,
+         name = "com_google_protobuf",
+         systemlib = "//third_party:protobuf_systemlib.BUILD",
++        python_build = "//third_party/systemlibs:protobuf.python.BUILD",
++        python_google_build = "//third_party/systemlibs:protobuf.python.google.BUILD",
++        python_google_protobuf_build = "//third_party/systemlibs:protobuf.python.google.protobuf.BUILD",
+         python_dist_build = "//third_party/systemlibs:protobuf.python.dist.BUILD",
+         python_dist_system_python = "//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
+     )
+@@ -808,6 +811,7 @@ def _tf_repositories():
+         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
+         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
+         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
++        patch_file = ["//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch"],
+     )
+ 
+     tf_http_archive(
+diff --git a/tensorflow/workspace3.bzl b/tensorflow/workspace3.bzl
+index 2f72442..ed1d818 100644
+--- a/tensorflow/workspace3.bzl
++++ b/tensorflow/workspace3.bzl
+@@ -21,12 +21,20 @@ def workspace():
+     # https://github.com/bazelbuild/bazel-skylib/releases
+     tf_http_archive(
+         name = "bazel_skylib",
+-        sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
++        sha256 = "51b5105a760b353773f904d2bbc5e664d0987fbaf22265164de65d43e910d8ac",
+         urls = tf_mirror_urls(
+-            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
++            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.8.1/bazel-skylib-1.8.1.tar.gz",
+         ),
+     )
+ 
++    tf_http_archive(
++        name = "rules_java",
++        urls = tf_mirror_urls(
++            "https://github.com/bazelbuild/rules_java/releases/download/7.12.5/rules_java-7.12.5.tar.gz",
++        ),
++        sha256 = "17b18cb4f92ab7b94aa343ce78531b73960b1bed2ba166e5b02c9fdf0b0ac270",
++    )
++
+     tf_http_archive(
+         name = "rules_license",
+         urls = tf_mirror_urls(
+@@ -45,10 +53,10 @@ def workspace():
+ 
+     tf_http_archive(
+         name = "bazel_features",
+-        sha256 = "4fd9922d464686820ffd8fcefa28ccffa147f7cdc6b6ac0d8b07fde565c65d66",
+-        strip_prefix = "bazel_features-1.25.0",
++        sha256 = "c41853e3b636c533b86bf5ab4658064e6cc9db0a3bce52cbff0629e094344ca9",
++        strip_prefix = "bazel_features-1.33.0",
+         urls = tf_mirror_urls(
+-            "https://github.com/bazel-contrib/bazel_features/releases/download/v1.25.0/bazel_features-v1.25.0.tar.gz",
++            "https://github.com/bazel-contrib/bazel_features/releases/download/v1.33.0/bazel_features-v1.33.0.tar.gz",
+         ),
+     )
+ 
+diff --git a/third_party/protobuf_impl.bzl b/third_party/protobuf_impl.bzl
+index ed9e99b..2867ba6 100644
+--- a/third_party/protobuf_impl.bzl
++++ b/third_party/protobuf_impl.bzl
+@@ -22,6 +22,14 @@ def _protobuf_impl(ctx):
+         "package(default_visibility = [\"//visibility:public\"])\n\ncc_library(name = \"io\", linkopts = [\"-lprotobuf\"])\n\ncc_library(name = \"tokenizer\", linkopts = [\"-lprotobuf\"])\n",
+     )
+ 
++    # python/ stubs required by protobuf-bazel-rules toolchains.
++    ctx.execute(["mkdir", "-p", "python"])
++    ctx.execute(["cp", ctx.path(ctx.attr.python_build), "python/BUILD.bazel"])
++
++    ctx.execute(["mkdir", "-p", "python/google/protobuf"])
++    ctx.execute(["cp", ctx.path(ctx.attr.python_google_build), "python/google/BUILD.bazel"])
++    ctx.execute(["cp", ctx.path(ctx.attr.python_google_protobuf_build), "python/google/protobuf/BUILD.bazel"])
++
+     # python/dist stubs referenced during repository mapping (protobuf_deps.bzl).
+     ctx.execute(["mkdir", "-p", "python/dist"])
+     ctx.execute(["cp", ctx.path(ctx.attr.python_dist_build), "python/dist/BUILD.bazel"])
+@@ -35,11 +43,78 @@ def _protobuf_impl(ctx):
+         "PROTOBUF_PLATFORMS = {}\n",
+     )
+ 
++    # WKT types live in system libprotobuf; skip cc codegen inside @com_google_protobuf.
++    cc_proto_bzl = "bazel/private/oss/cc_proto_library.bzl"
++    cc_proto_content = ctx.read(cc_proto_bzl)
++    aspect_impl_needle = "def _aspect_impl(target, ctx):\n    proto_info = target[ProtoInfo]"
++    aspect_impl_repl = """def _aspect_impl(target, ctx):
++    if target.label.workspace_name == "com_google_protobuf":
++        if CcInfo in ctx.attr._protobuf_runtime:
++            return [
++                ctx.attr._protobuf_runtime[CcInfo],
++                _ProtoCcFilesInfo(files = depset()),
++                OutputGroupInfo(),
++                _ProtoCcHeaderInfo(headers = depset()),
++            ]
++        return [
++            CcInfo(),
++            _ProtoCcFilesInfo(files = depset()),
++            OutputGroupInfo(),
++            _ProtoCcHeaderInfo(headers = depset()),
++        ]
++
++    proto_info = target[ProtoInfo]"""
++    aspect_attrs_needle = "    attrs = {\n                \"_cc_proto_library_header_suffixes\":"
++    aspect_attrs_repl = "    attrs = {\n                \"_protobuf_runtime\": attr.label(\n                    default = \"//:protobuf\",\n                ),\n                \"_cc_toolchain\": attr.label(\n                    default = \"@bazel_tools//tools/cpp:current_cc_toolchain\",\n                ),\n                \"_cc_proto_library_header_suffixes\":"
++    if aspect_impl_needle not in cc_proto_content:
++        fail("cc_proto_library.bzl: aspect impl anchor not found")
++    if aspect_attrs_needle not in cc_proto_content:
++        fail("cc_proto_library.bzl: aspect attrs anchor not found")
++    cc_proto_content = cc_proto_content.replace(aspect_impl_needle, aspect_impl_repl, 1)
++    cc_proto_content = cc_proto_content.replace(aspect_attrs_needle, aspect_attrs_repl, 1)
++    cc_proto_content = cc_proto_content.replace(
++        'load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")',
++        'load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "use_cpp_toolchain")',
++    )
++    cc_proto_content = cc_proto_content.replace(
++        "use_cc_toolchain()",
++        "use_cpp_toolchain()",
++    )
++    ctx.file(cc_proto_bzl, cc_proto_content)
++
++    cc_proto_support_bzl = "bazel/private/cc_proto_support.bzl"
++    cc_proto_support_content = ctx.read(cc_proto_support_bzl)
++    cc_proto_support_content = cc_proto_support_content.replace(
++        'load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")',
++        'load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")',
++    )
++    cc_proto_support_content = cc_proto_support_content.replace(
++        "find_cc_toolchain(",
++        "find_cpp_toolchain(",
++    )
++    ctx.file(cc_proto_support_bzl, cc_proto_support_content)
++
++    # Bazel's ctx.fragments.proto suffix accessors are methods; use fixed defaults.
++    flags_bzl = "bazel/flags/flags.bzl"
++    flags_content = ctx.read(flags_bzl)
++    flags_content = flags_content.replace(
++        'getattr(ctx.fragments.proto, "cc_proto_library_header_suffixes")',
++        '[".pb.h"]',
++    )
++    flags_content = flags_content.replace(
++        'getattr(ctx.fragments.proto, "cc_proto_library_source_suffixes")',
++        '[".pb.cc"]',
++    )
++    ctx.file(flags_bzl, flags_content)
++
+ protobuf_bazel_repo = repository_rule(
+     implementation = _protobuf_impl,
+     environ = ["PROTOBUF_BAZEL_DIR"],
+     attrs = {
+         "systemlib": attr.label(mandatory = True),
++        "python_build": attr.label(mandatory = True, allow_single_file = True),
++        "python_google_build": attr.label(mandatory = True, allow_single_file = True),
++        "python_google_protobuf_build": attr.label(mandatory = True, allow_single_file = True),
+         "python_dist_build": attr.label(mandatory = True, allow_single_file = True),
+         "python_dist_system_python": attr.label(mandatory = True, allow_single_file = True),
+     },
+diff --git a/third_party/protobuf_systemlib.BUILD b/third_party/protobuf_systemlib.BUILD
+index 7c5d1b9..499ff83 100644
+--- a/third_party/protobuf_systemlib.BUILD
++++ b/third_party/protobuf_systemlib.BUILD
+@@ -1,7 +1,7 @@
+ load("@rules_java//java:defs.bzl", "java_library")
+ load("@rules_cc//cc:defs.bzl", "cc_library")
++load("@rules_python//python:defs.bzl", "py_library")
+ load("//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
+-load("//bazel:cc_proto_library.bzl", "cc_proto_library")
+ load("//bazel:proto_library.bzl", "proto_library")
+ 
+ licenses(["notice"])
+@@ -111,8 +111,9 @@ genrule(
+     visibility = ["//visibility:public"],
+ )
+ 
+-cc_proto_library(
++cc_library(
+     name = "cc_wkt_protos",
++    linkopts = PROTO_LINKOPTS,
+     visibility = ["//visibility:public"],
+ )
+ 
+@@ -174,8 +175,14 @@ proto_lang_toolchain(
+     deps = [dep + "_proto" for dep in proto[1][1]],
+ ) for proto in WELL_KNOWN_PROTO_MAP.items()]
+ 
+-[cc_proto_library(
++[cc_library(
++    name = proto[0],
++    linkopts = PROTO_LINKOPTS,
++    visibility = ["//visibility:public"],
++) for proto in WELL_KNOWN_PROTO_MAP.items()]
++
++[cc_library(
+     name = proto[0] + "_cc_proto",
+-    deps = [":" + proto[0] + "_proto"],
++    linkopts = PROTO_LINKOPTS,
+     visibility = ["//visibility:public"],
+ ) for proto in WELL_KNOWN_PROTO_MAP.items()]
+diff --git a/third_party/py/python_init_rules.bzl b/third_party/py/python_init_rules.bzl
+index dd0d4f3..4f62c66 100644
+--- a/third_party/py/python_init_rules.bzl
++++ b/third_party/py/python_init_rules.bzl
+@@ -24,6 +24,9 @@ def python_init_rules(extra_patches = []):
+     protobuf_bazel_repo(
+         name = "com_google_protobuf",
+         systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.BUILD",
++        python_google_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.BUILD",
++        python_google_protobuf_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.protobuf.BUILD",
+         python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
+         python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
+     )
+diff --git a/third_party/systemlibs/grpc.bazel.generate_cc.bzl b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+index f396b1f..0faf4c0 100644
+--- a/third_party/systemlibs/grpc.bazel.generate_cc.bzl
++++ b/third_party/systemlibs/grpc.bazel.generate_cc.bzl
+@@ -11,7 +11,7 @@ load(
+     "get_proto_root",
+     "proto_path_to_generated_filename",
+ )
+-load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++load("@com_google_protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
+ 
+ _GRPC_PROTO_HEADER_FMT = "{}.grpc.pb.h"
+ _GRPC_PROTO_SRC_FMT = "{}.grpc.pb.cc"
+diff --git a/third_party/systemlibs/grpc.bazel.protobuf.bzl b/third_party/systemlibs/grpc.bazel.protobuf.bzl
+index 9eeb4cb..0881220 100644
+--- a/third_party/systemlibs/grpc.bazel.protobuf.bzl
++++ b/third_party/systemlibs/grpc.bazel.protobuf.bzl
+@@ -1,6 +1,6 @@
+ """Utility functions for generating protobuf code."""
+ 
+-load("@rules_proto//proto:defs.bzl", "ProtoInfo")
++load("@com_google_protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
+ 
+ _PROTO_EXTENSION = ".proto"
+ _VIRTUAL_IMPORTS = "/_virtual_imports/"
+diff --git a/third_party/systemlibs/protobuf.python.BUILD b/third_party/systemlibs/protobuf.python.BUILD
+index 2271c10..88d4bb2 100644
+--- a/third_party/systemlibs/protobuf.python.BUILD
++++ b/third_party/systemlibs/protobuf.python.BUILD
+@@ -1,21 +1,29 @@
+ # Stub BUILD file for protobuf python/ directory
+ # Used when TF_SYSTEM_LIBS=com_google_protobuf
+ 
++load("//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
++load("@rules_python//python:defs.bzl", "py_library")
++
+ package(default_visibility = ["//visibility:public"])
+ 
+-# Provide an empty py_library that depends on system protobuf
+ py_library(
+     name = "python",
+     srcs_version = "PY3",
+ )
+ 
+-# Alias for protobuf Python library
+ alias(
+     name = "protobuf_python",
+     actual = "//:protobuf_python",
+ )
+ 
+-# proto_api target for pybind11_protobuf - forward to the actual location
++proto_lang_toolchain(
++    name = "python_toolchain",
++    command_line = "--python_out=%s",
++    progress_message = "Generating Python proto_library %{label}",
++    runtime = ":protobuf_python",
++    visibility = ["//visibility:public"],
++)
++
+ alias(
+     name = "proto_api",
+     actual = "//python/google/protobuf:proto_api",
+diff --git a/third_party/xla/third_party/py/python_init_rules.bzl b/third_party/xla/third_party/py/python_init_rules.bzl
+index cfa318c..ad03015 100644
+--- a/third_party/xla/third_party/py/python_init_rules.bzl
++++ b/third_party/xla/third_party/py/python_init_rules.bzl
+@@ -24,6 +24,9 @@ def python_init_rules(extra_patches = []):
+     protobuf_bazel_repo(
+         name = "com_google_protobuf",
+         systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.BUILD",
++        python_google_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.BUILD",
++        python_google_protobuf_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.protobuf.BUILD",
+         python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
+         python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
+     )
+diff --git a/third_party/xla/workspace2.bzl b/third_party/xla/workspace2.bzl
+index 341e3dd..db5e42d 100644
+--- a/third_party/xla/workspace2.bzl
++++ b/third_party/xla/workspace2.bzl
+@@ -303,6 +303,9 @@ def _tf_repositories():
+         protobuf_bazel_repo,
+         name = "com_google_protobuf",
+         systemlib = "@org_tensorflow//third_party:protobuf_systemlib.BUILD",
++        python_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.BUILD",
++        python_google_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.BUILD",
++        python_google_protobuf_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.google.protobuf.BUILD",
+         python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
+         python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
+     )
+@@ -501,6 +504,7 @@ def _tf_repositories():
+         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
+         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
+         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
++        patch_file = ["//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch"],
+     )
+ 
+     java_import_external(
+diff --git a/third_party/xla/workspace3.bzl b/third_party/xla/workspace3.bzl
+index 10212d4..bd3249e 100644
+--- a/third_party/xla/workspace3.bzl
++++ b/third_party/xla/workspace3.bzl
+@@ -17,12 +17,20 @@ def workspace():
+     # https://github.com/bazelbuild/bazel-skylib/releases
+     tf_http_archive(
+         name = "bazel_skylib",
+-        sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
++        sha256 = "51b5105a760b353773f904d2bbc5e664d0987fbaf22265164de65d43e910d8ac",
+         urls = tf_mirror_urls(
+-            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
++            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.8.1/bazel-skylib-1.8.1.tar.gz",
+         ),
+     )
+ 
++    tf_http_archive(
++        name = "rules_java",
++        urls = tf_mirror_urls(
++            "https://github.com/bazelbuild/rules_java/releases/download/7.12.5/rules_java-7.12.5.tar.gz",
++        ),
++        sha256 = "17b18cb4f92ab7b94aa343ce78531b73960b1bed2ba166e5b02c9fdf0b0ac270",
++    )
++
+     tf_http_archive(
+         name = "rules_license",
+         urls = tf_mirror_urls(
+@@ -41,9 +49,9 @@ def workspace():
+ 
+     tf_http_archive(
+         name = "bazel_features",
+-        sha256 = "4fd9922d464686820ffd8fcefa28ccffa147f7cdc6b6ac0d8b07fde565c65d66",
+-        strip_prefix = "bazel_features-1.25.0",
+-        urls = tf_mirror_urls("https://github.com/bazel-contrib/bazel_features/releases/download/v1.25.0/bazel_features-v1.25.0.tar.gz"),
++        sha256 = "c41853e3b636c533b86bf5ab4658064e6cc9db0a3bce52cbff0629e094344ca9",
++        strip_prefix = "bazel_features-1.33.0",
++        urls = tf_mirror_urls("https://github.com/bazel-contrib/bazel_features/releases/download/v1.33.0/bazel_features-v1.33.0.tar.gz"),
+     )
+ 
+     # Maven dependencies.
