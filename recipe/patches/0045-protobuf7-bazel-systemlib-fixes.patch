@@ -19,14 +19,6 @@ index e0cf647..c8e1979 100644
          python_dist_build = "//third_party/systemlibs:protobuf.python.dist.BUILD",
          python_dist_system_python = "//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
-@@ -808,6 +811,7 @@ def _tf_repositories():
-         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
-         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
-         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
-+        patch_file = ["//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch"],
-     )
- 
-     tf_http_archive(
 diff --git a/tensorflow/workspace3.bzl b/tensorflow/workspace3.bzl
 index 2f72442..ed1d818 100644
 --- a/tensorflow/workspace3.bzl
@@ -311,14 +303,6 @@ index 341e3dd..db5e42d 100644
          python_dist_build = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.BUILD",
          python_dist_system_python = "@org_tensorflow//third_party/systemlibs:protobuf.python.dist.system_python.bzl",
      )
-@@ -501,6 +504,7 @@ def _tf_repositories():
-         urls = tf_mirror_urls("https://github.com/pybind/pybind11_protobuf/archive/f02a2b7653bc50eb5119d125842a3870db95d251.zip"),
-         sha256 = "3cf7bf0f23954c5ce6c37f0a215f506efa3035ca06e3b390d67f4cbe684dce23",
-         strip_prefix = "pybind11_protobuf-f02a2b7653bc50eb5119d125842a3870db95d251",
-+        patch_file = ["//third_party/pybind11_protobuf:0002-protobuf7-descriptor-database-string-view.patch"],
-     )
- 
-     java_import_external(
 diff --git a/third_party/xla/workspace3.bzl b/third_party/xla/workspace3.bzl
 index 10212d4..bd3249e 100644
 --- a/third_party/xla/workspace3.bzl
