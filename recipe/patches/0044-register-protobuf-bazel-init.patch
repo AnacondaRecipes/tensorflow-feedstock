@@ -1,4 +1,4 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 8e6ab6b647410671f0df8d05a5910dbfc1576ea4 Mon Sep 17 00:00:00 2001
 From: Anaconda Recipes <build@anaconda.com>
 Date: Wed, 10 Sep 2026 12:00:00 -0600
 Subject: [PATCH 0044] Register proto_bazel_features after python_init_rules
@@ -6,13 +6,13 @@ Subject: [PATCH 0044] Register proto_bazel_features after python_init_rules
 Wire companion repos required by protobuf-bazel-rules copied into
 @com_google_protobuf by protobuf_bazel_repo (0043).
 ---
- WORKSPACE                          | 12 ++++--------
+ WORKSPACE                           | 11 ++++-------
  third_party/protobuf_bazel_init.bzl | 10 ++++++++++
- 2 files changed, 14 insertions(+), 8 deletions(-)
+ 2 files changed, 14 insertions(+), 7 deletions(-)
  create mode 100644 third_party/protobuf_bazel_init.bzl
 
 diff --git a/WORKSPACE b/WORKSPACE
-index 0000000..0000000 100644
+index 013bda1..f37b5d5 100644
 --- a/WORKSPACE
 +++ b/WORKSPACE
 @@ -64,6 +64,10 @@ load("@xla//third_party/py:python_init_rules.bzl", "python_init_rules")
@@ -26,7 +26,7 @@ index 0000000..0000000 100644
  load("@xla//third_party/py:python_init_repositories.bzl", "python_init_repositories")
  
  python_init_repositories(
-@@ -99,14 +103,6 @@ load("@//tensorflow:workspace2.bzl", "tf_workspace2")
+@@ -99,13 +103,6 @@ load("@//tensorflow:workspace2.bzl", "tf_workspace2")
  
  tf_workspace2()
  
@@ -37,13 +37,12 @@ index 0000000..0000000 100644
 -system_python(
 -    name = "system_python",
 -)
--
+ 
  load("@//tensorflow:workspace1.bzl", "tf_workspace1")
  
- tf_workspace1()
 diff --git a/third_party/protobuf_bazel_init.bzl b/third_party/protobuf_bazel_init.bzl
 new file mode 100644
-index 0000000..0000000
+index 0000000..eb0568e
 --- /dev/null
 +++ b/third_party/protobuf_bazel_init.bzl
 @@ -0,0 +1,10 @@
