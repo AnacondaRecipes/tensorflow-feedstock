@@ -2,6 +2,11 @@
 
 set -ex
 
+# Bazel tf_http_archive expects this patch under //third_party/pybind11_protobuf.
+mkdir -p third_party/pybind11_protobuf
+cp "${RECIPE_DIR}/third_party/pybind11_protobuf/0002-protobuf7-descriptor-database-string-view.patch" \
+   third_party/pybind11_protobuf/
+
 # Override for GitHub Actions CI
 if [[ "$CI" == "github_actions" ]]; then
   export CPU_COUNT=4
@@ -86,6 +91,13 @@ if [[ "${target_platform}" == osx-* ]]; then
   # Force Bazel to use the conda C++ toolchain instead of Bazel’s Apple toolchain.
   export BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
   export DEVELOPER_DIR=/Library/Developer/CommandLineTools
+  # OSX_SDK_VER (12.3) is often not installed; clang then uses MacOSX.sdk while
+  # gen-bazel-toolchain hardcodes the variant SDK in cxx_builtin_include_directories.
+  if [[ ! -d "${CONDA_BUILD_SYSROOT}/usr/include" ]]; then
+    if [[ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" ]]; then
+      export CONDA_BUILD_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+    fi
+  fi
   export SDKROOT=${CONDA_BUILD_SYSROOT}
 else
   export LDFLAGS="${LDFLAGS} -lrt"
@@ -202,7 +214,27 @@ fi
 cp "${RECIPE_DIR}/xxd.py" xxd
 chmod +x xxd
 
+# gen-bazel-toolchain parses $CC -v with only a basename on PATH; use the full
+# build-env path so compiler version detection does not fall back to "not".
+if [[ "${target_platform}" == osx-* ]]; then
+  export CC="${BUILD_PREFIX}/bin/${CC}"
+  export CXX="${BUILD_PREFIX}/bin/${CXX}"
+fi
+
 source gen-bazel-toolchain
+
+if [[ "${target_platform}" == osx-* ]]; then
+  export CC=$(basename "${CC}")
+  export CXX=$(basename "${CXX}")
+  CLANG_VERSION="$("${BUILD_PREFIX}/bin/${CC}" -v 2>&1 | sed -n 's/^clang version //p' | awk '{print $1}')"
+  SHORT_CLANG_VERSION="${CLANG_VERSION%%.*}"
+  for f in bazel_toolchain/cc_toolchain_config.bzl bazel_toolchain/cc_toolchain_build_config.bzl; do
+    sed -i.bak "s|/Library/Developer/CommandLineTools/SDKs/MacOSX[0-9][0-9]*\\(.[0-9]*\\)*\\.sdk|${CONDA_BUILD_SYSROOT}|g" "$f"
+    sed -i.bak "s|lib/clang/not/include|lib/clang/${SHORT_CLANG_VERSION}/include|g" "$f"
+    sed -i.bak "s|lib/gcc/${HOST}/not|lib/gcc/${HOST}/${CLANG_VERSION}|g" "$f"
+    sed -i.bak "s|${HOST}/include/c++/not|${HOST}/include/c++/${CLANG_VERSION}|g" "$f"
+  done
+fi
 
 # Get rid of unwanted defaults
 sed -i -e "/PREFIX/c\ " .bazelrc
@@ -211,6 +243,13 @@ echo "" >> .bazelrc
 
 if [[ "${target_platform}" == "osx-arm64" ]]; then
   echo "build --config=macos_arm64" >> .bazelrc
+fi
+
+if [[ "${target_platform}" == osx-* ]]; then
+  echo "build --action_env=DEVELOPER_DIR=${DEVELOPER_DIR}" >> .bazelrc
+  echo "build --host_action_env=DEVELOPER_DIR=${DEVELOPER_DIR}" >> .bazelrc
+  echo "build --action_env=SDKROOT=${CONDA_BUILD_SYSROOT}" >> .bazelrc
+  echo "build --host_action_env=SDKROOT=${CONDA_BUILD_SYSROOT}" >> .bazelrc
 fi
 
 export TF_ENABLE_XLA=1
@@ -258,7 +297,10 @@ build --noincompatible_enable_cc_toolchain_resolution
 build --logging=6
 build --verbose_failures
 build --define=PREFIX=${PREFIX}
+build --define=BUILD_PREFIX=${BUILD_PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
+build --repo_env=PROTOBUF_BAZEL_DIR=${PREFIX}/share/bazel/protobuf/bazel
+build --repo_env=BAZEL_CXXOPTS=-isystem:${PREFIX}/include:-isystem:${BUILD_PREFIX}/include:-std=c++17
 
 # hwloc (and other deps) need _GNU_SOURCE for glibc extensions like
 # dynamic CPU set macros (CPU_ALLOC, sched_setaffinity, etc.) that

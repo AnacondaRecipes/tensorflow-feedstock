@@ -190,7 +190,7 @@ index c7d940605f9..63c3f6f1637 100644
  genrule(
 @@ -82,32 +61,66 @@ genrule(
      outs = ["protoc.bin"],
-     cmd = "ln -s $$(which protoc) $@",
+     cmd = "ln -s $$(PREFIX)/bin/protoc $@",
      executable = 1,
 -    visibility = ["//visibility:public"],
 -)

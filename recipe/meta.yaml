@@ -1,5 +1,5 @@
 {% set version = "2.21.0" %}
-{% set build = 1 %}
+{% set build = 2 %}
 
 {% if cuda_compiler_version != "None" %}
 {% set build = build + 200 %}
@@ -70,6 +70,11 @@ source:
       # CUDA 13 packed-struct fix
       - patches/0041-fix-cupti-marker-packed-field-ref.patch  # [cuda_compiler_version != "None"]
       - patches/0042-make-tensorflow-builable-with-cccl-3.patch  # [cuda_compiler_version != "None"]
+      - patches/0043-jaxlib-style-protobuf-bazel-repo.patch  # [not win]
+      - patches/0044-register-protobuf-bazel-init.patch  # [not win]
+      - patches/0045-protobuf7-bazel-systemlib-fixes.patch  # [not win]
+      - patches/0046-pybind11-protobuf7-workspace-osx.patch  # [osx]
+      - patches/0047-fix-protobuf7-serialize-nodiscard.patch  # [linux]
 build:
   number: {{ build }}
   skip: true  # [python_impl == 'pypy']
@@ -102,9 +107,7 @@ requirements:
     - bazel 7.*
     # v0.2.0b1 contains patchelf support, see https://github.com/AnacondaRecipes/bazel-toolchain-feedstock/pull/3
     - bazel-toolchain 0.3.2  # [not win]
-    - libgrpc {{ libgrpc }}
-    # Protobuf is still vendored on windows. 
-    - libprotobuf {{ libprotobuf }}  # [not win]
+    # libgrpc/libprotobuf only in host — bazel 7 caps libgrpc <1.79 and libprotobuf <5.30
     - re2                                    # [not win]
     - nasm 2.14                              # [x86_64]
     - patchelf   # [unix]
@@ -166,6 +169,7 @@ requirements:
     - libpng {{ libpng }}
     - libprotobuf {{ libprotobuf }}  # [not win]
     - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
+    - protobuf-bazel-rules  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
