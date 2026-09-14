@@ -1,15 +1,54 @@
 From a1b3c807ce33a377403decead610b6674d44aceb Mon Sep 17 00:00:00 2001
 From: Anaconda Recipes <build@anaconda.com>
 Date: Fri, 11 Sep 2026 11:15:00 -0600
-Subject: [PATCH 0047] Fix protobuf7 SerializeToString nodiscard on linux
+Subject: [PATCH 0047] Fix protobuf7 nodiscard unused-result on linux
 
-Protobuf 7 marks MessageLite::SerializeToString as [[nodiscard]]. XLA's
-trace_container ignores the return value; GCC with -Werror=unused-result
-fails the linux build.
+Protobuf 7 marks MessageLite::{ParseFromString,SerializeToString} as
+[[nodiscard]]. Several XLA call sites ignore return values; GCC with
+-Werror=unused-result fails the linux build. Wrap known header/inline
+sites and downgrade unused-result from error to warning on linux.
 ---
+ .bazelrc | 1 -
+ third_party/xla/xla/pjrt/distributed/coordination/coordination_service_error_util.h | 2 +-
+ third_party/xla/xla/tsl/distributed_runtime/coordination/coordination_service_error_util.h | 2 +-
  third_party/xla/xla/tsl/profiler/convert/trace_container.cc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ 4 files changed, 3 insertions(+), 4 deletions(-)
 
+diff --git a/.bazelrc b/.bazelrc
+--- a/.bazelrc
++++ b/.bazelrc
+@@ -425,7 +425,6 @@ common:linux --copt="-Wno-array-bounds"
+ 
+ # Add unused-result as an error on Linux.
+ common:linux --copt="-Wunused-result"
+-common:linux --copt="-Werror=unused-result"
+ # Add switch as an error on Linux.
+ common:linux --copt="-Wswitch"
+ 
+diff --git a/third_party/xla/xla/pjrt/distributed/coordination/coordination_service_error_util.h b/third_party/xla/xla/pjrt/distributed/coordination/coordination_service_error_util.h
+--- a/third_party/xla/xla/pjrt/distributed/coordination/coordination_service_error_util.h
++++ b/third_party/xla/xla/pjrt/distributed/coordination/coordination_service_error_util.h
+@@ -56,7 +56,7 @@ inline int64_t GetBarrierCounterFromError(const absl::Status& s) {
+     return -1;
+   }
+   tensorflow::BarrierError error;
+-  error.ParseFromString(
++  (void)error.ParseFromString(
+       std::string(s.GetPayload(BarrierErrorPayloadKey()).value()));
+   return error.counter();
+ }
+diff --git a/third_party/xla/xla/tsl/distributed_runtime/coordination/coordination_service_error_util.h b/third_party/xla/xla/tsl/distributed_runtime/coordination/coordination_service_error_util.h
+--- a/third_party/xla/xla/tsl/distributed_runtime/coordination/coordination_service_error_util.h
++++ b/third_party/xla/xla/tsl/distributed_runtime/coordination/coordination_service_error_util.h
+@@ -56,7 +56,7 @@ inline int64_t GetBarrierCounterFromError(const absl::Status& s) {
+     return -1;
+   }
+   tensorflow::BarrierError error;
+-  error.ParseFromString(
++  (void)error.ParseFromString(
+       std::string(s.GetPayload(BarrierErrorPayloadKey()).value()));
+   return error.counter();
+ }
 diff --git a/third_party/xla/xla/tsl/profiler/convert/trace_container.cc b/third_party/xla/xla/tsl/profiler/convert/trace_container.cc
 --- a/third_party/xla/xla/tsl/profiler/convert/trace_container.cc
 +++ b/third_party/xla/xla/tsl/profiler/convert/trace_container.cc
