@@ -94,8 +94,9 @@ if [[ "${target_platform}" == osx-* ]]; then
   # OSX_SDK_VER (12.3) is often not installed; clang then uses MacOSX.sdk while
   # gen-bazel-toolchain hardcodes the variant SDK in cxx_builtin_include_directories.
   if [[ ! -d "${CONDA_BUILD_SYSROOT}/usr/include" ]]; then
-    if [[ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" ]]; then
-      export CONDA_BUILD_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"
+    if [[ -d "${OSX_SDK_DIR}/MacOSX.sdk/usr/include" ]]; then
+      echo "WARNING: ${CONDA_BUILD_SYSROOT} missing, falling back to ${OSX_SDK_DIR}/MacOSX.sdk"
+      export CONDA_BUILD_SYSROOT="${OSX_SDK_DIR}/MacOSX.sdk"
     fi
   fi
   export SDKROOT=${CONDA_BUILD_SYSROOT}
@@ -300,7 +301,7 @@ build --define=PREFIX=${PREFIX}
 build --define=BUILD_PREFIX=${BUILD_PREFIX}
 build --define=PROTOBUF_INCLUDE_PATH=${PREFIX}/include
 build --repo_env=PROTOBUF_BAZEL_DIR=${PREFIX}/share/bazel/protobuf/bazel
-build --repo_env=BAZEL_CXXOPTS=-isystem:${PREFIX}/include:-isystem:${BUILD_PREFIX}/include:-std=c++17
+build --repo_env=BAZEL_CXXOPTS=-isystem:${PREFIX}/include:-std=c++17
 
 # hwloc (and other deps) need _GNU_SOURCE for glibc extensions like
 # dynamic CPU set macros (CPU_ALLOC, sched_setaffinity, etc.) that

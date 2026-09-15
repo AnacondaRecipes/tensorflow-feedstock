@@ -169,7 +169,9 @@ requirements:
     - libpng {{ libpng }}
     - libprotobuf {{ libprotobuf }}  # [not win]
     - libprotobuf-python-headers {{ libprotobuf }}  # [not win]
-    - protobuf-bazel-rules  # [not win]
+    # protobuf-bazel-rules tracks protobuf's 35.x versioning while libprotobuf
+    # uses 7.35.x; strip the C++ major so the two stay in lockstep.
+    - protobuf-bazel-rules {{ libprotobuf.split('.', 1)[1] }}  # [not win]
     - openssl {{ openssl }}
     - pybind11 2
     - sqlite {{ sqlite }}
