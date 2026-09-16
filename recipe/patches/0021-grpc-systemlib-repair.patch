@@ -197,7 +197,7 @@ index c53b4727..bbabe65b 100644
      name = "ln_grpc_cpp_plugin",
      outs = ["grpc_cpp_plugin.bin"],
 -    cmd = "ln -s $$(which grpc_cpp_plugin) $@",
-+    cmd = "ln -s $$(PREFIX)/bin/grpc_cpp_plugin $@",
++    cmd = "ln -s $(PREFIX)/bin/grpc_cpp_plugin $@",
  )
  
  sh_binary(
