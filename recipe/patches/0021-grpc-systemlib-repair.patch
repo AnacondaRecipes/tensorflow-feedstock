@@ -20,13 +20,18 @@ grpc.bazel.python_rules.bzl (new file): Creates a minimal py_grpc_library implem
 Instead of generating code, it creates stub targets with dummy Python files, since the actual gRPC 
 Python bindings come from the system's grpcio package.
 
+third_party/systemlibs/grpc.BUILD: Resolves grpc_cpp_plugin from the host env
+(${PREFIX}/bin) instead of `which`, which finds the build env's grpc and can
+pair a mismatched plugin with the host libgrpc.
+
 ---
  WORKSPACE                                     |  8 +++
  tensorflow/workspace2.bzl                     | 10 ++++
+ third_party/systemlibs/grpc.BUILD             |  2 +-
  .../systemlibs/grpc.bazel.cc_grpc_library.bzl |  5 ++
  .../systemlibs/grpc.bazel.python_rules.bzl    | 55 +++++++++++++++++++
  third_party/xla/workspace2.bzl                | 10 ++++
- 5 files changed, 88 insertions(+)
+ 6 files changed, 89 insertions(+), 1 deletion(-)
  create mode 100644 third_party/systemlibs/grpc.bazel.python_rules.bzl
 
 diff --git a/third_party/systemlibs/grpc.bazel.python_rules.bzl b/third_party/systemlibs/grpc.bazel.python_rules.bzl
@@ -182,3 +187,17 @@ index 3f9041ed6ea..81613ae26e9 100644
          urls = tf_mirror_urls("https://github.com/grpc/grpc/archive/refs/tags/v1.74.0.tar.gz"),
      )
  
+
+diff --git a/third_party/systemlibs/grpc.BUILD b/third_party/systemlibs/grpc.BUILD
+index c53b4727..bbabe65b 100644
+--- a/third_party/systemlibs/grpc.BUILD
++++ b/third_party/systemlibs/grpc.BUILD
+@@ -53,7 +53,7 @@
+ genrule(
+     name = "ln_grpc_cpp_plugin",
+     outs = ["grpc_cpp_plugin.bin"],
+-    cmd = "ln -s $$(which grpc_cpp_plugin) $@",
++    cmd = "ln -s $(PREFIX)/bin/grpc_cpp_plugin $@",
+ )
+ 
+ sh_binary(
